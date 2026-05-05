@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +12,8 @@ import {
   Sparkles,
   AlertTriangle,
   Timer,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle
 } from "lucide-react"
 import type { MetodoPago, Extras, DatosCliente } from "@/app/page"
 import type { Turno } from "@/lib/turno"
@@ -81,6 +82,16 @@ export function ResumenReserva({
 }: ResumenReservaProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [waUrl, setWaUrl] = useState("")
+
+  useEffect(() => {
+    if (isSuccess) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+    return () => { document.body.style.overflow = "unset" }
+  }, [isSuccess])
 
   const selectedExtras = Object.entries(extras)
     .filter(([, value]) => value)
@@ -145,6 +156,7 @@ export function ResumenReserva({
 
       const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP_SALON}?text=${encodeURIComponent(mensajeWhatsApp)}`
       
+      setWaUrl(urlWhatsapp)
       window.open(urlWhatsapp, "_blank")
       
       setIsSuccess(true) 
@@ -166,53 +178,100 @@ export function ResumenReserva({
     calculos.sena,
   ])
 
+  // MODAL FESTIVO CON SCROLL CORREGIDO PARA PC
   if (isSuccess && selectedDate && selectedTurno) {
     return (
-      <div className="fixed inset-0 z-[100] bg-slate-50/95 backdrop-blur-sm overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4">
-          <div className="bg-gradient-to-b from-green-50 to-emerald-100/50 rounded-2xl p-6 md:p-8 shadow-2xl border border-green-200 text-center max-w-md w-full animate-in zoom-in-95 duration-500 my-8">
-            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md shadow-green-500/20">
-              <CheckCircle2 className="w-10 h-10 text-white" />
-            </div>
-            <h3 className="text-2xl font-extrabold text-azul-marino mb-2">¡Reserva Solicitada!</h3>
-            <p className="text-muted-foreground mb-6 text-sm md:text-base">
-              Tu fecha quedó bloqueada en nuestro sistema. Se abrió una pestaña de WhatsApp para que nos envíes el comprobante de la seña.
-            </p>
+      <div className="fixed inset-0 z-[200] bg-slate-50 overflow-y-auto overscroll-none">
+        
+        {/* Decoración mágica de fondo */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-rosa/20 rounded-full blur-3xl opacity-60" />
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-azul-claro/20 rounded-full blur-3xl opacity-60" />
+        </div>
+
+        {/* CONTENEDOR FIXEADO: Uso de p-4 py-12 sm:py-16 con m-auto adentro */}
+        <div className="relative z-10 flex min-h-full p-4 py-12 sm:py-16">
+          
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-emerald-100 text-center animate-in zoom-in-95 duration-500 overflow-hidden m-auto">
             
-            <div className="bg-white rounded-xl p-4 md:p-5 mb-8 text-left shadow-sm border border-border/50 space-y-3">
-              <p className="text-sm flex justify-between">
-                <span className="font-semibold text-muted-foreground">Fecha:</span> 
-                <span className="font-bold text-azul-marino capitalize text-right">{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</span>
-              </p>
-              <p className="text-sm flex justify-between">
-                <span className="font-semibold text-muted-foreground">Turno:</span> 
-                <span className="font-bold text-azul-marino text-right">{getTurnoLabel(selectedTurno)}</span>
-              </p>
-              <p className="text-sm flex justify-between">
-                <span className="font-semibold text-muted-foreground">A nombre de:</span> 
-                <span className="font-bold text-azul-marino text-right">{datosCliente.nombre}</span>
-              </p>
-              
-              <Separator className="my-3" />
-              
-              <p className="text-sm flex justify-between items-center">
-                <span className="font-semibold text-muted-foreground">Total:</span> 
-                <span className="font-bold text-lg text-azul-marino">{formatPrice(calculos.total)}</span>
-              </p>
-              <div className="bg-amarillo/20 p-3 rounded-lg border border-amarillo/30">
-                <p className="text-sm flex justify-between items-center text-azul-marino">
-                  <span className="font-bold">Seña a transferir:</span> 
-                  <span className="font-extrabold text-lg md:text-xl">{formatPrice(calculos.sena)}</span>
-                </p>
+            {/* Cinta de colores superior */}
+            <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-rosa via-amarillo to-azul-claro" />
+            
+            {/* Ícono gigante y festivo */}
+            <div className="relative w-24 h-24 bg-gradient-to-br from-[#25D366] to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/30 border-4 border-white mt-2">
+              <PartyPopper className="w-12 h-12 text-white animate-bounce" />
+              <div className="absolute -right-2 -top-2 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white">
+                <CheckCircle2 className="w-5 h-5 text-azul-marino" />
               </div>
             </div>
 
-            <Button 
-              onClick={() => window.location.reload()}
-              className="w-full h-12 font-bold bg-azul-marino hover:bg-azul-marino/90 text-white rounded-full transition-transform active:scale-95"
-            >
-              Finalizar y volver al inicio
-            </Button>
+            <h3 className="text-2xl md:text-3xl font-extrabold text-azul-marino mb-3 flex items-center justify-center gap-2">
+              <Sparkles className="w-6 h-6 text-amarillo animate-pulse" />
+              ¡Reserva Solicitada!
+              <Sparkles className="w-6 h-6 text-amarillo animate-pulse" />
+            </h3>
+            
+            <p className="text-muted-foreground mb-6 text-sm md:text-base font-medium px-2 leading-relaxed">
+              ¡Qué emoción! Tu fecha ya está separada. Para confirmarla definitivamente, envianos el comprobante de la seña.
+            </p>
+            
+            {/* Ticket Estilo Cine/Recibo Premium */}
+            <div className="bg-slate-50 rounded-2xl p-5 mb-8 text-left border border-slate-200 space-y-3 relative overflow-hidden">
+              
+              {/* Efecto de borde troquelado del ticket */}
+              <div className="absolute -left-4 top-[55%] w-8 h-8 bg-white rounded-full border border-slate-200" />
+              <div className="absolute -right-4 top-[55%] w-8 h-8 bg-white rounded-full border border-slate-200" />
+              
+              <div className="relative z-10 space-y-2.5">
+                <p className="text-sm flex justify-between">
+                  <span className="font-semibold text-muted-foreground">Fecha:</span> 
+                  <span className="font-bold text-azul-marino capitalize text-right">{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</span>
+                </p>
+                <p className="text-sm flex justify-between">
+                  <span className="font-semibold text-muted-foreground">Turno:</span> 
+                  <span className="font-bold text-azul-marino text-right">{getTurnoLabel(selectedTurno)}</span>
+                </p>
+                <p className="text-sm flex justify-between">
+                  <span className="font-semibold text-muted-foreground">A nombre de:</span> 
+                  <span className="font-bold text-azul-marino text-right">{datosCliente.nombre}</span>
+                </p>
+              </div>
+              
+              <Separator className="my-4 border-dashed border-slate-300 relative z-10" />
+              
+              <div className="relative z-10">
+                <p className="text-sm flex justify-between items-center mb-3">
+                  <span className="font-semibold text-muted-foreground">Total:</span> 
+                  <span className="font-bold text-lg text-azul-marino">{formatPrice(calculos.total)}</span>
+                </p>
+                <div className="bg-gradient-to-r from-amarillo/20 to-amarillo/10 p-4 rounded-xl border border-amarillo/30">
+                  <p className="text-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 text-azul-marino">
+                    <span className="font-bold">Seña a transferir:</span> 
+                    <span className="font-extrabold text-2xl text-azul-marino">{formatPrice(calculos.sena)}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <a 
+                href={waUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center h-14 font-extrabold bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full transition-all hover:-translate-y-1 active:scale-95 shadow-lg shadow-green-500/20 text-lg"
+              >
+                <MessageCircle className="w-6 h-6 mr-2" /> 
+                Enviar comprobante
+              </a>
+
+              <Button 
+                onClick={() => window.location.reload()}
+                variant="ghost"
+                className="w-full h-12 font-bold text-muted-foreground hover:text-azul-marino hover:bg-slate-100 rounded-full transition-all"
+              >
+                Cerrar y volver al inicio
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -357,7 +416,7 @@ export function ResumenReserva({
           size="lg"
           disabled={!canSubmit || isSubmitting}
           onClick={handleReserva}
-          className="hidden lg:flex w-full h-14 text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="hidden lg:flex w-full h-14 text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
         >
           <Sparkles className="w-5 h-5 mr-2" />
           {isSubmitting ? "Procesando reserva..." : "Solicitar Reserva"}

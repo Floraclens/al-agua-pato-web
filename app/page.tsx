@@ -8,7 +8,7 @@ import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
 import { PhotoGallery } from "@/components/photo-gallery"
-import { Sparkles, MapPin, CheckCircle2, Star, Quote, ArrowDown } from "lucide-react"
+import { Sparkles, MapPin, CheckCircle2, Star, Quote, ArrowDown, Info } from "lucide-react"
 import { precioTurnoKey, type Turno } from "@/lib/turno"
 import { Button } from "@/components/ui/button"
 
@@ -266,13 +266,30 @@ export default function ReservasPage() {
 
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-12" />
 
-        <div id="seccion-reserva" className="text-center mb-10 pt-4 scroll-m-24">
+        {/* SECCIÓN DE RESERVA Y PRECIOS */}
+        <div id="seccion-reserva" className="text-center mb-6 pt-4 scroll-m-24">
           <h2 className="text-3xl md:text-4xl font-bold text-azul-marino mb-3 text-balance">
             Reservá tu lugar mágico
           </h2>
           <p className="text-muted-foreground text-lg">
             Armá tu paquete a medida y asegurá tu fecha
           </p>
+        </div>
+
+        {/* NUEVO: TARJETA DE INFORMACIÓN DE PRECIOS */}
+        <div className="max-w-3xl mx-auto mb-10 bg-azul-claro/10 border border-azul-claro/20 rounded-2xl p-5 md:p-6 text-left flex flex-col sm:flex-row gap-4 items-start shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-azul-claro/20 flex items-center justify-center shrink-0">
+            <Info className="w-6 h-6 text-azul-marino" />
+          </div>
+          <div>
+            <h4 className="text-lg font-extrabold text-azul-marino mb-2">Valores del Salón</h4>
+            <p className="text-sm md:text-base text-azul-marino/80 leading-relaxed">
+              El valor general del salón es de <strong className="text-azul-marino bg-white px-2 py-0.5 rounded-md shadow-sm border border-border/50">$710.000</strong>.<br className="hidden sm:block" />
+              <span className="block mt-2 text-xs md:text-sm bg-white/50 p-3 rounded-lg border border-azul-claro/10">
+                <strong className="text-azul-marino">Excepción:</strong> El turno de las <strong>18:30 a 22:30hs</strong> tiene un valor de <strong className="text-azul-marino">$790.000</strong> aplicable <strong>exclusivamente</strong> los días Sábados, Domingos, Feriados y en Temporada Alta (del 15 de Diciembre hasta fines de Febrero).
+              </span>
+            </p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
