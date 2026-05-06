@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { format, addDays } from "date-fns"
+import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -44,22 +44,12 @@ function isLunVieTurn(t: NonNullable<Turno>): t is LunVieTurno {
   return typeof t === "object" && t !== null && "id" in t && t.id === "lun_vie"
 }
 
+// Alta temporada: Del 15 de Diciembre hasta fines de Marzo
 function isHighSeason(date: Date): boolean {
   const m = date.getMonth() + 1
   const d = date.getDate()
   if (m === 12 && d >= 15) return true
-  if (m === 1) return true
-  if (m === 2) return true 
-  return false
-}
-
-// Nueva función para detectar el invierno (21 Junio a 21 Septiembre)
-function isWinter(date: Date): boolean {
-  const m = date.getMonth() + 1
-  const d = date.getDate()
-  if (m === 6 && d >= 21) return true
-  if (m === 7 || m === 8) return true
-  if (m === 9 && d <= 21) return true
+  if (m >= 1 && m <= 3) return true 
   return false
 }
 
@@ -75,6 +65,7 @@ function isHoliday(date: Date): boolean {
   return FERIADOS.includes(`${y}-${m}-${d}`)
 }
 
+// Define si el día tiene 2 turnos fijos (Fines de semana, Feriados o Temporada Alta)
 function showDualFixedSlots(date: Date): boolean {
   return isWeekend(date) || isHighSeason(date) || isHoliday(date)
 }
@@ -116,8 +107,27 @@ export function ReservationCalendar({
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
+  // Estado para guardar todas las reservas y pintar el calendario
+  const [globalBookings, setGlobalBookings] = useState<Record<string, string[]>>({})
+
   useEffect(() => {
     setIsMounted(true)
+    
+    // Buscar todas las reservas al iniciar para colorear el calendario
+    async function fetchAllReservations() {
+      const supabase = createBrowserClient()
+      const { data, error } = await supabase.from("reservas").select("fecha, turno")
+      if (!error && data) {
+        const mapping: Record<string, string[]> = {}
+        data.forEach((r) => {
+          const dateOnly = r.fecha.split("T")[0]
+          if (!mapping[dateOnly]) mapping[dateOnly] = []
+          mapping[dateOnly].push(r.turno)
+        })
+        setGlobalBookings(mapping)
+      }
+    }
+    fetchAllReservations()
   }, [])
 
   useEffect(() => {
@@ -130,9 +140,9 @@ export function ReservationCalendar({
       setIsLoadingSlots(true)
       const supabase = createBrowserClient()
       
-      const y = selectedDate.getFullYear()
-      const m = String(selectedDate.getMonth() + 1).padStart(2, "0")
-      const d = String(selectedDate.getDate()).padStart(2, "0")
+      const y = selectedDate!.getFullYear()
+      const m = String(selectedDate!.getMonth() + 1).padStart(2, "0")
+      const d = String(selectedDate!.getDate()).padStart(2, "0")
       const dateStr = `${y}-${m}-${d}`
 
       const { data, error } = await supabase
@@ -149,10 +159,29 @@ export function ReservationCalendar({
     fetchReservations()
   }, [selectedDate])
 
+  // Evalúa si un día está 100% ocupado para pintarlo de rojo
+  const isDayFullyBooked = useCallback((date: Date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, "0")
+    const d = String(date.getDate()).padStart(2, "0")
+    const dateStr = `${y}-${m}-${d}`
+
+    const bookings = globalBookings[dateStr] || []
+    if (bookings.length === 0) return false
+
+    const isDual = showDualFixedSlots(date)
+    if (isDual) {
+      return bookings.length >= 2 
+    } else {
+      return bookings.length >= 1 
+    }
+  }, [globalBookings])
+
+  // MODIFICADO: Solo desactiva "hoy" y fechas pasadas. Permite reservar para mañana.
   const disabledDays = useCallback((date: Date) => {
-    const minDate = addDays(new Date(), 1)
-    minDate.setHours(0, 0, 0, 0)
-    return date <= minDate
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date <= today
   }, [])
 
   const handleSelectDate = useCallback(
@@ -187,28 +216,47 @@ export function ReservationCalendar({
   const isSegundoBooked = isDual ? checkOverlap(18 * 60 + 30, 22 * 60 + 30, bookedSlots) : false
   const isLunVieFullyBooked = !isDual && bookedSlots.length > 0
 
-  // Generación dinámica de horarios de Lunes a Viernes según la estación del año seleccionada
+  // Generación dinámica de horarios de Lunes a Viernes
   const lunVieStartOptions: number[] = []
   if (selectedDate) {
-    const lastStart = isWinter(selectedDate) ? 16 * 60 : 18 * 60 + 30
-    for (let m = LUN_VIE_FIRST_START; m <= lastStart; m += 30) {
-      lunVieStartOptions.push(m)
+    const m = selectedDate.getMonth() + 1
+    const d = selectedDate.getDate()
+    
+    let lastStart = 15 * 60 // Por defecto: Abril a Agosto (inicio máximo a las 15:00)
+    
+    // Si es de Septiembre al 14 de Diciembre, el horario se extiende (inicio máximo a las 18:30)
+    if ((m >= 9 && m <= 11) || (m === 12 && d <= 14)) {
+      lastStart = 18 * 60 + 30 
+    }
+    
+    for (let min = LUN_VIE_FIRST_START; min <= lastStart; min += 30) {
+      lunVieStartOptions.push(min)
     }
   }
 
   return (
     <div className="w-full space-y-6">
       
+      {/* Tarjetas informativas de los horarios */}
       <div className="grid sm:grid-cols-2 gap-3 mb-4">
         <div className="bg-azul-claro/10 rounded-xl p-4 text-center border border-azul-claro/20 shadow-sm flex flex-col justify-center">
           <span className="font-extrabold text-xs uppercase tracking-wider text-azul-marino mb-1">📅 Lunes a Viernes</span>
-          <span className="text-[10px] text-azul-marino/70 mb-2 uppercase font-semibold">(De Marzo a mediados de Dic)</span>
-          <span className="text-xs font-medium text-azul-marino">Un solo evento por día. Horario de 4hs a elección.</span>
+          <span className="text-[10px] text-azul-marino/70 mb-2 uppercase font-semibold">(Abril al 14 de Dic)</span>
+          <span className="text-xs font-medium text-azul-marino">Un evento por día. Horario de 4hs a elección.</span>
         </div>
         <div className="bg-naranja/10 rounded-xl p-4 text-center border border-naranja/20 shadow-sm flex flex-col justify-center">
           <span className="font-extrabold text-xs uppercase tracking-wider text-azul-marino mb-1">⭐ Sáb/Dom, Feriados y Verano</span>
-          <span className="text-[10px] text-azul-marino/70 mb-2 uppercase font-semibold">(15 Dic al 28 Feb)</span>
+          <span className="text-[10px] text-azul-marino/70 mb-2 uppercase font-semibold">(15 Dic a fines de Marzo)</span>
           <span className="text-xs font-medium text-azul-marino">Dos turnos fijos: 12:00 a 16:00 o 18:30 a 22:30.</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-6 text-xs font-bold text-slate-500 uppercase mb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-white border border-slate-300 shadow-sm" /> Disponible
+        </div>
+        <div className="flex items-center gap-2 text-red-600">
+          <div className="w-3 h-3 rounded-full bg-red-100 border border-red-400 shadow-sm" /> Ocupado
         </div>
       </div>
 
@@ -217,9 +265,15 @@ export function ReservationCalendar({
           mode="single"
           selected={selectedDate}
           onSelect={handleSelectDate}
-          disabled={disabledDays}
+          disabled={(date) => disabledDays(date) || isDayFullyBooked(date)}
           locale={es}
           className="rounded-xl border border-border/50 bg-background p-3"
+          modifiers={{
+            ocupado: (date) => isDayFullyBooked(date),
+          }}
+          modifiersClassNames={{
+            ocupado: "!bg-red-100 !text-red-600 !line-through !opacity-100 !font-bold border border-red-300"
+          }}
           classNames={{
             months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
             month: "space-y-4",

@@ -17,7 +17,7 @@ import {
   Cake,
   Sparkles,
   AlertTriangle,
-  CheckCircle2 // <-- Agregamos el tilde verde para las mini-tarjetas
+  CheckCircle2
 } from "lucide-react"
 
 interface ServiceItem {
@@ -116,7 +116,7 @@ const serviciosAccordion: ServiceCategory[] = [
     color: "text-amarillo",
     bgColor: "bg-amarillo/10",
     items: [
-      { text: "Panchukera" },
+      { text: "2 Panchukeras" },
       { text: "Pochoclera" },
       { text: "Cascada de Chocolate (incluye 10 bowls para toppings)" },
     ],
@@ -127,7 +127,7 @@ const serviciosAccordion: ServiceCategory[] = [
   },
   {
     id: "decoracion",
-    titulo: "Decoración",
+    titulo: "Ambientación",
     icon: PartyPopper,
     color: "text-rosa",
     bgColor: "bg-rosa/10",
@@ -147,7 +147,7 @@ const serviciosAccordion: ServiceCategory[] = [
     color: "text-naranja",
     bgColor: "bg-naranja/10",
     items: [
-      { text: "Mesas cuadradas de distintas alturas" },
+      { text: "4 Mesas cuadradas de distintas alturas" },
       { text: "Posatorta y posa chupetines" },
       { text: "Porta cupcakes" },
       { text: "Mini kiosko y más" },

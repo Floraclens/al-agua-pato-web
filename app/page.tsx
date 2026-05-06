@@ -16,6 +16,8 @@ export type { Turno, LunVieTurno } from "@/lib/turno"
 export type MetodoPago = "efectivo" | "transferencia" | "tarjeta" | null
 
 export interface Extras {
+  adultosAdicionales: number
+  personajeName: string
   animacion: boolean
   horaExtra: boolean
   robotLed: boolean
@@ -40,6 +42,7 @@ const PRECIOS = {
     lun_vie: 710000,
   },
   extras: {
+    adultosAdicionales: 7000,
     animacion: 60000,
     horaExtra: 200000,
     robotLed: 50000,
@@ -62,6 +65,8 @@ export default function ReservasPage() {
   }
   
   const [extras, setExtras] = useState<Extras>({
+    adultosAdicionales: 0,
+    personajeName: "",
     animacion: false,
     horaExtra: false,
     robotLed: false,
@@ -72,6 +77,7 @@ export default function ReservasPage() {
   })
   
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(null)
+  const [pagoTotalidad, setPagoTotalidad] = useState<boolean>(false) // NUEVO ESTADO
 
   const [datosCliente, setDatosCliente] = useState<DatosCliente>({
     nombre: "",
@@ -93,17 +99,25 @@ export default function ReservasPage() {
     }
 
     Object.keys(extras).forEach((key) => {
-      if (extras[key as keyof Extras]) {
+      if (key === "adultosAdicionales") {
+        precioExtras += extras.adultosAdicionales * PRECIOS.extras.adultosAdicionales
+      } else if (key === "personajeName") {
+        // Nada, es solo texto
+      } else if (extras[key as keyof Extras] === true) {
         precioExtras += PRECIOS.extras[key as keyof typeof PRECIOS.extras]
       }
     })
     subtotal += precioExtras
 
-    if (metodoPago === "efectivo" && subtotal > 0) {
+    // MODIFICADO: Aplica descuento si es efectivo Y seleccionó pagar la totalidad
+    if (metodoPago === "efectivo" && pagoTotalidad && subtotal > 0) {
       descuento = subtotal * PRECIOS.descuentoEfectivo
     }
 
     const total = subtotal - descuento
+    
+    // Si paga la totalidad, la seña requerida es igual al total a pagar
+    const senaFinal = pagoTotalidad ? total : PRECIOS.sena
 
     return {
       precioTurno,
@@ -111,9 +125,9 @@ export default function ReservasPage() {
       subtotal,
       descuento,
       total,
-      sena: PRECIOS.sena,
+      sena: senaFinal,
     }
-  }, [selectedTurno, extras, metodoPago])
+  }, [selectedTurno, extras, metodoPago, pagoTotalidad])
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPhone = (phone: string) => {
@@ -135,6 +149,14 @@ export default function ReservasPage() {
   
   const scrollToReserva = () => {
     document.getElementById('seccion-reserva')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Manejador para limpiar el check de "Totalidad" si cambian de método de pago
+  const handleSelectMetodoPago = (metodo: MetodoPago) => {
+    setMetodoPago(metodo)
+    if (metodo !== "efectivo") {
+      setPagoTotalidad(false)
+    }
   }
 
   return (
@@ -185,11 +207,11 @@ export default function ReservasPage() {
             <Sparkles className="w-4 h-4" /> ¡Fechas disponibles 2026!
           </div>
           <h2 className="text-4xl md:text-6xl font-extrabold text-azul-marino tracking-tight text-balance leading-tight">
-            Cumpleaños mágicos, <br className="hidden md:block" />
-            <span className="text-azul-claro">cero estrés para vos.</span>
+            Eventos Mágicos
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
-            El salón más completo con pelotero gigante, animación y shows exclusivos. Relajate y disfrutá, nosotros nos encargamos del resto.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">
+            "Al agua pato" un espacio lleno de aventuras, juegos y experiencias únicas e inolvidables. <br className="hidden md:block" />
+            <span className="text-azul-claro font-bold mt-2 inline-block">Próximamente se viene un nuevo espacio que te hará "saltar de diversión"... ¿estas preparado?</span>
           </p>
           <div className="pt-6">
             <Button 
@@ -211,14 +233,15 @@ export default function ReservasPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-10">
             <h3 className="text-2xl md:text-3xl font-extrabold text-azul-marino">Lo que dicen las familias</h3>
-            <p className="text-muted-foreground mt-2">Cientos de cumpleaños inolvidables nos avalan</p>
+            <p className="text-muted-foreground mt-2">Cientos de eventos inolvidables nos avalan</p>
           </div>
           
-          <div className="flex overflow-x-auto md:grid md:grid-cols-3 snap-x snap-mandatory gap-4 pb-6 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex overflow-x-auto md:grid md:grid-cols-4 snap-x snap-mandatory gap-4 pb-6 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {[
               { nombre: "Laura G.", texto: "Festejamos los 5 de Mateo y salió todo perfecto. El salón es hermoso, súper limpio y los animadores unos genios totales. ¡Los chicos no pararon de jugar!" },
               { nombre: "Martín P.", texto: "Excelente atención de principio a fin. El show del Robot LED fue una locura, todos los invitados quedaron alucinados. Cero estrés para nosotros." },
-              { nombre: "Sabrina V.", texto: "Súper recomendable. La comida, la organización, las chicas que atienden... de 10. Pagás y te olvidás de todo, ellos se encargan. Volveremos el año que viene." }
+              { nombre: "Sabrina V.", texto: "Súper recomendable. La comida, la organización, las chicas que atienden... de 10. Pagás y te olvidás de todo, ellos se encargan. Volveremos el año que viene." },
+              { nombre: "Julieta F.", texto: "El mejor salón al que fuimos. La ambientación es soñada y el pelotero es gigante. Estuvimos súper cómodos y nos atendieron como reyes." }
             ].map((review, i) => (
               <div 
                 key={i} 
@@ -266,7 +289,6 @@ export default function ReservasPage() {
 
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-12" />
 
-        {/* SECCIÓN DE RESERVA Y PRECIOS */}
         <div id="seccion-reserva" className="text-center mb-6 pt-4 scroll-m-24">
           <h2 className="text-3xl md:text-4xl font-bold text-azul-marino mb-3 text-balance">
             Reservá tu lugar mágico
@@ -276,7 +298,6 @@ export default function ReservasPage() {
           </p>
         </div>
 
-        {/* NUEVO: TARJETA DE INFORMACIÓN DE PRECIOS */}
         <div className="max-w-3xl mx-auto mb-10 bg-azul-claro/10 border border-azul-claro/20 rounded-2xl p-5 md:p-6 text-left flex flex-col sm:flex-row gap-4 items-start shadow-sm">
           <div className="w-12 h-12 rounded-full bg-azul-claro/20 flex items-center justify-center shrink-0">
             <Info className="w-6 h-6 text-azul-marino" />
@@ -412,7 +433,9 @@ export default function ReservasPage() {
               </h3>
               <MetodoPagoSelector
                 metodoPago={metodoPago}
-                onSelectMetodoPago={setMetodoPago}
+                onSelectMetodoPago={handleSelectMetodoPago}
+                pagoTotalidad={pagoTotalidad}
+                onSelectPagoTotalidad={setPagoTotalidad}
               />
             </section>
           </div>
@@ -427,6 +450,7 @@ export default function ReservasPage() {
                 datosCliente={datosCliente}
                 calculos={calculos}
                 canSubmit={!!canSubmit}
+                pagoTotalidad={pagoTotalidad}
               />
             </div>
           </div>

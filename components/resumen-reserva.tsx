@@ -37,6 +37,7 @@ interface ResumenReservaProps {
     sena: number
   }
   canSubmit: boolean
+  pagoTotalidad: boolean
 }
 
 function formatPrice(price: number): string {
@@ -54,7 +55,7 @@ const metodoPagoLabels: Record<NonNullable<MetodoPago>, string> = {
   tarjeta: "Tarjeta",
 }
 
-const extraLabels: Record<keyof Extras, string> = {
+const extraLabels: Record<keyof Omit<Extras, "adultosAdicionales" | "personajeName">, string> = {
   animacion: "Animación",
   horaExtra: "Hora Extra",
   robotLed: "Robot LED",
@@ -79,6 +80,7 @@ export function ResumenReserva({
   datosCliente,
   calculos,
   canSubmit,
+  pagoTotalidad
 }: ResumenReservaProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -93,26 +95,46 @@ export function ResumenReserva({
     return () => { document.body.style.overflow = "unset" }
   }, [isSuccess])
 
-  const selectedExtras = Object.entries(extras)
-    .filter(([, value]) => value)
-    .map(([key]) => extraLabels[key as keyof Extras])
+  const getSelectedExtrasLabels = useCallback(() => {
+    const labels: string[] = []
+    
+    if (extras.adultosAdicionales > 0) {
+      labels.push(`+${extras.adultosAdicionales} Adultos`)
+    }
+
+    Object.entries(extras).forEach(([key, value]) => {
+      if (key === "adultosAdicionales" || key === "personajeName") return
+
+      if (value === true) {
+        let label = extraLabels[key as keyof typeof extraLabels]
+        if (key === "personaje" && extras.personajeName) {
+          label += ` (${extras.personajeName})`
+        }
+        labels.push(label)
+      }
+    })
+
+    return labels
+  }, [extras])
+
+  const selectedExtras = getSelectedExtrasLabels()
 
   const handleReserva = useCallback(async () => {
     if (!selectedDate || !selectedTurno || !metodoPago) return
 
     setIsSubmitting(true)
     try {
-      const extrasLabels = Object.entries(extras)
-        .filter(([, value]) => value)
-        .map(([key]) => extraLabels[key as keyof Extras])
-      const extras_elegidos =
-        extrasLabels.length > 0 ? extrasLabels.join(", ") : "Ninguno"
+      const extras_elegidos = selectedExtras.length > 0 ? selectedExtras.join(", ") : "Ninguno"
+      
+      const textoMetodoPago = pagoTotalidad 
+        ? `${metodoPagoLabels[metodoPago]} (Abonando Totalidad)` 
+        : metodoPagoLabels[metodoPago]
 
       const supabase = createBrowserClient()
       const { error } = await supabase.from("reservas").insert({
         fecha: toLocalDateString(selectedDate),
         turno: getTurnoLabel(selectedTurno),
-        metodo_pago: metodoPagoLabels[metodoPago],
+        metodo_pago: textoMetodoPago,
         total: calculos.total,
         sena: calculos.sena,
         extras_elegidos,
@@ -144,15 +166,15 @@ export function ResumenReserva({
 🎈 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-💵 Método: ${metodoPagoLabels[metodoPago]}
+💵 Método: ${textoMetodoPago}
 💰 Total: ${formatPrice(calculos.total)}
-💸 Seña requerida: ${formatPrice(calculos.sena)}
+💸 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
 
 *Mis datos:*
 👤 A nombre de: ${datosCliente.nombre}
 🎂 Cumpleañero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " añitos" : "-"})
 
-¿Te puedo pasar el comprobante de la seña por acá para confirmar la fecha?`
+¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
 
       const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP_SALON}?text=${encodeURIComponent(mensajeWhatsApp)}`
       
@@ -172,32 +194,24 @@ export function ResumenReserva({
     selectedDate,
     selectedTurno,
     metodoPago,
-    extras,
     datosCliente,
     calculos.total,
     calculos.sena,
+    selectedExtras,
+    pagoTotalidad
   ])
 
-  // MODAL FESTIVO CON SCROLL CORREGIDO PARA PC
   if (isSuccess && selectedDate && selectedTurno) {
     return (
       <div className="fixed inset-0 z-[200] bg-slate-50 overflow-y-auto overscroll-none">
-        
-        {/* Decoración mágica de fondo */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
           <div className="absolute top-10 left-10 w-72 h-72 bg-rosa/20 rounded-full blur-3xl opacity-60" />
           <div className="absolute bottom-10 right-10 w-72 h-72 bg-azul-claro/20 rounded-full blur-3xl opacity-60" />
         </div>
 
-        {/* CONTENEDOR FIXEADO: Uso de p-4 py-12 sm:py-16 con m-auto adentro */}
         <div className="relative z-10 flex min-h-full p-4 py-12 sm:py-16">
-          
           <div className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-emerald-100 text-center animate-in zoom-in-95 duration-500 overflow-hidden m-auto">
-            
-            {/* Cinta de colores superior */}
             <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-rosa via-amarillo to-azul-claro" />
-            
-            {/* Ícono gigante y festivo */}
             <div className="relative w-24 h-24 bg-gradient-to-br from-[#25D366] to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/30 border-4 border-white mt-2">
               <PartyPopper className="w-12 h-12 text-white animate-bounce" />
               <div className="absolute -right-2 -top-2 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white">
@@ -212,13 +226,10 @@ export function ResumenReserva({
             </h3>
             
             <p className="text-muted-foreground mb-6 text-sm md:text-base font-medium px-2 leading-relaxed">
-              ¡Qué emoción! Tu fecha ya está separada. Para confirmarla definitivamente, envianos el comprobante de la seña.
+              ¡Qué emoción! Tu fecha ya está separada. Para confirmarla definitivamente, envianos el comprobante de pago.
             </p>
             
-            {/* Ticket Estilo Cine/Recibo Premium */}
             <div className="bg-slate-50 rounded-2xl p-5 mb-8 text-left border border-slate-200 space-y-3 relative overflow-hidden">
-              
-              {/* Efecto de borde troquelado del ticket */}
               <div className="absolute -left-4 top-[55%] w-8 h-8 bg-white rounded-full border border-slate-200" />
               <div className="absolute -right-4 top-[55%] w-8 h-8 bg-white rounded-full border border-slate-200" />
               
@@ -246,7 +257,7 @@ export function ResumenReserva({
                 </p>
                 <div className="bg-gradient-to-r from-amarillo/20 to-amarillo/10 p-4 rounded-xl border border-amarillo/30">
                   <p className="text-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 text-azul-marino">
-                    <span className="font-bold">Seña a transferir:</span> 
+                    <span className="font-bold">{pagoTotalidad ? "Monto a transferir ahora:" : "Seña a transferir:"}</span> 
                     <span className="font-extrabold text-2xl text-azul-marino">{formatPrice(calculos.sena)}</span>
                   </p>
                 </div>
@@ -347,7 +358,7 @@ export function ResumenReserva({
                   <p className="font-semibold text-azul-marino">
                     {metodoPagoLabels[metodoPago]}
                   </p>
-                  {metodoPago === "efectivo" && (
+                  {metodoPago === "efectivo" && pagoTotalidad && (
                     <Badge className="bg-verde text-white text-xs">10% OFF</Badge>
                   )}
                 </div>
@@ -385,7 +396,10 @@ export function ResumenReserva({
           )}
           {calculos.descuento > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-verde font-medium">Descuento 10%</span>
+              <span className="text-verde font-medium flex flex-col">
+                Descuento 10%
+                <span className="text-[10px] opacity-80 leading-tight">(Abonando la totalidad)</span>
+              </span>
               <span className="text-verde font-medium">
                 -{formatPrice(calculos.descuento)}
               </span>
@@ -404,7 +418,9 @@ export function ResumenReserva({
 
         <div className="bg-amarillo/20 rounded-xl p-4 mb-6 text-center">
           <p className="text-sm text-azul-marino">
-            <span className="font-bold">Seña requerida para reservar:</span>
+            <span className="font-bold">
+              {pagoTotalidad ? "Total a abonar para reservar:" : "Seña requerida para reservar:"}
+            </span>
           </p>
           <p className="text-2xl font-extrabold text-azul-marino">
             {formatPrice(calculos.sena)}
