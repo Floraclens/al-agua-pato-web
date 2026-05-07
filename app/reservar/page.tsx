@@ -5,7 +5,7 @@ import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
-import { Info, ArrowLeft, PartyPopper } from "lucide-react"
+import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock } from "lucide-react" // Importé MessageCircle y Lock
 import { precioTurnoKey, type Turno } from "@/lib/turno"
 import Link from "next/link"
 
@@ -254,12 +254,26 @@ export default function PaginaReserva() {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-azul-marino">Teléfono / WhatsApp *</label>
                   <input type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${datosCliente.telefono && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); }} />
-                  {datosCliente.telefono && !isValidPhone(datosCliente.telefono) && <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>}
+                  {datosCliente.telefono && !isValidPhone(datosCliente.telefono) ? (
+                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>
+                  ) : (
+                    // MICRO-TEXTO DE CONFIANZA
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
+                      <Lock className="w-3 h-3" /> Solo para enviarte tu confirmación.
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-bold text-azul-marino">Email *</label>
                   <input type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${datosCliente.email && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => setDatosCliente({...datosCliente, email: e.target.value})} />
-                  {datosCliente.email && !isValidEmail(datosCliente.email) && <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>}
+                  {datosCliente.email && !isValidEmail(datosCliente.email) ? (
+                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>
+                  ) : (
+                    // MICRO-TEXTO DE CONFIANZA
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
+                      <Lock className="w-3 h-3" /> 100% privado. Sin spam.
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -303,19 +317,33 @@ export default function PaginaReserva() {
               
               {/* MENSAJES DE ERROR DE VALIDACIÓN */}
               {errorPersonajeVacio && (
-                <p className="text-red-500 text-xs font-bold text-center mt-4 bg-red-50 p-2 rounded-lg">
+                <p className="text-red-500 text-xs font-bold text-center mt-4 bg-red-50 p-2 rounded-lg border border-red-200 shadow-sm">
                   * Marcaste la opción de Personajes pero no elegiste ninguno. Seleccionalo o destildá la opción.
                 </p>
               )}
               {errorConsultaIncompleta && (
-                <p className="text-red-500 text-xs font-bold text-center mt-4 bg-red-50 p-2 rounded-lg">
-                  * Por favor, completá los nombres de todos los personajes que querés consultar, o reducí la cantidad.
+                <p className="text-red-500 text-xs font-bold text-center mt-4 bg-red-50 p-2 rounded-lg border border-red-200 shadow-sm">
+                  * Por favor, completá los nombres de todos los personajes que querés consultar.
                 </p>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* --- BOTÓN FLOTANTE WHATSAPP (SALVAVIDAS) --- */}
+      <a 
+        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20en%20la%20página%20de%20reservas%20y%20tengo%20una%20duda..." 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"
+      >
+        <MessageCircle className="w-6 h-6 lg:w-7 lg:h-7" />
+        <span className="absolute right-full mr-4 bg-white text-slate-800 text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden lg:block">
+          ¿Dudas con tu reserva?
+        </span>
+      </a>
+
     </main>
   )
 }

@@ -13,9 +13,10 @@ import {
   AlertTriangle,
   Timer,
   CheckCircle2,
-  MessageCircle
+  MessageCircle,
+  ShieldCheck
 } from "lucide-react"
-import type { MetodoPago, Extras, DatosCliente } from "@/app/reservar/page" // ACTUALIZADO PARA APUNTAR A RESERVAR
+import type { MetodoPago, Extras, DatosCliente } from "@/app/reservar/page"
 import type { Turno } from "@/lib/turno"
 import { getTurnoLabel } from "@/lib/turno"
 import { format } from "date-fns"
@@ -107,7 +108,7 @@ export function ResumenReserva({
     }
 
     Object.entries(extras).forEach(([key, value]) => {
-      if (key === "adultosAdicionales" || key === "mozoAdicional" || key === "cantidadMozos" || key === "personajesSeleccionados" || key === "consultasPersonajes" || key === "personajeName" || key === "cantidadPersonajeConsulta") return
+      if (key === "adultosAdicionales" || key === "mozoAdicional" || key === "cantidadMozos" || key === "personajesSeleccionados" || key === "consultasPersonajes") return
 
       if (value === true) {
         let label = extraLabels[key as keyof typeof extraLabels]
@@ -151,6 +152,8 @@ export function ResumenReserva({
         : metodoPagoLabels[metodoPago]
 
       const supabase = createBrowserClient()
+      
+      // MODIFICADO: Agregamos el campo 'estado'
       const { data, error } = await supabase.from("reservas").insert({
         fecha: toLocalDateString(selectedDate),
         turno: getTurnoLabel(selectedTurno),
@@ -162,7 +165,8 @@ export function ResumenReserva({
         telefono: datosCliente.telefono,
         email: datosCliente.email || null,
         nombre_cumpleanero: datosCliente.nombreCumpleanero || null,
-        edad_cumple: datosCliente.edadCumple || null
+        edad_cumple: datosCliente.edadCumple || null,
+        estado: 'pendiente' // <-- Siempre nace como pendiente
       }).select('id').single()
 
       if (error) {
@@ -316,7 +320,7 @@ export function ResumenReserva({
             </div>
 
             <Button 
-              onClick={() => window.location.href = "/"} // MODIFICADO: REDIRIGE AL INICIO
+              onClick={() => window.location.href = "/"}
               variant="ghost"
               className="w-full h-12 font-bold text-muted-foreground hover:text-azul-marino hover:bg-slate-100 rounded-full transition-all"
             >
@@ -330,7 +334,7 @@ export function ResumenReserva({
 
   return (
     <>
-      <div className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-20 lg:mb-0">
+      <div className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-20 lg:mb-0 relative">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amarillo/20 mb-3">
             <Sparkles className="w-4 h-4 text-amarillo" />
@@ -477,11 +481,23 @@ export function ResumenReserva({
           size="lg"
           disabled={!canSubmit || isSubmitting}
           onClick={handleReserva}
-          className="hidden lg:flex w-full h-14 text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
+          className="hidden lg:flex w-full h-14 text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full mb-3"
         >
           <Sparkles className="w-5 h-5 mr-2" />
           {isSubmitting ? "Procesando reserva..." : "Solicitar Reserva"}
         </Button>
+
+        <div className="hidden lg:flex flex-col items-center justify-center gap-1.5 mb-6 opacity-70">
+          <div className="flex items-center gap-1.5 text-azul-marino font-semibold text-xs">
+            <ShieldCheck className="w-4 h-4 text-verde" />
+            <span>Transacción segura y protegida</span>
+          </div>
+          <div className="flex gap-2">
+            <Badge variant="outline" className="text-[10px] bg-white">Transferencia</Badge>
+            <Badge variant="outline" className="text-[10px] bg-white">MercadoPago</Badge>
+            <Badge variant="outline" className="text-[10px] bg-white">Efectivo</Badge>
+          </div>
+        </div>
 
         <div className="mt-6 space-y-3">
           <div className="flex items-start gap-2 text-sm bg-azul-claro/10 p-3 rounded-lg">
@@ -505,24 +521,31 @@ export function ResumenReserva({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border/50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 lg:hidden flex items-center justify-between pb-safe">
-        <div className="flex flex-col">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total</span>
-          <span className="text-xl font-extrabold text-azul-marino leading-none mt-1">
-            {formatPrice(calculos.total)}
-          </span>
+      <div className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border/50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 lg:hidden flex flex-col pb-safe">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total</span>
+            <span className="text-xl font-extrabold text-azul-marino leading-none mt-1">
+              {formatPrice(calculos.total)}
+            </span>
+          </div>
+          <Button
+            type="button"
+            disabled={!canSubmit || isSubmitting}
+            onClick={handleReserva}
+            className="h-12 px-6 font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
+          >
+            <Sparkles className="w-4 h-4 mr-2 shrink-0" />
+            <span className="truncate max-w-[120px]">
+              {isSubmitting ? "Procesando..." : "Reservar"}
+            </span>
+          </Button>
         </div>
-        <Button
-          type="button"
-          disabled={!canSubmit || isSubmitting}
-          onClick={handleReserva}
-          className="h-12 px-6 font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
-        >
-          <Sparkles className="w-4 h-4 mr-2 shrink-0" />
-          <span className="truncate max-w-[120px]">
-            {isSubmitting ? "Procesando..." : "Reservar"}
-          </span>
-        </Button>
+        
+        <div className="flex items-center justify-center gap-1.5 mt-1 opacity-80">
+          <ShieldCheck className="w-3.5 h-3.5 text-verde" />
+          <span className="text-[10px] text-azul-marino font-semibold">Reserva segura y encriptada</span>
+        </div>
       </div>
     </>
   )
