@@ -216,17 +216,16 @@ export default function ReservasPage() {
       {/* --- PORTADA SUPER PREMIUM --- */}
       <section className="relative pt-16 pb-16 md:pt-28 md:pb-24 text-center px-4 overflow-hidden bg-slate-50">
         
-        {/* Manchas de luz desenfocadas de fondo */}
+        {/* Background light blurs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] bg-gradient-to-tr from-rosa/20 via-amarillo/20 to-azul-claro/20 blur-[100px] -z-10 rounded-full" />
         
         {/* Decoraciones flotantes */}
         <Sparkles className="absolute top-24 left-[10%] md:left-[20%] w-8 h-8 text-amarillo animate-pulse opacity-70" />
-        <Star className="absolute bottom-32 right-[15%] md:right-[25%] w-6 h-6 text-rosa animate-bounce opacity-70" />
         <PartyPopper className="absolute top-40 right-[5%] md:right-[15%] w-10 h-10 text-azul-claro opacity-50 -rotate-12" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           
-          {/* Etiqueta viva */}
+          {/* Tag */}
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-rosa/30 shadow-[0_0_20px_rgba(236,72,153,0.15)] text-rosa font-black text-sm uppercase tracking-widest">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rosa opacity-75"></span>
@@ -235,7 +234,6 @@ export default function ReservasPage() {
             ¡Agenda 2026 Abierta!
           </div>
 
-          {/* Título Monumental */}
           <div className="space-y-6">
             <h1 className="text-6xl md:text-[5.5rem] lg:text-[6.5rem] font-black text-azul-marino tracking-tighter leading-[1.05] drop-shadow-sm">
               Tu evento soñado es <br className="hidden md:block" />
@@ -251,7 +249,7 @@ export default function ReservasPage() {
             </p>
           </div>
 
-          {/* Tarjeta Sorpresa */}
+          {/* Próximamente Card */}
           <div className="max-w-xl mx-auto relative group mt-12">
             <div className="absolute -inset-1 bg-gradient-to-r from-azul-claro via-lavanda to-rosa rounded-[2rem] blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
             
@@ -270,20 +268,39 @@ export default function ReservasPage() {
             </div>
           </div>
 
-          {/* Botón Principal (Animación en todo el span) */}
-          <div className="mt-10 relative inline-block">
-            <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
+          <div className="mt-10 flex flex-col items-center gap-8">
             
-            <Button 
-              onClick={scrollToGaleria}
-              className="group relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-lg h-20 px-12 rounded-full border border-white/40 shadow-lg active:scale-95 transition-all duration-300 overflow-hidden"
-            >
-              <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100"></span>
+            {/* Contenedor del Botón + Estrella para alinear perfecto */}
+            <div className="relative inline-block">
+              {/* --- Estrella anclada al botón, modificada a -top-2 para bajarla --- */}
+              <Star className="absolute -top-2 -right-10 w-6 h-6 text-rosa animate-bounce opacity-70 z-20" />
+              
+              <div className="relative inline-block w-fit">
+                <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
+                
+                <Button 
+                  onClick={scrollToGaleria}
+                  className="group relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-lg h-20 px-12 rounded-full border border-white/40 shadow-lg active:scale-95 transition-all duration-300 overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100"></span>
 
-              <span className="relative z-10 flex items-center gap-3 uppercase tracking-wider animate-bounce mt-1">
-                ¡Conocenos! <ArrowDown className="h-6 w-6 text-azul-marino" />
-              </span>
-            </Button>
+                  <span className="relative z-10 flex items-center gap-3 uppercase tracking-wider animate-bounce mt-1">
+                    ¡Conocenos! <ArrowDown className="h-6 w-6 text-azul-marino" />
+                  </span>
+                </Button>
+              </div>
+            </div>
+
+            {/* --- Cartel VIP Centrado --- */}
+            <div className="max-w-md mx-auto flex items-center justify-center gap-3.5 px-6 py-3.5 rounded-full bg-gradient-to-br from-white via-rosa/5 to-white/80 backdrop-blur-xl border border-rosa/30 shadow-[0_5px_15px_-5px_rgba(236,72,153,0.15)] hover:shadow-[0_8px_25px_-5px_rgba(236,72,153,0.25)] hover:-translate-y-0.5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-1000 w-full sm:w-auto text-left sm:text-center">
+              <div className="bg-rosa/15 p-2.5 rounded-full shrink-0 shadow-inner">
+                <Sparkles className="w-5 h-5 text-rosa animate-pulse" />
+              </div>
+              <p className="text-sm md:text-base font-bold text-slate-700 leading-tight">
+                ¡Con tu seña te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-azul-marino font-black">Invitación Digital Interactiva</strong>! 🎁
+              </p>
+            </div>
+
           </div>
         </div>
       </section>
@@ -331,14 +348,12 @@ export default function ReservasPage() {
           </div>
         </div>
 
-        {/* --- BOTÓN MEDIO SUPER PREMIUM Y RESPONSIVO --- */}
         <div className="text-center mt-12 mb-16 px-4">
           <div className="relative inline-block w-full sm:w-auto">
             <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-60 animate-pulse"></div>
             
             <Button 
               onClick={scrollToReserva} 
-              // Adaptado para celular: fuente más chica, altura auto, permite wrap del texto
               className="group relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[14px] sm:text-lg h-auto min-h-[64px] py-3 px-4 sm:px-10 rounded-full border border-white/40 shadow-lg active:scale-95 transition-all duration-300 overflow-hidden w-full sm:w-auto"
             >
               <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100"></span>
@@ -356,18 +371,30 @@ export default function ReservasPage() {
           <p className="text-muted-foreground text-lg">Armá tu paquete a medida y asegurá tu fecha</p>
         </div>
 
-        <div className="max-w-3xl mx-auto mb-10 bg-azul-claro/10 border border-azul-claro/20 rounded-2xl p-5 md:p-6 text-left flex flex-col sm:flex-row gap-4 items-start shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-azul-claro/20 flex items-center justify-center shrink-0">
-            <Info className="w-6 h-6 text-azul-marino" />
+        <div className="max-w-3xl mx-auto mb-10 bg-azul-claro/5 border border-azul-claro/20 rounded-3xl p-5 md:p-6 text-left flex flex-col shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-4 items-start">
+            <div className="w-12 h-12 rounded-full bg-azul-claro/20 flex items-center justify-center shrink-0">
+              <Info className="w-6 h-6 text-azul-marino" />
+            </div>
+            <div>
+              <h4 className="text-lg font-extrabold text-azul-marino mb-2">Valores del Predio</h4>
+              <p className="text-sm md:text-base text-azul-marino/80 leading-relaxed">
+                El valor general del predio es de <strong className="text-azul-marino bg-white px-2 py-0.5 rounded-md shadow-sm border border-border/50">$710.000</strong>.<br className="hidden sm:block" />
+                <span className="block mt-2 text-xs md:text-sm bg-white/60 p-3 rounded-lg border border-azul-claro/10">
+                  <strong className="text-azul-marino">Excepción:</strong> El turno de las <strong>18:30 a 22:30hs</strong> tiene un valor de <strong className="text-azul-marino">$790.000</strong> aplicable <strong>exclusivamente</strong> los días Sábados, Domingos, Feriados y en Temporada Alta (del 15 de Diciembre hasta fines de Febrero).
+                </span>
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-lg font-extrabold text-azul-marino mb-2">Valores del Predio</h4>
-            <p className="text-sm md:text-base text-azul-marino/80 leading-relaxed">
-              El valor general del predio es de <strong className="text-azul-marino bg-white px-2 py-0.5 rounded-md shadow-sm border border-border/50">$710.000</strong>.<br className="hidden sm:block" />
-              <span className="block mt-2 text-xs md:text-sm bg-white/50 p-3 rounded-lg border border-azul-claro/10">
-                <strong className="text-azul-marino">Excepción:</strong> El turno de las <strong>18:30 a 22:30hs</strong> tiene un valor de <strong className="text-azul-marino">$790.000</strong> aplicable <strong>exclusivamente</strong> los días Sábados, Domingos, Feriados y en Temporada Alta (del 15 de Diciembre hasta fines de Febrero).
-              </span>
-            </p>
+          
+          <div className="mt-5 p-3.5 bg-gradient-to-r from-amarillo/20 to-naranja/10 rounded-xl border border-amarillo/30 flex items-start sm:items-center gap-3 ml-0 sm:ml-16 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-2xl rounded-full"></div>
+             <div className="bg-white p-2 rounded-lg shadow-sm shrink-0">
+               <PartyPopper className="w-5 h-5 text-naranja" />
+             </div>
+             <p className="text-[13px] md:text-sm text-slate-700 font-medium leading-snug relative z-10">
+               <strong className="font-extrabold text-azul-marino">✨ Bonus Exclusivo:</strong> Tu reserva incluye automáticamente el acceso a nuestro panel VIP para crear y descargar la <strong className="text-naranja">Invitación Digital Interactiva</strong> para tus invitados.
+             </p>
           </div>
         </div>
 
