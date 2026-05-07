@@ -55,14 +55,14 @@ const metodoPagoLabels: Record<NonNullable<MetodoPago>, string> = {
   tarjeta: "Tarjeta",
 }
 
-const extraLabels: Record<keyof Omit<Extras, "adultosAdicionales" | "personajeName">, string> = {
+const extraLabels: Record<keyof Omit<Extras, "adultosAdicionales" | "cantidadMozos" | "personajesSeleccionados" | "consultasPersonajes">, string> = {
   animacion: "Animación",
   horaExtra: "Hora Extra",
   robotLed: "Robot LED",
   zancosLed: "Zancos LED",
   astronautasLed: "Astronautas LED",
-  personaje: "Personaje",
-  mozoAdicional: "Mozo Adicional",
+  personaje: "Personajes",
+  mozoAdicional: "Mozo",
 }
 
 function toLocalDateString(date: Date) {
@@ -99,17 +99,37 @@ export function ResumenReserva({
     const labels: string[] = []
     
     if (extras.adultosAdicionales > 0) {
-      labels.push(`+${extras.adultosAdicionales} Adultos`)
+      labels.push(`+${extras.adultosAdicionales} Adulto/s`)
+    }
+
+    if (extras.mozoAdicional) {
+      labels.push(`+${extras.cantidadMozos} Mozo/s`)
     }
 
     Object.entries(extras).forEach(([key, value]) => {
-      if (key === "adultosAdicionales" || key === "personajeName") return
+      if (key === "adultosAdicionales" || key === "mozoAdicional" || key === "cantidadMozos" || key === "personajesSeleccionados" || key === "consultasPersonajes" || key === "personajeName" || key === "cantidadPersonajeConsulta") return
 
       if (value === true) {
         let label = extraLabels[key as keyof typeof extraLabels]
-        if (key === "personaje" && extras.personajeName) {
-          label += ` (${extras.personajeName})`
+        
+        if (key === "personaje") {
+           const descripciones = []
+           if (extras.personajesSeleccionados.length > 0) {
+               descripciones.push(extras.personajesSeleccionados.join(", "))
+           }
+           
+           const consultasValidas = extras.consultasPersonajes.filter(c => c.trim() !== "")
+           if (consultasValidas.length > 0) {
+               descripciones.push(`Consultar: ${consultasValidas.join(", ")}`)
+           }
+           
+           if (descripciones.length > 0) {
+               label += ` (${descripciones.join(" | ")})`
+           } else {
+               return; 
+           }
         }
+        
         labels.push(label)
       }
     })
@@ -131,7 +151,8 @@ export function ResumenReserva({
         : metodoPagoLabels[metodoPago]
 
       const supabase = createBrowserClient()
-      const { error } = await supabase.from("reservas").insert({
+      // MODIFICADO: Agregamos .select('id').single() para recuperar el ID generado
+      const { data, error } = await supabase.from("reservas").insert({
         fecha: toLocalDateString(selectedDate),
         turno: getTurnoLabel(selectedTurno),
         metodo_pago: textoMetodoPago,
@@ -143,7 +164,7 @@ export function ResumenReserva({
         email: datosCliente.email || null,
         nombre_cumpleanero: datosCliente.nombreCumpleanero || null,
         edad_cumple: datosCliente.edadCumple || null
-      })
+      }).select('id').single()
 
       if (error) {
         console.error("[reservas] Error al guardar:", error.message, error)
@@ -152,11 +173,13 @@ export function ResumenReserva({
         return
       }
 
+      const reservaId = data?.id || "N/A"
       const NUMERO_WHATSAPP_SALON = "5493854470103" 
       
       const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM", { locale: es })
       const turnoLabel = getTurnoLabel(selectedTurno)
       
+      // MODIFICADO: Agregamos el ID de reserva al mensaje
       const mensajeWhatsApp = 
 `¡Hola Al Agua Pato! 🦆✨ Acabo de solicitar una reserva desde la página web.
 
@@ -173,6 +196,8 @@ export function ResumenReserva({
 *Mis datos:*
 👤 A nombre de: ${datosCliente.nombre}
 🎂 Cumpleañero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " añitos" : "-"})
+
+*(ID interno de reserva: ${reservaId})*
 
 ¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
 
@@ -200,6 +225,8 @@ export function ResumenReserva({
     selectedExtras,
     pagoTotalidad
   ])
+
+  const faltaElegirPersonaje = extras.personaje && extras.personajesSeleccionados.length === 0 && !extras.consultasPersonajes.some(c => c.trim().length > 0);
 
   if (isSuccess && selectedDate && selectedTurno) {
     return (
@@ -264,7 +291,7 @@ export function ResumenReserva({
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 mb-6">
               <a 
                 href={waUrl} 
                 target="_blank" 
@@ -272,17 +299,32 @@ export function ResumenReserva({
                 className="w-full flex items-center justify-center h-14 font-extrabold bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full transition-all hover:-translate-y-1 active:scale-95 shadow-lg shadow-green-500/20 text-lg"
               >
                 <MessageCircle className="w-6 h-6 mr-2" /> 
-                Enviar comprobante
+                1. Enviar comprobante
               </a>
-
-              <Button 
-                onClick={() => window.location.reload()}
-                variant="ghost"
-                className="w-full h-12 font-bold text-muted-foreground hover:text-azul-marino hover:bg-slate-100 rounded-full transition-all"
-              >
-                Cerrar y volver al inicio
-              </Button>
             </div>
+
+            {/* NUEVA SECCIÓN DE AVISO DE INVITACIÓN */}
+            <div className="bg-azul-claro/10 border border-azul-claro/20 rounded-xl p-5 mb-8 text-left shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="bg-azul-claro/20 p-2.5 rounded-full shrink-0">
+                  <PartyPopper className="w-5 h-5 text-azul-marino" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-azul-marino mb-1 text-[15px]">Próximo paso: Tu invitación VIP</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Una vez que nos envíes el comprobante por WhatsApp y confirmemos tu pago, te enviaremos un <strong>enlace exclusivo</strong> para que diseñes y compartas tu invitación digital.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => window.location.reload()}
+              variant="ghost"
+              className="w-full h-12 font-bold text-muted-foreground hover:text-azul-marino hover:bg-slate-100 rounded-full transition-all"
+            >
+              Cerrar y volver al inicio
+            </Button>
           </div>
         </div>
       </div>
@@ -334,11 +376,11 @@ export function ResumenReserva({
               <div className="w-10 h-10 rounded-full bg-lavanda/10 flex items-center justify-center shrink-0">
                 <PartyPopper className="w-5 h-5 text-lavanda" />
               </div>
-              <div>
+              <div className="w-full overflow-hidden">
                 <p className="text-xs text-muted-foreground">Extras</p>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-wrap gap-1.5 mt-1">
                   {selectedExtras.map((extra) => (
-                    <Badge key={extra} variant="secondary" className="bg-rosa/20 text-rosa text-xs">
+                    <Badge key={extra} variant="secondary" className="bg-rosa/20 text-rosa text-xs whitespace-normal break-words h-auto py-1.5 text-left leading-snug">
                       {extra}
                     </Badge>
                   ))}
@@ -416,7 +458,7 @@ export function ResumenReserva({
           </span>
         </div>
 
-        <div className="bg-amarillo/20 rounded-xl p-4 mb-6 text-center">
+        <div className="bg-amarillo/20 rounded-xl p-4 mb-4 text-center">
           <p className="text-sm text-azul-marino">
             <span className="font-bold">
               {pagoTotalidad ? "Total a abonar para reservar:" : "Seña requerida para reservar:"}
@@ -426,6 +468,12 @@ export function ResumenReserva({
             {formatPrice(calculos.sena)}
           </p>
         </div>
+
+        {faltaElegirPersonaje && (
+          <p className="text-red-500 text-xs font-bold text-center mb-4">
+            * Marcaste la opción de Personajes pero no elegiste ninguno. Seleccionalo o destildá la opción.
+          </p>
+        )}
 
         <Button
           type="button"

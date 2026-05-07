@@ -1,7 +1,5 @@
 "use client"
 
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Banknote, Building2, CreditCard } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -19,7 +17,7 @@ const metodos = [
   {
     id: "efectivo" as const,
     titulo: "Efectivo",
-    descripcion: "Pago en efectivo",
+    descripcion: "Pago en efectivo el día del evento",
     icon: Banknote,
     color: "text-verde",
     bgColor: "bg-verde/10",
@@ -49,11 +47,7 @@ export function MetodoPagoSelector({
   onSelectPagoTotalidad
 }: MetodoPagoSelectorProps) {
   return (
-    <RadioGroup
-      value={metodoPago || ""}
-      onValueChange={(value) => onSelectMetodoPago(value as MetodoPago)}
-      className="space-y-3"
-    >
+    <div className="space-y-3">
       {metodos.map((metodo) => {
         const Icon = metodo.icon
         const isSelected = metodoPago === metodo.id
@@ -62,22 +56,18 @@ export function MetodoPagoSelector({
           <div
             key={metodo.id}
             className={cn(
-              "relative flex flex-col rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden",
+              "relative flex flex-col rounded-xl border-2 transition-all duration-200 overflow-hidden",
               isSelected
                 ? "border-azul-marino bg-azul-claro/5"
-                : "border-border/50 hover:border-border"
+                : "border-border/50 hover:border-border bg-white"
             )}
           >
-            <div 
-              className="flex items-center p-4"
-              onClick={() => onSelectMetodoPago(metodo.id)}
+            {/* Convertido a <button> para solucionar clicks en celular y permitir desmarcar */}
+            <button
+              type="button"
+              className="flex items-center p-4 w-full text-left cursor-pointer"
+              onClick={() => onSelectMetodoPago(metodo.id as MetodoPago)}
             >
-              <RadioGroupItem
-                value={metodo.id}
-                id={metodo.id}
-                className="sr-only"
-              />
-
               <div
                 className={cn(
                   "w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center transition-colors shrink-0",
@@ -95,20 +85,14 @@ export function MetodoPagoSelector({
                 <Icon className={`w-5 h-5 ${metodo.color}`} />
               </div>
 
-              <Label
-                htmlFor={metodo.id}
-                className="flex-1 cursor-pointer"
-              >
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-bold text-azul-marino">{metodo.titulo}</h4>
-                </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-azul-marino mb-0.5">{metodo.titulo}</h4>
                 <p className="text-sm text-muted-foreground">
                   {metodo.descripcion}
                 </p>
-              </Label>
-            </div>
+              </div>
+            </button>
 
-            {/* Sub-opción para Efectivo con el cartelito movido acá */}
             {isSelected && metodo.id === "efectivo" && (
               <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-300 pl-[4.5rem]">
                 <label className="flex items-start gap-3 cursor-pointer p-3 bg-white border border-verde/20 rounded-lg shadow-sm">
@@ -134,6 +118,6 @@ export function MetodoPagoSelector({
           </div>
         )
       })}
-    </RadioGroup>
+    </div>
   )
 }
