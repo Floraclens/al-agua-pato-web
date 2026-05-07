@@ -11,7 +11,7 @@ export function PhotoGallery() {
   // 📸 CONFIGURACIÓN DINÁMICA: 
   // Solo cambia este número cuando agregues fotos a /public/galeria/
   // Asegurate que se llamen 1.jpg, 2.jpg, 3.jpg, etc.
-  const CANTIDAD_TOTAL_FOTOS = 4
+  const CANTIDAD_TOTAL_FOTOS = 24
   // -------------------------------------------------------------------------
 
   const images = Array.from({ length: CANTIDAD_TOTAL_FOTOS }, (_, i) => ({
