@@ -13,7 +13,7 @@ export function PhotoGallery() {
   // Asegurate que se llamen 1.jpg, 2.jpg, 3.jpg, etc.
   const CANTIDAD_TOTAL_FOTOS = 24
   // -------------------------------------------------------------------------
-
+  
   const images = Array.from({ length: CANTIDAD_TOTAL_FOTOS }, (_, i) => ({
     src: `/galeria/${i + 1}.jpg`,
     alt: `Salón Al Agua Pato - Foto ${i + 1}`,
@@ -55,7 +55,16 @@ export function PhotoGallery() {
             className="relative w-full h-[240px] sm:h-[300px] rounded-2xl overflow-hidden shadow-sm active:scale-[0.98] transition-transform"
             onClick={() => setSelectedIndex(0)}
           >
-            {images[0] && <Image src={images[0].src} alt={images[0].alt} fill className="object-cover" priority />}
+            {images[0] && (
+              <Image 
+                src={images[0].src} 
+                alt={images[0].alt} 
+                fill 
+                className="object-cover" 
+                priority // La primera carga de inmediato
+                sizes="(max-width: 768px) 100vw, 50vw" // Optimizacion: Le decimos el tamaño real
+              />
+            )}
             <div className="absolute inset-0 bg-black/5" />
           </div>
           
@@ -66,7 +75,14 @@ export function PhotoGallery() {
                 className="relative min-w-[45%] h-[120px] snap-center rounded-xl overflow-hidden shadow-sm active:scale-[0.98] transition-transform"
                 onClick={() => setSelectedIndex(index + 1)}
               >
-                <Image src={img.src} alt={img.alt} fill className="object-cover" />
+                <Image 
+                  src={img.src} 
+                  alt={img.alt} 
+                  fill 
+                  className="object-cover" 
+                  sizes="(max-width: 768px) 50vw, 25vw" // Optimizacion: Fotos chiquitas, poco peso
+                  loading="lazy"
+                />
                 <div className="absolute inset-0 bg-black/5" />
               </div>
             ))}
@@ -76,19 +92,55 @@ export function PhotoGallery() {
         {/* 💻 VISTA ESCRITORIO (Grilla de 4 con indicador inteligente "+X") */}
         <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-3 h-[480px]">
           <div className="col-span-2 row-span-2 relative w-full h-full rounded-l-3xl overflow-hidden group cursor-pointer shadow-sm" onClick={() => setSelectedIndex(0)}>
-            {images[0] && <Image src={images[0].src} alt={images[0].alt} fill className="object-cover transition-transform duration-700 group-hover:scale-105" priority />}
+            {images[0] && (
+              <Image 
+                src={images[0].src} 
+                alt={images[0].alt} 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                priority 
+                sizes="(max-width: 1200px) 50vw, 33vw"
+              />
+            )}
             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
           </div>
           <div className="col-span-2 row-span-1 relative w-full h-full rounded-tr-3xl overflow-hidden group cursor-pointer shadow-sm" onClick={() => setSelectedIndex(1)}>
-            {images[1] && <Image src={images[1].src} alt={images[1].alt} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />}
+            {images[1] && (
+              <Image 
+                src={images[1].src} 
+                alt={images[1].alt} 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                sizes="(max-width: 1200px) 50vw, 33vw"
+                loading="lazy"
+              />
+            )}
             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
           </div>
           <div className="col-span-1 row-span-1 relative w-full h-full overflow-hidden group cursor-pointer shadow-sm" onClick={() => setSelectedIndex(2)}>
-            {images[2] && <Image src={images[2].src} alt={images[2].alt} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />}
+            {images[2] && (
+              <Image 
+                src={images[2].src} 
+                alt={images[2].alt} 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                sizes="(max-width: 1200px) 25vw, 20vw"
+                loading="lazy"
+              />
+            )}
             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
           </div>
           <div className="col-span-1 row-span-1 relative w-full h-full rounded-br-3xl overflow-hidden group cursor-pointer shadow-sm" onClick={() => setSelectedIndex(3)}>
-            {images[3] && <Image src={images[3].src} alt={images[3].alt} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />}
+            {images[3] && (
+              <Image 
+                src={images[3].src} 
+                alt={images[3].alt} 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                sizes="(max-width: 1200px) 25vw, 20vw"
+                loading="lazy"
+              />
+            )}
             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
             
             {images.length > 4 && (
@@ -102,7 +154,7 @@ export function PhotoGallery() {
         </div>
       </section>
 
-      {/* 🔍 VISOR DE FOTOS (LIGHTBOX) */}
+      {/* 🔍 VISOR DE FOTOS (LIGHTBOX) - ALTA CALIDAD PARA EL ZOOM */}
       {selectedIndex !== null && (
         <div 
           className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-300 overscroll-none"
@@ -129,6 +181,9 @@ export function PhotoGallery() {
               fill 
               className="object-contain animate-in fade-in zoom-in-95 duration-300" 
               key={selectedIndex}
+              quality={95} // ¡ACÁ ESTÁ LA MAGIA! Calidad casi perfecta cuando hacen zoom
+              sizes="100vw" // Le decimos que esta foto va a ocupar toda la pantalla
+              priority
             />
           </div>
 

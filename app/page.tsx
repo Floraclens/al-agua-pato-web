@@ -7,9 +7,16 @@ import { ServiciosIncluidos } from "@/components/servicios-incluidos"
 import { PhotoGallery } from "@/components/photo-gallery"
 import { 
   Sparkles, MapPin, CheckCircle2, Star, Quote, ArrowDown, 
-  PartyPopper, Wand2, ArrowRight, ShieldCheck, X
+  PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
+  HelpCircle, ChevronDown
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 export default function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -20,7 +27,6 @@ export default function LandingPage() {
 
   return (
     <main className="min-h-screen bg-[#081524] font-sans">
-      {/* AQUÍ ESTABA EL ERROR: Le sacamos el pb-20 que generaba la franja blanca */}
       <div className="bg-background">
         
         <header className="bg-white/90 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 shadow-sm">
@@ -38,7 +44,7 @@ export default function LandingPage() {
                   <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1 hidden sm:block">Predio de Eventos</span>
                 </div>
               </div>
-              <a href="https://google.com/maps" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border-2 border-azul-marino text-azul-marino hover:bg-azul-marino hover:text-white transition-all duration-200 font-bold text-xs md:text-sm rounded-full shadow-sm hover:shadow-md active:scale-95">
+              <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border-2 border-azul-marino text-azul-marino hover:bg-azul-marino hover:text-white transition-all duration-200 font-bold text-xs md:text-sm rounded-full shadow-sm hover:shadow-md active:scale-95">
                 <MapPin className="h-4 w-4" />
                 <span className="hidden sm:inline">Ver en Maps</span>
                 <span className="sm:hidden">Ubicación</span>
@@ -126,32 +132,64 @@ export default function LandingPage() {
           <PhotoGallery />
         </div>
 
-        {/* --- TESTIMONIOS --- */}
+        {/* --- TESTIMONIOS (AHORA CON PRUEBA SOCIAL DE GOOGLE) --- */}
         <section className="py-16 md:py-24 bg-azul-claro/5 border-b border-border/50 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-black text-azul-marino">Lo que dicen las familias</h3>
-              <p className="text-muted-foreground text-lg mt-2 font-medium">Cientos de eventos inolvidables nos avalan</p>
+            <div className="flex flex-col items-center text-center mb-12">
+              <h3 className="text-3xl md:text-4xl font-black text-azul-marino mb-6">Lo que dicen las familias</h3>
+              
+              {/* Insignia de confianza Google */}
+              <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-sm border border-border/50 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black text-slate-800">4.9</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-5 h-5 fill-[#FBBC05] text-[#FBBC05]" />)}
+                  </div>
+                </div>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block"></div>
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                  Basado en reseñas en 
+                  <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                </div>
+              </div>
             </div>
-            <div className="flex overflow-x-auto md:grid md:grid-cols-4 snap-x snap-mandatory gap-4 pb-6 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+
+            <div className="flex overflow-x-auto md:grid md:grid-cols-4 snap-x snap-mandatory gap-5 pb-6 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {[
-                { nombre: "Laura G.", texto: "Festejamos los 5 de Mateo y salió todo perfecto. El predio es hermoso, súper limpio y los animadores unos genios totales. ¡Los chicos no pararon de jugar!" },
-                { nombre: "Martín P.", texto: "Excelente atención de principio a fin. El show del Robot LED fue una locura, todos los invitados quedaron alucinados. Cero estrés para nosotros." },
-                { nombre: "Sabrina V.", texto: "Súper recomendable. La comida, la organización, las chicas que atienden... de 10. Pagás y te olvidás de todo, ellos se encargan. Volveremos el año que viene." },
-                { nombre: "Julieta F.", texto: "El mejor lugar al que fuimos. La ambientación es soñada y el pelotero es gigante. Estuvimos súper cómodos y nos atendieron como reyes." }
+                { nombre: "Laura G.", tiempo: "Hace 2 semanas", texto: "Festejamos los 5 de Mateo y salió todo perfecto. El predio es hermoso, súper limpio y los animadores unos genios totales. ¡Los chicos no pararon de jugar!", color: "bg-rosa text-white" },
+                { nombre: "Martín P.", tiempo: "Hace 1 mes", texto: "Excelente atención de principio a fin. El show del Robot LED fue una locura, todos los invitados quedaron alucinados. Cero estrés para nosotros.", color: "bg-azul-claro text-white" },
+                { nombre: "Sabrina V.", tiempo: "Hace 3 meses", texto: "Súper recomendable. La comida, la organización, las chicas que atienden... de 10. Pagás y te olvidás de todo, ellos se encargan. Volveremos el año que viene.", color: "bg-lavanda text-white" },
+                { nombre: "Julieta F.", tiempo: "Hace 4 meses", texto: "El mejor lugar al que fuimos. La ambientación es soñada y el pelotero es gigante. Estuvimos súper cómodos y nos atendieron como reyes.", color: "bg-amarillo text-azul-marino" }
               ].map((review, i) => (
                 <div key={i} className="min-w-[85%] sm:min-w-[60%] md:min-w-0 snap-center bg-white p-6 rounded-3xl shadow-sm border border-border/50 relative flex flex-col hover:-translate-y-1 transition-transform duration-300">
-                  <Quote className="absolute top-5 right-5 w-8 h-8 text-azul-claro/20" />
-                  <div className="flex gap-1 mb-4">
-                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-5 h-5 fill-amarillo text-amarillo" />)}
-                  </div>
-                  <p className="text-sm text-foreground/80 leading-relaxed mb-6 relative z-10 italic flex-1 font-medium">"{review.texto}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-azul-marino text-xs">
+                  {/* Logo de Google sutil en la esquina */}
+                  <svg className="absolute top-6 right-6 w-5 h-5 opacity-70" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-inner ${review.color}`}>
                       {review.nombre.charAt(0)}
                     </div>
-                    <p className="font-bold text-azul-marino text-sm">{review.nombre}</p>
+                    <div>
+                      <p className="font-bold text-slate-800 text-sm leading-tight">{review.nombre}</p>
+                      <p className="text-xs text-muted-foreground font-medium">{review.tiempo}</p>
+                    </div>
                   </div>
+                  
+                  <div className="flex gap-0.5 mb-3">
+                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-4 h-4 fill-[#FBBC05] text-[#FBBC05]" />)}
+                  </div>
+                  
+                  <p className="text-[15px] text-slate-700 leading-relaxed font-medium">"{review.texto}"</p>
                 </div>
               ))}
             </div>
@@ -270,6 +308,37 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* --- PREGUNTAS FRECUENTES (FAQ) --- */}
+        <section className="py-20 bg-slate-50 border-t border-border/50">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-azul-claro/10 text-azul-claro font-bold text-xs uppercase tracking-widest mb-4">
+                <HelpCircle className="w-4 h-4" /> Dudas Frecuentes
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-azul-marino">Todo lo que necesitas saber</h2>
+            </div>
+
+            <Accordion type="single" collapsible className="space-y-4">
+              {[
+                { q: "¿Con cuánta anticipación debo reservar?", a: "Recomendamos reservar con al menos 2 o 3 meses de anticipación, especialmente para fines de semana o fechas en temporada alta, para asegurar tu lugar." },
+                { q: "¿El salón cuenta con climatización?", a: "Sí, el quincho principal está totalmente cerrado y equipado con aire acondicionado y ventiladores de techo para garantizar la comodidad en cualquier época del año." },
+                { q: "¿Qué sucede si llueve el día de mi evento?", a: "¡No te preocupes! Nuestras instalaciones principales son techadas y climatizadas. Los juegos de exterior son los únicos que podrían verse afectados, pero la fiesta continúa perfectamente dentro del salón." },
+                { q: "¿Puedo llevar mi propia decoración o comida?", a: "¡Claro! Podés personalizar el evento a tu gusto. Contamos con asador y cocina equipada si decidís traer tu propio catering. También ofrecemos extras para facilitarte todo." },
+                { q: "¿Cómo se confirma la reserva de la fecha?", a: "La fecha se bloquea únicamente con el pago de la seña. Una vez realizada a través de nuestra web, nos envías el comprobante por WhatsApp y ¡listo!, tu lugar está asegurado." }
+              ].map((faq, i) => (
+                <AccordionItem key={i} value={`item-${i}`} className="bg-white border border-border/50 rounded-2xl px-6 shadow-sm overflow-hidden">
+                  <AccordionTrigger className="hover:no-underline font-bold text-azul-marino text-left py-5">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-slate-600 font-medium pb-5 leading-relaxed">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
+
         {/* --- SÚPER BANNER FINAL --- */}
         <section className="relative py-24 overflow-hidden bg-azul-marino">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30" />
@@ -290,7 +359,7 @@ export default function LandingPage() {
               Elegí tu fecha, armá tu paquete ideal y asegurá el mejor cumpleaños para tu familia.
             </p>
 
-            <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-8">
+            <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-10">
                <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-4 py-2 rounded-full shadow-xl animate-bounce z-20 border-2 border-rosa/30">
                  🎁 ¡Incluye Invitación Digital VIP!
                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0" />
@@ -309,9 +378,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-      </div> {/* <-- FIN DEL WRAPPER BLANCO (bg-background) */}
+      </div>
 
-      {/* --- FOOTER COMPACTO (Ahora con padding para el botón móvil) --- */}
+      {/* --- FOOTER COMPACTO --- */}
       <footer className="bg-[#081524] text-white pt-10 pb-28 lg:pb-10 border-t-4 border-amarillo relative z-10">
         <div className="container mx-auto px-4 text-center">
           <div className="flex flex-col items-center gap-4">
@@ -339,6 +408,19 @@ export default function LandingPage() {
             </Button>
          </Link>
       </div>
+
+      {/* --- BOTÓN FLOTANTE WHATSAPP --- */}
+      <a 
+        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20viendo%20la%20página%20web%20y%20tengo%20una%20consulta%20sobre%20el%20salón..." 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"
+      >
+        <MessageCircle className="w-6 h-6 lg:w-7 lg:h-7" />
+        <span className="absolute right-full mr-4 bg-white text-slate-800 text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap hidden lg:block">
+          ¿Tenés dudas? Escribinos
+        </span>
+      </a>
 
       {/* --- MODAL DE IMAGEN (ZOOM) --- */}
       {selectedImage && (
