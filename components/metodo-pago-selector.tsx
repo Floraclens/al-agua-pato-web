@@ -17,7 +17,7 @@ const metodos = [
   {
     id: "efectivo" as const,
     titulo: "Efectivo",
-    descripcion: "Pago en efectivo el día del evento",
+    descripcion: "Pago en efectivo",
     icon: Banknote,
     color: "text-verde",
     bgColor: "bg-verde/10",

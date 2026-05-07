@@ -213,7 +213,7 @@ export default function ReservasPage() {
         </div>
       </header>
 
-      {/* --- NUEVA PORTADA SUPER PREMIUM --- */}
+      {/* --- PORTADA SUPER PREMIUM --- */}
       <section className="relative pt-16 pb-16 md:pt-28 md:pb-24 text-center px-4 overflow-hidden bg-slate-50">
         
         {/* Manchas de luz desenfocadas de fondo */}
@@ -246,13 +246,12 @@ export default function ReservasPage() {
                 </span>
               </span>
             </h1>
-            {/* Párrafo Corregido */}
             <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto text-balance font-medium leading-relaxed">
               <strong className="text-azul-marino font-extrabold">"Al agua pato"</strong> un espacio lleno de aventuras, juegos y experiencias únicas e inolvidables.
             </p>
           </div>
 
-          {/* Tarjeta Sorpresa Mejorada */}
+          {/* Tarjeta Sorpresa */}
           <div className="max-w-xl mx-auto relative group mt-12">
             <div className="absolute -inset-1 bg-gradient-to-r from-azul-claro via-lavanda to-rosa rounded-[2rem] blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
             
@@ -271,22 +270,18 @@ export default function ReservasPage() {
             </div>
           </div>
 
-          {/* --- DETALLE CORREGIDO: BOTÓN LLAMATIVO Y VIBRANTE --- */}
+          {/* Botón Principal (Animación en todo el span) */}
           <div className="mt-10 relative inline-block">
-             {/* Resplandor (Glow) exterior corregido para que caiga parejo y hacia abajo */}
             <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
             
             <Button 
               onClick={scrollToGaleria}
-              // Botón con degradado vibrante, rebote activo para el celular y sombra ajustada
               className="group relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-lg h-20 px-12 rounded-full border border-white/40 shadow-lg active:scale-95 transition-all duration-300 overflow-hidden"
             >
-              {/* Efecto de brillo interior brillante al hover */}
               <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100"></span>
 
-              <span className="relative z-10 flex items-center gap-3 uppercase tracking-wider">
-                {/* Flecha con rebote constante para atraer la vista en celular */}
-                ¡Conocenos! <ArrowDown className="h-6 w-6 text-azul-marino animate-bounce" />
+              <span className="relative z-10 flex items-center gap-3 uppercase tracking-wider animate-bounce mt-1">
+                ¡Conocenos! <ArrowDown className="h-6 w-6 text-azul-marino" />
               </span>
             </Button>
           </div>
@@ -326,7 +321,7 @@ export default function ReservasPage() {
       <div className="container mx-auto px-4 pb-12">
         <div>
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-azul-marino mb-3 flex items-center justify-center gap-3">
+            <h2 className="text-3xl md:text-4xl font-bold text-azul-marino mb-3 flex flex-col md:flex-row items-center justify-center gap-3">
               <CheckCircle2 className="h-8 w-8 text-verde" /> ¿Qué incluye tu evento?
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-balance">Todo está pensado para que disfruten al máximo sin preocuparse por nada.</p>
@@ -336,10 +331,22 @@ export default function ReservasPage() {
           </div>
         </div>
 
-        <div className="text-center mt-12 mb-16">
-          <Button onClick={scrollToReserva} className="bg-amarillo hover:bg-amarillo/90 text-azul-marino font-extrabold text-lg h-16 px-10 rounded-full shadow-[0_10px_40px_-10px_rgba(250,204,21,0.6)] hover:shadow-[0_10px_40px_-5px_rgba(250,204,21,0.8)] transition-all hover:-translate-y-1 w-full sm:w-auto">
-            ¡Me encantó! Ver fechas disponibles ✨
-          </Button>
+        {/* --- BOTÓN MEDIO SUPER PREMIUM Y RESPONSIVO --- */}
+        <div className="text-center mt-12 mb-16 px-4">
+          <div className="relative inline-block w-full sm:w-auto">
+            <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-60 animate-pulse"></div>
+            
+            <Button 
+              onClick={scrollToReserva} 
+              // Adaptado para celular: fuente más chica, altura auto, permite wrap del texto
+              className="group relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[14px] sm:text-lg h-auto min-h-[64px] py-3 px-4 sm:px-10 rounded-full border border-white/40 shadow-lg active:scale-95 transition-all duration-300 overflow-hidden w-full sm:w-auto"
+            >
+              <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100"></span>
+              <span className="relative z-10 flex items-center justify-center gap-2 uppercase tracking-wide whitespace-normal text-center leading-tight">
+                ¡Me encantó! Ver fechas disponibles ✨
+              </span>
+            </Button>
+          </div>
         </div>
 
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-12" />
@@ -406,11 +413,11 @@ export default function ReservasPage() {
               </div>
               <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Nombre del Agasajado/a</label>
+                  <label className="text-sm font-bold text-azul-marino">Nombre del Cumpleañero/a</label>
                   <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Lucas" value={datosCliente.nombreCumpleanero} onChange={(e) => setDatosCliente({...datosCliente, nombreCumpleanero: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">¿Cuántos años cumple? (Si aplica)</label>
+                  <label className="text-sm font-bold text-azul-marino">¿Cuántos años cumple?</label>
                   <input type="text" inputMode="numeric" maxLength={2} className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: 5" value={datosCliente.edadCumple} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, edadCumple: soloNumeros}); }} />
                 </div>
               </div>
