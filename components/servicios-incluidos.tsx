@@ -1,17 +1,10 @@
 "use client"
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import {
   Users,
   Home,
   Armchair,
   Waves,
-  Car,
   Popcorn,
   PartyPopper,
   Cake,
@@ -31,6 +24,8 @@ interface ServiceCategory {
   icon: React.ComponentType<{ className?: string }>
   color: string
   bgColor: string
+  borderColor: string
+  shadowColor: string
   items: ServiceItem[]
   nota?: {
     text: string
@@ -38,13 +33,15 @@ interface ServiceCategory {
   }
 }
 
-const serviciosAccordion: ServiceCategory[] = [
+const serviciosData: ServiceCategory[] = [
   {
     id: "capacidad",
     titulo: "Capacidad y General",
     icon: Users,
     color: "text-rosa",
     bgColor: "bg-rosa/10",
+    borderColor: "border-rosa/20",
+    shadowColor: "hover:shadow-rosa/10",
     items: [
       { text: "Máx 60 adultos y 40 niños" },
       { text: "Edad límite 8 añitos (sin excepción)", highlight: "warning" },
@@ -60,6 +57,8 @@ const serviciosAccordion: ServiceCategory[] = [
     icon: Home,
     color: "text-azul-claro",
     bgColor: "bg-azul-claro/10",
+    borderColor: "border-azul-claro/20",
+    shadowColor: "hover:shadow-azul-claro/10",
     items: [
       { text: "Salón/Quincho cerrado y climatizado" },
       { text: "Asador, galería y living" },
@@ -76,6 +75,8 @@ const serviciosAccordion: ServiceCategory[] = [
     icon: Armchair,
     color: "text-naranja",
     bgColor: "bg-naranja/10",
+    borderColor: "border-naranja/20",
+    shadowColor: "hover:shadow-naranja/10",
     items: [
       { text: "Mesas y sillas para grandes y niños" },
       { text: "Juegos de living" },
@@ -95,6 +96,8 @@ const serviciosAccordion: ServiceCategory[] = [
     icon: Waves,
     color: "text-azul-claro",
     bgColor: "bg-azul-claro/10",
+    borderColor: "border-azul-claro/20",
+    shadowColor: "hover:shadow-azul-claro/10",
     items: [
       { text: "Pileta (45cm de alto) con juegos de parque acuático y flotadores" },
       { text: "Montaña con toboganes y túneles" },
@@ -115,6 +118,8 @@ const serviciosAccordion: ServiceCategory[] = [
     icon: Popcorn,
     color: "text-amarillo",
     bgColor: "bg-amarillo/10",
+    borderColor: "border-amarillo/20",
+    shadowColor: "hover:shadow-amarillo/10",
     items: [
       { text: "2 Panchukeras" },
       { text: "Pochoclera" },
@@ -131,6 +136,8 @@ const serviciosAccordion: ServiceCategory[] = [
     icon: PartyPopper,
     color: "text-rosa",
     bgColor: "bg-rosa/10",
+    borderColor: "border-rosa/20",
+    shadowColor: "hover:shadow-rosa/10",
     items: [
       { text: "Escenario" },
       { text: "Telas blancas con luces LED" },
@@ -146,6 +153,8 @@ const serviciosAccordion: ServiceCategory[] = [
     icon: Cake,
     color: "text-naranja",
     bgColor: "bg-naranja/10",
+    borderColor: "border-naranja/20",
+    shadowColor: "hover:shadow-naranja/10",
     items: [
       { text: "4 Mesas cuadradas de distintas alturas" },
       { text: "Posatorta y posa chupetines" },
@@ -157,56 +166,66 @@ const serviciosAccordion: ServiceCategory[] = [
 
 export function ServiciosIncluidos() {
   return (
-    <div className="space-y-5">
-      <Accordion type="single" collapsible className="w-full flex flex-col gap-3">
-        {serviciosAccordion.map((servicio) => {
+    <div className="space-y-8 md:space-y-12">
+      
+      {/* GRILLA BENTO PREMIUM (Todo visible, cero clics) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        {serviciosData.map((servicio, index) => {
           const Icon = servicio.icon
+          // El ítem 6 (Candy bar) lo hacemos ocupar las dos columnas si estamos en desktop para cerrar el diseño simétrico
+          const isLast = index === serviciosData.length - 1
+
           return (
-            <AccordionItem
+            <div
               key={servicio.id}
-              value={servicio.id}
-              className="border border-border/50 rounded-2xl bg-white shadow-sm overflow-hidden group data-[state=open]:border-azul-marino/20 data-[state=open]:shadow-md transition-all duration-300"
+              className={`relative overflow-hidden bg-white rounded-[2rem] border-2 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl ${servicio.borderColor} ${servicio.shadowColor} ${isLast ? 'md:col-span-2' : ''} group`}
             >
-              <AccordionTrigger className="hover:no-underline px-5 py-4 hover:bg-slate-50 transition-colors">
-                <div className="flex items-center gap-4 w-full pr-4">
-                  {/* Ícono Principal */}
-                  <div className={`w-12 h-12 rounded-full ${servicio.bgColor} flex items-center justify-center shrink-0 group-data-[state=open]:scale-110 transition-transform duration-300`}>
-                    <Icon className={`w-6 h-6 ${servicio.color}`} />
+              {/* Marca de agua gigante animada */}
+              <div className="absolute -right-8 -bottom-8 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 pointer-events-none">
+                <Icon className={`w-64 h-64 ${servicio.color}`} />
+              </div>
+
+              {/* Degradado superior sutil */}
+              <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${servicio.bgColor.replace('10', '5')} to-transparent pointer-events-none`} />
+
+              <div className="relative z-10 p-6 md:p-8">
+                {/* Cabecera de la Tarjeta */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className={`w-14 h-14 rounded-2xl ${servicio.bgColor} border border-white flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500`}>
+                    <Icon className={`w-7 h-7 ${servicio.color}`} />
                   </div>
-                  
-                  {/* Título y Badge de cantidad */}
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="font-extrabold text-azul-marino text-left text-lg">
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-black text-azul-marino tracking-tight">
                       {servicio.titulo}
-                    </span>
-                    <span className="text-xs font-semibold text-muted-foreground bg-slate-100 px-2 py-0.5 rounded-full">
-                      {servicio.items.length} incluidos
-                    </span>
+                    </h3>
+                    <div className="flex items-center mt-1">
+                      <span className={`text-[10px] md:text-xs font-extrabold ${servicio.color} bg-white border border-slate-100 shadow-sm px-2.5 py-0.5 rounded-full uppercase tracking-wider`}>
+                        {servicio.items.length} incluidos
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </AccordionTrigger>
 
-              <AccordionContent className="px-5 pb-5 pt-2">
-                {/* Nueva Grilla de Mini-Tarjetas en lugar de una lista de texto aburrida */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {servicio.items.map((item, index) => (
+                {/* Lista de Ítems */}
+                <div className={`grid grid-cols-1 gap-2.5 ${isLast ? 'md:grid-cols-2 lg:grid-cols-4' : ''}`}>
+                  {servicio.items.map((item, i) => (
                     <div
-                      key={index}
-                      className={`flex items-start gap-3 p-3 rounded-xl border ${
+                      key={i}
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl transition-all duration-300 ${
                         item.highlight === "warning"
-                          ? "bg-red-50/50 border-red-100"
-                          : "bg-slate-50/50 border-slate-100 hover:bg-slate-50 hover:border-slate-200"
-                      } transition-colors`}
+                          ? "bg-red-50/50 border border-red-100 hover:bg-red-50"
+                          : "bg-slate-50/50 border border-transparent hover:bg-white hover:border-slate-200 hover:shadow-sm"
+                      }`}
                     >
-                      {/* El ícono cambia si es una advertencia o un check normal */}
-                      {item.highlight === "warning" ? (
-                        <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                      ) : (
-                        <CheckCircle2 className={`w-5 h-5 shrink-0 mt-0.5 ${servicio.color}`} />
-                      )}
-                      
-                      <span className={`text-sm leading-snug font-medium ${
-                        item.highlight === "warning" ? "text-red-700" : "text-azul-marino/80"
+                      <div className={`mt-0.5 shrink-0`}>
+                        {item.highlight === "warning" ? (
+                          <AlertTriangle className="w-5 h-5 text-red-500" />
+                        ) : (
+                          <CheckCircle2 className={`w-5 h-5 ${servicio.color}`} />
+                        )}
+                      </div>
+                      <span className={`text-[14px] leading-snug font-bold pt-0.5 ${
+                        item.highlight === "warning" ? "text-red-700" : "text-slate-700"
                       }`}>
                         {item.text}
                       </span>
@@ -214,32 +233,41 @@ export function ServiciosIncluidos() {
                   ))}
                 </div>
 
-                {/* Notas o aclaraciones (ej: la vajilla, materia prima) */}
+                {/* Nota / Aclaración */}
                 {servicio.nota && (
                   <div
-                    className={`mt-4 flex items-start gap-2 text-sm font-bold p-3.5 rounded-xl border ${
+                    className={`mt-5 flex items-start gap-3 text-sm font-extrabold p-4 rounded-2xl border shadow-inner ${
                       servicio.nota.type === "warning"
-                        ? "text-red-700 bg-red-50 border-red-200"
-                        : "text-azul-marino bg-azul-claro/10 border-azul-claro/20"
+                        ? "text-red-800 bg-gradient-to-r from-red-50 to-white border-red-200"
+                        : "text-azul-marino bg-gradient-to-r from-azul-claro/10 to-white border-azul-claro/20"
                     }`}
                   >
-                    <AlertTriangle className="w-5 h-5 shrink-0" />
-                    <p>{servicio.nota.text}</p>
+                    <div className={`p-1.5 rounded-full shrink-0 ${servicio.nota.type === "warning" ? "bg-red-200" : "bg-azul-claro/20"}`}>
+                      <AlertTriangle className={`w-4 h-4 ${servicio.nota.type === "warning" ? "text-red-600" : "text-azul-claro"}`} />
+                    </div>
+                    <p className="pt-1 text-[13px]">{servicio.nota.text}</p>
                   </div>
                 )}
-              </AccordionContent>
-            </AccordionItem>
+              </div>
+            </div>
           )
         })}
-      </Accordion>
-
-      {/* Cartelito final de Todo Incluido */}
-      <div className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-gradient-to-r from-amarillo/20 via-amarillo/10 to-transparent border border-amarillo/30 shadow-sm">
-        <Sparkles className="w-6 h-6 text-amarillo shrink-0 animate-pulse" />
-        <p className="text-base text-azul-marino">
-          <span className="font-extrabold">¡Todo incluido!</span> Sin costos ocultos ni sorpresas.
-        </p>
       </div>
+
+      {/* Súper Cartelito de Todo Incluido */}
+      <div className="relative overflow-hidden flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 p-8 rounded-[2.5rem] bg-gradient-to-r from-amarillo via-[#fbbf24] to-naranja border-4 border-white shadow-2xl group hover:scale-[1.02] transition-transform duration-500 max-w-4xl mx-auto">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay" />
+        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-white/20 blur-3xl rounded-full" />
+        
+        <div className="bg-white/20 backdrop-blur-md p-4 rounded-full shrink-0 relative z-10 shadow-[inset_0_2px_10px_rgba(255,255,255,0.5)] border border-white/30">
+          <Sparkles className="w-10 h-10 text-white animate-pulse" />
+        </div>
+        <div className="text-center md:text-left relative z-10 drop-shadow-md">
+          <h3 className="text-2xl md:text-3xl font-black text-white mb-1 tracking-tight">¡Todo esto está incluido!</h3>
+          <p className="text-white/90 text-base md:text-lg font-bold">Reserva sin costos ocultos ni sorpresas de último momento.</p>
+        </div>
+      </div>
+
     </div>
   )
 }

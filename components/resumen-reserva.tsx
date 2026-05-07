@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   MessageCircle
 } from "lucide-react"
-import type { MetodoPago, Extras, DatosCliente } from "@/app/page"
+import type { MetodoPago, Extras, DatosCliente } from "@/app/reservar/page" // ACTUALIZADO PARA APUNTAR A RESERVAR
 import type { Turno } from "@/lib/turno"
 import { getTurnoLabel } from "@/lib/turno"
 import { format } from "date-fns"
@@ -151,7 +151,6 @@ export function ResumenReserva({
         : metodoPagoLabels[metodoPago]
 
       const supabase = createBrowserClient()
-      // MODIFICADO: Agregamos .select('id').single() para recuperar el ID generado
       const { data, error } = await supabase.from("reservas").insert({
         fecha: toLocalDateString(selectedDate),
         turno: getTurnoLabel(selectedTurno),
@@ -179,7 +178,6 @@ export function ResumenReserva({
       const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM", { locale: es })
       const turnoLabel = getTurnoLabel(selectedTurno)
       
-      // MODIFICADO: Agregamos el ID de reserva al mensaje
       const mensajeWhatsApp = 
 `¡Hola Al Agua Pato! 🦆✨ Acabo de solicitar una reserva desde la página web.
 
@@ -303,7 +301,6 @@ export function ResumenReserva({
               </a>
             </div>
 
-            {/* NUEVA SECCIÓN DE AVISO DE INVITACIÓN */}
             <div className="bg-azul-claro/10 border border-azul-claro/20 rounded-xl p-5 mb-8 text-left shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="bg-azul-claro/20 p-2.5 rounded-full shrink-0">
@@ -319,7 +316,7 @@ export function ResumenReserva({
             </div>
 
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={() => window.location.href = "/"} // MODIFICADO: REDIRIGE AL INICIO
               variant="ghost"
               className="w-full h-12 font-bold text-muted-foreground hover:text-azul-marino hover:bg-slate-100 rounded-full transition-all"
             >
