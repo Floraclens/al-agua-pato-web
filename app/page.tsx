@@ -42,7 +42,7 @@ export default function LandingPage() {
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
-                {/* LOGO HEADER CORREGIDO */}
+                {/* LOGO HEADER */}
                 <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
                   <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" priority />
                 </div>
@@ -63,10 +63,9 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* --- PORTADA CON VIDEO DE FONDO (EFECTO WOW) --- */}
+        {/* --- PORTADA CON VIDEO DE FONDO --- */}
         <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
           
-          {/* VIDEO DE FONDO */}
           <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
@@ -75,9 +74,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
 
-          {/* DECORACIONES FLOTANTES */}
-          <Sparkles className="absolute top-24 left-[10%] md:left-[20%] w-8 h-8 text-amarillo animate-pulse opacity-70 z-20" />
-          <PartyPopper className="absolute top-40 right-[5%] md:right-[15%] w-10 h-10 text-azul-claro opacity-50 -rotate-12 z-20" />
+          {/* ICONOS FLOTANTES ELIMINADOS PARA MAYOR LIMPIEZA EN MÓVIL Y ESCRITORIO */}
 
           <div className="relative z-20 max-w-5xl mx-auto space-y-10">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-black text-sm uppercase tracking-widest">
@@ -121,7 +118,7 @@ export default function LandingPage() {
 
             <div className="mt-10 flex flex-col items-center gap-8">
               <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0">
-                <Star className="absolute -top-2 right-0 sm:-right-10 w-6 h-6 text-amarillo animate-bounce opacity-90 z-20" />
+                <Star className="absolute -top-2 right-0 sm:-right-10 w-6 h-6 text-amarillo animate-bounce opacity-90 z-20 hidden sm:block" />
                 <div className="relative inline-block w-full sm:w-fit">
                   <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
                   <Button 
@@ -353,7 +350,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- SÚPER BANNER FINAL CORREGIDO (Luz Redondeada y Texto Centrado) --- */}
+        {/* --- SÚPER BANNER FINAL --- */}
         <section className="relative py-24 overflow-hidden bg-azul-marino text-white">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 z-0" />
           <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-amarillo/30 blur-[120px] rounded-full z-0" />
@@ -366,7 +363,6 @@ export default function LandingPage() {
               <span className="text-sm font-bold tracking-wide">Reserva online 100% segura</span>
             </div>
 
-            {/* Título brillante igual que en la portada */}
             <h2 className="text-4xl md:text-6xl font-black mb-16 tracking-tight drop-shadow-lg">
               ¿Listos para vivir la <br className="sm:hidden" />
               <span className="relative inline-block mt-2 sm:mt-0 sm:ml-3">
@@ -377,25 +373,23 @@ export default function LandingPage() {
               </span>
             </h2>
             
-            {/* ESTRUCTURA CORREGIDA: Luz proporcional ajustada al texto en móvil y menos cuadrada */}
             <div className="max-w-4xl mx-auto flex flex-col items-center justify-center mb-10 text-center">
               <div className="flex flex-col gap-8 max-w-3xl">
-                  {/* TEXTO CON CORRECCIÓN LUZ EXACTA AL TEXTO Y REDONDEADA */}
-                  <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-balance relative flex flex-col items-center justify-center">
+                  <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-balance relative">
                     Nuestro espacio te ofrece una oferta única que te hará sentir que
-                    {/* Contenedor inline-block para que la luz envuelva justo el texto y no la pantalla entera */}
-                    <span className="inline-block mt-4 md:mt-6 relative">
-                       {/* THE PROPORTIONAL GLOW CORREGIDO: blur aumentado (blur-2xl) e inset mayor (-inset-2) para forma orgánica */}
-                       <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
-                       {/* THE TEXT */}
-                       <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-4xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text">
-                        "la magia se vive aquí"
-                       </strong>
+                    <span className="block mt-4 md:mt-6">
+                       {/* CONTENEDOR INLINE-BLOCK PARA AJUSTAR LA LUZ AL TEXTO. whitespace-nowrap EVITA QUE SE ROMPA EN DOS RENGLONES */}
+                       <span className="relative inline-block whitespace-nowrap">
+                         <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
+                         {/* THE TEXT: text-3xl en movil para que entre en una linea */}
+                         <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text px-1">
+                          "la magia se vive aquí"
+                         </strong>
+                       </span>
                     </span>
                   </p>
                   
-                  {/* PÁRRAFO DE CUPOS LIMITADOS CORREGIDO (Sin punto y centrado explícito en móvil) */}
-                  <div className="flex flex-col gap-4 justify-center text-xl text-white/90 font-medium text-balance mt-4">
+                  <div className="flex flex-col gap-4 justify-center text-xl text-white/90 font-medium mt-4">
                     <p className="text-center">
                       Consulta disponibilidad, <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rosa/20 border border-rosa/50 text-white font-black text-base mx-1 relative shadow-inner"><span className="relative flex h-3.5 w-3.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rosa opacity-75"></span><span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rosa"></span></span>cupos limitados</span>
                     </p>
@@ -406,7 +400,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* BOTÓN DE CTA CON ESPACIADO CORREGIDO */}
             <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-8 md:mt-12">
                <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-4 py-2 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30">
                  🎁 ¡Incluye Invitación Digital VIP!
