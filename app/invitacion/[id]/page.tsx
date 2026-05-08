@@ -52,15 +52,15 @@ export default function InvitacionVIP() {
     fetchReserva()
   }, [id])
 
-  // NUEVO MOTOR DE CAPTURA
   const capturarImagen = async () => {
     if (!tarjetaRef.current) return null
     try {
       setIsGenerating(true)
       const dataUrl = await toPng(tarjetaRef.current, {
         quality: 1,
-        pixelRatio: 3, // Alta definición
+        pixelRatio: 3, 
         cacheBust: true,
+        backgroundColor: temaActual === 'neon' ? '#0f172a' : temaActual === 'aventura' ? '#ecfdf5' : '#ffffff',
       })
       setIsGenerating(false)
       return dataUrl
@@ -84,7 +84,6 @@ export default function InvitacionVIP() {
     const dataUrl = await capturarImagen()
     if (!dataUrl) return
     
-    // Convertimos la imagen a un archivo para enviarla por WhatsApp/Redes
     try {
       const res = await fetch(dataUrl)
       const blob = await res.blob()
@@ -94,11 +93,11 @@ export default function InvitacionVIP() {
         await navigator.share({
           files: [file],
           title: '¡Estás invitado!',
-          text: '¡Te espero en mi cumple! 🦆✨',
+          text: '¡Te espero en mi evento! 🦆✨',
         })
       } else {
         handleDownload()
-        alert("Tu dispositivo no soporta compartir directamente. La imagen se descargó para que la envíes manualmente.")
+        alert("Tu celular no permite compartir directo. La imagen se descargó en tu galería para que la envíes manualmente.")
       }
     } catch (err) {
       console.log("Compartir cancelado o falló", err)
@@ -131,6 +130,10 @@ export default function InvitacionVIP() {
   const [year, month, day] = reserva.fecha.split("-")
   const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
   const fechaLegible = `${day} de ${meses[Number(month) - 1]}`
+  
+  const edadFormat = reserva.edad_cumple 
+    ? (reserva.edad_cumple === "1" ? "1 añito" : `${reserva.edad_cumple} añitos`)
+    : "";
 
   const themes = {
     pastel: {
@@ -182,10 +185,10 @@ export default function InvitacionVIP() {
         
         <div className="text-center mb-6">
           <h1 className={`text-2xl font-extrabold ${temaActual === 'neon' ? 'text-white' : 'text-azul-marino'} tracking-tight`}>
-            Tu Invitación Digital
+            Tu Invitación VIP
           </h1>
           <p className={`${temaActual === 'neon' ? 'text-slate-400' : 'text-muted-foreground'} text-sm mt-1`}>
-            Elegí un diseño y descargá la imagen
+            Elegí tu diseño favorito y compartilo
           </p>
         </div>
 
@@ -206,11 +209,10 @@ export default function InvitacionVIP() {
           ))}
         </div>
 
-        <div className="relative mx-auto w-full max-w-[360px] aspect-[9/16] p-4 flex items-center justify-center">
+        <div className="relative mx-auto w-full max-w-[360px] aspect-[9/16] p-4 flex items-center justify-center mb-4">
           <div 
             ref={tarjetaRef} 
             className={`w-full h-full rounded-3xl ${t.cardBg} ${t.cardBorder} p-6 flex flex-col relative overflow-hidden`}
-            style={{ backgroundColor: temaActual === 'neon' ? '#0f172a' : '#ffffff' }}
           >
             {temaActual === "pastel" && (
               <>
@@ -235,9 +237,17 @@ export default function InvitacionVIP() {
             <div className="relative z-10 flex flex-col h-full text-center">
               
               <div className="mb-auto pt-4">
-                <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg rotate-3 mb-6 ${temaActual === 'neon' ? 'bg-slate-800 border border-cyan-500/50' : 'bg-white border border-slate-100'}`}>
-                   <Image src="/og-image.jpg" alt="Logo" width={64} height={64} className="rounded-2xl object-cover" />
+                
+                {/* LOGO DE INVITACION CORREGIDO: Sin bordes y scale-110 para rellenar al 100% */}
+                <div className="mx-auto w-24 h-24 rounded-full flex items-center justify-center shadow-lg mb-6 overflow-hidden shrink-0 bg-transparent relative">
+                   <Image 
+                     src="/logo-circular.png" 
+                     alt="Logo Al Agua Pato" 
+                     fill
+                     className="object-cover scale-110" 
+                   />
                 </div>
+                
                 <Badge className={`mx-auto ${t.badge} mb-4 uppercase tracking-widest text-[10px] font-black px-3 py-1 shadow-sm`}>
                   Estás Invitado/a
                 </Badge>
@@ -246,11 +256,11 @@ export default function InvitacionVIP() {
                 </h2>
                 <h1 className={`text-4xl md:text-5xl font-black ${t.gradientText} leading-tight`}>
                   {reserva.nombre_cumpleanero || "nosotros"} <br/>
-                  {reserva.edad_cumple ? <span className="text-3xl">{reserva.edad_cumple} añitos</span> : ""}
+                  {edadFormat && <span className="text-3xl">{edadFormat}</span>}
                 </h1>
               </div>
 
-              <div className={`mt-auto w-full rounded-2xl p-4 text-left space-y-4 ${temaActual === 'neon' ? 'bg-slate-900/50 border-slate-700' : 'bg-white/60 border-white'} border backdrop-blur-md shadow-sm`}>
+              <div className={`mt-auto w-full rounded-2xl p-4 text-left space-y-4 ${temaActual === 'neon' ? 'bg-slate-900/50 border-slate-700' : 'bg-white/60 border-white'} border backdrop-blur-md shadow-sm mb-4`}>
                 
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-full ${t.accentBg} flex items-center justify-center shrink-0`}>
@@ -279,17 +289,17 @@ export default function InvitacionVIP() {
                   <div>
                     <p className={`text-[11px] uppercase tracking-wider font-bold opacity-60 ${t.textColor}`}>Ubicación</p>
                     <p className={`font-black text-lg leading-none ${t.textColor}`}>Al Agua Pato</p>
-                    <p className={`text-xs font-medium opacity-70 mt-1 ${t.textColor}`}>Salón de Fiestas Infantiles</p>
+                    <p className={`text-xs font-medium opacity-70 mt-1 ${t.textColor}`}>Los Flores, Santiago del Estero</p>
                   </div>
                 </div>
 
               </div>
 
-              <div className="pt-6 pb-2 text-center">
-                <p className={`text-sm font-bold ${t.textColor} flex items-center justify-center gap-2 opacity-80`}>
-                  <PartyPopper className="w-4 h-4" />
-                  ¡Te esperamos para jugar!
-                  <PartyPopper className="w-4 h-4" />
+              {/* SELLO CABALLO DE TROYA */}
+              <div className="mt-auto text-center border-t border-black/5 pt-3">
+                <p className={`text-[10px] font-extrabold ${t.textColor} flex items-center justify-center gap-1.5 opacity-60 uppercase tracking-widest`}>
+                  <Sparkles className="w-3 h-3" />
+                  Al Agua Pato - Fiestas Infantiles
                 </p>
               </div>
 
@@ -297,7 +307,7 @@ export default function InvitacionVIP() {
           </div>
         </div>
 
-        <div className="flex gap-3 px-4 mt-2">
+        <div className="flex gap-3 px-4">
           <Button 
             onClick={handleDownload} 
             disabled={isGenerating}
@@ -309,7 +319,7 @@ export default function InvitacionVIP() {
             }`}
           >
             {isGenerating ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Download className="w-5 h-5 mr-2" />}
-            Descargar
+            Guardar
           </Button>
 
           <Button 
@@ -322,7 +332,7 @@ export default function InvitacionVIP() {
             }`}
           >
             {isGenerating ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Share2 className="w-5 h-5 mr-2" />}
-            Compartir
+            WhatsApp
           </Button>
         </div>
 

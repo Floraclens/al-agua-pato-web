@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     siteName: 'Al Agua Pato',
     images: [
       {
-        url: '/og-image.jpg', 
+        url: '/logo-circular.png', 
         width: 1200,
-        height: 630,
+        height: 1200,
         alt: 'Predio de Eventos Al Agua Pato',
       },
     ],
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
     type: 'website',
   },
   icons: {
-    icon: '/icon.svg',
-    apple: '/apple-icon.png',
+    icon: '/logo-circular.png',
+    apple: '/logo-circular.png',
   },
 }
 
@@ -44,7 +44,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "EventVenue",
     "name": "Al Agua Pato | Salón de Fiestas Infantiles",
-    "image": "https://al-agua-pato-web.vercel.app/og-image.jpg",
+    "image": "https://al-agua-pato-web.vercel.app/logo-circular.png",
     "url": "https://al-agua-pato-web.vercel.app",
     "telephone": "+5493854470103",
     "address": {

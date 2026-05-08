@@ -16,6 +16,7 @@ import {
   MessageCircle,
   ShieldCheck
 } from "lucide-react"
+import Image from "next/image"
 import type { MetodoPago, Extras, DatosCliente } from "@/app/reservar/page"
 import type { Turno } from "@/lib/turno"
 import { getTurnoLabel } from "@/lib/turno"
@@ -153,7 +154,6 @@ export function ResumenReserva({
 
       const supabase = createBrowserClient()
       
-      // MODIFICADO: Agregamos el campo 'estado'
       const { data, error } = await supabase.from("reservas").insert({
         fecha: toLocalDateString(selectedDate),
         turno: getTurnoLabel(selectedTurno),
@@ -166,7 +166,7 @@ export function ResumenReserva({
         email: datosCliente.email || null,
         nombre_cumpleanero: datosCliente.nombreCumpleanero || null,
         edad_cumple: datosCliente.edadCumple || null,
-        estado: 'pendiente' // <-- Siempre nace como pendiente
+        estado: 'pendiente'
       }).select('id').single()
 
       if (error) {
@@ -241,9 +241,10 @@ export function ResumenReserva({
         <div className="relative z-10 flex min-h-full p-4 py-12 sm:py-16">
           <div className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-emerald-100 text-center animate-in zoom-in-95 duration-500 overflow-hidden m-auto">
             <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-rosa via-amarillo to-azul-claro" />
-            <div className="relative w-24 h-24 bg-gradient-to-br from-[#25D366] to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/30 border-4 border-white mt-2">
-              <PartyPopper className="w-12 h-12 text-white animate-bounce" />
-              <div className="absolute -right-2 -top-2 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white">
+            
+            <div className="relative w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/20 border-4 border-white mt-2 overflow-hidden">
+              <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover" />
+              <div className="absolute -right-2 -top-2 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white z-10">
                 <CheckCircle2 className="w-5 h-5 text-azul-marino" />
               </div>
             </div>

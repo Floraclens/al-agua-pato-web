@@ -33,8 +33,9 @@ export default function LandingPage() {
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
-                <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-amarillo shadow-sm bg-white shrink-0">
-                  <Image src="/og-image.jpg" alt="Logo Al Agua Pato" fill className="object-cover" priority />
+                {/* LOGO HEADER CORREGIDO: Sin bordes, bg transparente y scale-110 */}
+                <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
+                  <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" priority />
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
@@ -53,47 +54,64 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* --- PORTADA SUPER PREMIUM --- */}
-        <section className="relative pt-16 pb-16 md:pt-28 md:pb-24 text-center px-4 overflow-hidden bg-slate-50">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] bg-gradient-to-tr from-rosa/20 via-amarillo/20 to-azul-claro/20 blur-[100px] -z-10 rounded-full" />
-          <Sparkles className="absolute top-24 left-[10%] md:left-[20%] w-8 h-8 text-amarillo animate-pulse opacity-70" />
-          <PartyPopper className="absolute top-40 right-[5%] md:right-[15%] w-10 h-10 text-azul-claro opacity-50 -rotate-12" />
+        {/* --- PORTADA CON VIDEO DE FONDO (EFECTO WOW) --- */}
+        <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
+          
+          {/* VIDEO DE FONDO */}
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="absolute inset-0 w-full h-full object-cover z-0"
+            poster="/logo-circular.png" 
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
 
-          <div className="relative z-10 max-w-5xl mx-auto space-y-10">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-rosa/30 shadow-[0_0_20px_rgba(236,72,153,0.15)] text-rosa font-black text-sm uppercase tracking-widest">
+          {/* OVERLAY OSCURO PARA LEGIBILIDAD */}
+          <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
+
+          {/* DECORACIONES FLOTANTES */}
+          <Sparkles className="absolute top-24 left-[10%] md:left-[20%] w-8 h-8 text-amarillo animate-pulse opacity-70 z-20" />
+          <PartyPopper className="absolute top-40 right-[5%] md:right-[15%] w-10 h-10 text-azul-claro opacity-50 -rotate-12 z-20" />
+
+          <div className="relative z-20 max-w-5xl mx-auto space-y-10">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-black text-sm uppercase tracking-widest">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rosa opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-rosa"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amarillo opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amarillo"></span>
               </span>
               ¡Agenda 2026 Abierta!
             </div>
 
             <div className="space-y-6">
-              <h1 className="text-6xl md:text-[5.5rem] lg:text-[6.5rem] font-black text-azul-marino tracking-tighter leading-[1.05] drop-shadow-sm">
+              <h1 className="text-6xl md:text-[5.5rem] lg:text-[6.5rem] font-black text-white tracking-tighter leading-[1.05] drop-shadow-lg">
                 Tu evento soñado es <br className="hidden md:block" />
                 <span className="relative inline-block mt-2">
-                  <span className="absolute -inset-2 bg-gradient-to-r from-rosa via-amarillo to-azul-claro blur-2xl opacity-40"></span>
-                  <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-rosa via-naranja to-amarillo">
+                  <span className="absolute -inset-2 bg-gradient-to-r from-rosa via-amarillo to-azul-claro blur-2xl opacity-50"></span>
+                  <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-rosa via-naranja to-amarillo drop-shadow-sm">
                     Inolvidable
                   </span>
                 </span>
               </h1>
-              <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto text-balance font-medium leading-relaxed">
-                <strong className="text-azul-marino font-extrabold">"Al agua pato"</strong> un espacio lleno de aventuras, juegos y experiencias únicas e inolvidables.
+              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto text-balance font-medium leading-relaxed drop-shadow-md">
+                <strong className="text-white font-extrabold">"Al agua pato"</strong> un espacio lleno de aventuras, juegos y experiencias únicas e inolvidables.
               </p>
             </div>
 
             <div className="max-w-xl mx-auto relative group mt-12">
-              <div className="absolute -inset-1 bg-gradient-to-r from-azul-claro via-lavanda to-rosa rounded-[2rem] blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
-              <div className="relative bg-gradient-to-br from-white via-azul-claro/5 to-rosa/5 backdrop-blur-xl ring-1 ring-white/50 rounded-[2rem] p-6 md:p-8 text-left flex items-start sm:items-center gap-5 shadow-2xl overflow-hidden">
-                <Sparkles className="absolute -top-4 -left-4 w-12 h-12 text-amarillo opacity-20 rotate-12" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-azul-claro via-lavanda to-rosa rounded-[2rem] blur opacity-40 group-hover:opacity-70 transition duration-500"></div>
+              <div className="relative bg-white/10 backdrop-blur-xl ring-1 ring-white/20 rounded-[2rem] p-6 md:p-8 text-left flex items-start sm:items-center gap-5 shadow-2xl overflow-hidden">
+                <Sparkles className="absolute -top-4 -left-4 w-12 h-12 text-amarillo opacity-30 rotate-12" />
                 <div className="relative z-10 bg-gradient-to-br from-amarillo to-naranja p-4 rounded-2xl shrink-0 shadow-inner">
                   <PartyPopper className="w-8 h-8 text-white" />
                 </div>
                 <div className="relative z-10">
-                  <h4 className="font-black text-azul-marino mb-1.5 text-lg md:text-xl">¡Se viene algo <span className="text-rosa">increíble!</span> 🚀</h4>
-                  <p className="text-sm md:text-base text-slate-600 leading-relaxed font-medium">
-                    Muy pronto estrenamos un nuevo espacio que te hará <strong className="text-naranja font-bold">saltar de diversión</strong>... ¿Estás preparado para lo que se viene?
+                  <h4 className="font-black text-white mb-1.5 text-lg md:text-xl drop-shadow-md">¡Se viene algo <span className="text-rosa">increíble!</span> 🚀</h4>
+                  <p className="text-sm md:text-base text-white/80 leading-relaxed font-medium">
+                    Muy pronto estrenamos un nuevo espacio que te hará <strong className="text-amarillo font-bold">saltar de diversión</strong>... ¿Estás preparado para lo que se viene?
                   </p>
                 </div>
               </div>
@@ -101,12 +119,12 @@ export default function LandingPage() {
 
             <div className="mt-10 flex flex-col items-center gap-8">
               <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0">
-                <Star className="absolute -top-2 right-0 sm:-right-10 w-6 h-6 text-rosa animate-bounce opacity-70 z-20" />
+                <Star className="absolute -top-2 right-0 sm:-right-10 w-6 h-6 text-amarillo animate-bounce opacity-90 z-20" />
                 <div className="relative inline-block w-full sm:w-fit">
                   <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
                   <Button 
                     onClick={scrollToGaleria}
-                    className="group w-full sm:w-auto relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-lg h-20 px-12 rounded-full border border-white/40 shadow-lg active:scale-95 transition-all duration-300 overflow-hidden"
+                    className="group w-full sm:w-auto relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-lg h-20 px-12 rounded-full border border-white/40 shadow-xl active:scale-95 transition-all duration-300 overflow-hidden"
                   >
                     <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100"></span>
                     <span className="relative z-10 flex items-center justify-center gap-3 uppercase tracking-wider animate-bounce mt-1">
@@ -116,12 +134,12 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="max-w-md mx-auto flex items-center justify-center gap-3.5 px-6 py-3.5 rounded-full bg-gradient-to-br from-white via-rosa/5 to-white/80 backdrop-blur-xl border border-rosa/30 shadow-[0_5px_15px_-5px_rgba(236,72,153,0.15)] hover:shadow-[0_8px_25px_-5px_rgba(236,72,153,0.25)] hover:-translate-y-0.5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-1000 w-full sm:w-auto text-left sm:text-center">
-                <div className="bg-rosa/15 p-2.5 rounded-full shrink-0 shadow-inner">
+              <div className="max-w-md mx-auto flex items-center justify-center gap-3.5 px-6 py-3.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-500 w-full sm:w-auto text-left sm:text-center">
+                <div className="bg-rosa/20 p-2.5 rounded-full shrink-0 shadow-inner">
                   <Sparkles className="w-5 h-5 text-rosa animate-pulse" />
                 </div>
-                <p className="text-sm md:text-base font-bold text-slate-700 leading-tight">
-                  ¡Con tu seña te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-azul-marino font-black">Invitación Digital Interactiva</strong>! 🎁
+                <p className="text-sm md:text-base font-bold text-white leading-tight drop-shadow-md">
+                  ¡Con tu seña te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-amarillo font-black">Invitación Digital Interactiva</strong>! 🎁
                 </p>
               </div>
             </div>
@@ -132,13 +150,12 @@ export default function LandingPage() {
           <PhotoGallery />
         </div>
 
-        {/* --- TESTIMONIOS (AHORA CON PRUEBA SOCIAL DE GOOGLE) --- */}
+        {/* --- TESTIMONIOS (CON PRUEBA SOCIAL DE GOOGLE) --- */}
         <section className="py-16 md:py-24 bg-azul-claro/5 border-b border-border/50 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex flex-col items-center text-center mb-12">
               <h3 className="text-3xl md:text-4xl font-black text-azul-marino mb-6">Lo que dicen las familias</h3>
               
-              {/* Insignia de confianza Google */}
               <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-sm border border-border/50 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-black text-slate-800">4.9</span>
@@ -167,7 +184,6 @@ export default function LandingPage() {
                 { nombre: "Julieta F.", tiempo: "Hace 4 meses", texto: "El mejor lugar al que fuimos. La ambientación es soñada y el pelotero es gigante. Estuvimos súper cómodos y nos atendieron como reyes.", color: "bg-amarillo text-azul-marino" }
               ].map((review, i) => (
                 <div key={i} className="min-w-[85%] sm:min-w-[60%] md:min-w-0 snap-center bg-white p-6 rounded-3xl shadow-sm border border-border/50 relative flex flex-col hover:-translate-y-1 transition-transform duration-300">
-                  {/* Logo de Google sutil en la esquina */}
                   <svg className="absolute top-6 right-6 w-5 h-5 opacity-70" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -228,7 +244,6 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[220px]">
               
-              {/* Robot LED */}
               <div 
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-2 lg:col-span-2 row-span-2 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/robot.jpg')}
@@ -242,7 +257,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Astronautas LED */}
               <div 
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-1 lg:col-span-2 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/astronautas.jpg')}
@@ -255,7 +269,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Zancos LED */}
               <div 
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/zancos.jpg')}
@@ -269,7 +282,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Personajes a elección */}
               <div 
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/personajes.jpg')}
@@ -355,8 +367,10 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
               ¿Listos para vivir la magia?
             </h2>
-            <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto font-medium mb-12 text-balance">
-              Elegí tu fecha, armá tu paquete ideal y asegurá el mejor cumpleaños para tu familia.
+            
+            {/* TEXTO CORREGIDO PARA ABARCAR EVENTOS GENERALES Y QUITAR EL PRECIO */}
+            <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto font-medium mb-12 text-balance leading-relaxed">
+              Creamos eventos inolvidables con pileta, parque acuático y todo incluido. <strong className="text-white font-bold">¡Los cupos son limitados!</strong> Consultá la disponibilidad ahora mismo y asegurá la mejor experiencia para tu festejo o jornada.
             </p>
 
             <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-10">
@@ -384,8 +398,9 @@ export default function LandingPage() {
       <footer className="bg-[#081524] text-white pt-10 pb-28 lg:pb-10 border-t-4 border-amarillo relative z-10">
         <div className="container mx-auto px-4 text-center">
           <div className="flex flex-col items-center gap-4">
-             <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
-                <Image src="/og-image.jpg" alt="Logo Al Agua Pato" fill className="object-cover" />
+             {/* LOGO FOOTER CORREGIDO: Sin bordes y scale-110 para pisar cualquier espacio en blanco */}
+             <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
+                <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" />
              </div>
              <div className="space-y-1">
                <h4 className="text-xl font-bold tracking-wide">Al Agua Pato</h4>
