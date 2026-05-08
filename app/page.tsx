@@ -8,7 +8,7 @@ import { PhotoGallery } from "@/components/photo-gallery"
 import { 
   Sparkles, MapPin, CheckCircle2, Star, Quote, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
-  HelpCircle, ChevronDown
+  HelpCircle, ChevronDown, Phone, Mail
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,15 +25,24 @@ export default function LandingPage() {
     document.getElementById('galeria')?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  // Enlaces rápidos para el footer
+  const footerLinks = [
+    { name: "Inicio", href: "#top" },
+    { name: "Galería", href: "#galeria" },
+    { name: "Servicios", href: "#servicios" },
+    { name: "Preguntas Frecuentes", href: "#faq" },
+    { name: "Reservar", href: "/reservar" },
+  ]
+
   return (
-    <main className="min-h-screen bg-[#081524] font-sans">
+    <main id="top" className="min-h-screen bg-[#081524] font-sans">
       <div className="bg-background">
         
         <header className="bg-white/90 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 shadow-sm">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
-                {/* LOGO HEADER CORREGIDO: Sin bordes, bg transparente y scale-110 */}
+                {/* LOGO HEADER CORREGIDO */}
                 <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
                   <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" priority />
                 </div>
@@ -58,14 +67,7 @@ export default function LandingPage() {
         <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
           
           {/* VIDEO DE FONDO */}
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover z-0"
-            poster="/logo-circular.png" 
-          >
+          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
 
@@ -88,16 +90,16 @@ export default function LandingPage() {
 
             <div className="space-y-6">
               <h1 className="text-6xl md:text-[5.5rem] lg:text-[6.5rem] font-black text-white tracking-tighter leading-[1.05] drop-shadow-lg">
-                Tu evento soñado es <br className="hidden md:block" />
+                Cada evento merece <br className="hidden md:block" />
                 <span className="relative inline-block mt-2">
                   <span className="absolute -inset-2 bg-gradient-to-r from-rosa via-amarillo to-azul-claro blur-2xl opacity-50"></span>
                   <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-rosa via-naranja to-amarillo drop-shadow-sm">
-                    Inolvidable
+                    magia
                   </span>
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto text-balance font-medium leading-relaxed drop-shadow-md">
-                <strong className="text-white font-extrabold">"Al agua pato"</strong> un espacio lleno de aventuras, juegos y experiencias únicas e inolvidables.
+                <strong className="text-white font-extrabold">"¡Al agua pato!"</strong> Recrea momentos únicos e inolvidables, donde la diversión es la principal protagonista.
               </p>
             </div>
 
@@ -150,7 +152,7 @@ export default function LandingPage() {
           <PhotoGallery />
         </div>
 
-        {/* --- TESTIMONIOS (CON PRUEBA SOCIAL DE GOOGLE) --- */}
+        {/* --- TESTIMONIOS --- */}
         <section className="py-16 md:py-24 bg-azul-claro/5 border-b border-border/50 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex flex-col items-center text-center mb-12">
@@ -213,7 +215,7 @@ export default function LandingPage() {
         </section>
 
         {/* --- SECCIÓN QUÉ INCLUYE --- */}
-        <div className="container mx-auto px-4 py-16 md:py-24">
+        <div id="servicios" className="container mx-auto px-4 py-16 md:py-24">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black text-azul-marino mb-4 flex flex-col md:flex-row items-center justify-center gap-3">
               <CheckCircle2 className="h-10 w-10 text-verde" /> ¿Qué incluye tu evento?
@@ -321,7 +323,7 @@ export default function LandingPage() {
         </section>
 
         {/* --- PREGUNTAS FRECUENTES (FAQ) --- */}
-        <section className="py-20 bg-slate-50 border-t border-border/50">
+        <section id="faq" className="py-20 bg-slate-50 border-t border-border/50">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-azul-claro/10 text-azul-claro font-bold text-xs uppercase tracking-widest mb-4">
@@ -351,35 +353,67 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- SÚPER BANNER FINAL --- */}
-        <section className="relative py-24 overflow-hidden bg-azul-marino">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30" />
-          <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-amarillo/30 blur-[120px] rounded-full" />
-          <div className="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-rosa/30 blur-[120px] rounded-full" />
+        {/* --- SÚPER BANNER FINAL CORREGIDO (Luz Redondeada y Texto Centrado) --- */}
+        <section className="relative py-24 overflow-hidden bg-azul-marino text-white">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 z-0" />
+          <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-amarillo/30 blur-[120px] rounded-full z-0" />
+          <div className="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-rosa/30 blur-[120px] rounded-full z-0" />
           
           <div className="relative z-10 container mx-auto px-4 text-center">
             
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-10 shadow-lg">
               <ShieldCheck className="w-5 h-5 text-verde" />
-              <span className="text-white text-sm font-bold tracking-wide">Reserva online 100% segura</span>
+              <span className="text-sm font-bold tracking-wide">Reserva online 100% segura</span>
             </div>
 
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-6">
-              ¿Listos para vivir la magia?
+            {/* Título brillante igual que en la portada */}
+            <h2 className="text-4xl md:text-6xl font-black mb-16 tracking-tight drop-shadow-lg">
+              ¿Listos para vivir la <br className="sm:hidden" />
+              <span className="relative inline-block mt-2 sm:mt-0 sm:ml-3">
+                <span className="absolute -inset-2 bg-gradient-to-r from-rosa via-amarillo to-azul-claro blur-2xl opacity-50 animate-pulse"></span>
+                <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-rosa via-naranja to-amarillo drop-shadow-sm">
+                  magia?
+                </span>
+              </span>
             </h2>
             
-            {/* TEXTO CORREGIDO PARA ABARCAR EVENTOS GENERALES Y QUITAR EL PRECIO */}
-            <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto font-medium mb-12 text-balance leading-relaxed">
-              Creamos eventos inolvidables con pileta, parque acuático y todo incluido. <strong className="text-white font-bold">¡Los cupos son limitados!</strong> Consultá la disponibilidad ahora mismo y asegurá la mejor experiencia para tu festejo o jornada.
-            </p>
+            {/* ESTRUCTURA CORREGIDA: Luz proporcional ajustada al texto en móvil y menos cuadrada */}
+            <div className="max-w-4xl mx-auto flex flex-col items-center justify-center mb-10 text-center">
+              <div className="flex flex-col gap-8 max-w-3xl">
+                  {/* TEXTO CON CORRECCIÓN LUZ EXACTA AL TEXTO Y REDONDEADA */}
+                  <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-balance relative flex flex-col items-center justify-center">
+                    Nuestro espacio te ofrece una oferta única que te hará sentir que
+                    {/* Contenedor inline-block para que la luz envuelva justo el texto y no la pantalla entera */}
+                    <span className="inline-block mt-4 md:mt-6 relative">
+                       {/* THE PROPORTIONAL GLOW CORREGIDO: blur aumentado (blur-2xl) e inset mayor (-inset-2) para forma orgánica */}
+                       <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
+                       {/* THE TEXT */}
+                       <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-4xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text">
+                        "la magia se vive aquí"
+                       </strong>
+                    </span>
+                  </p>
+                  
+                  {/* PÁRRAFO DE CUPOS LIMITADOS CORREGIDO (Sin punto y centrado explícito en móvil) */}
+                  <div className="flex flex-col gap-4 justify-center text-xl text-white/90 font-medium text-balance mt-4">
+                    <p className="text-center">
+                      Consulta disponibilidad, <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rosa/20 border border-rosa/50 text-white font-black text-base mx-1 relative shadow-inner"><span className="relative flex h-3.5 w-3.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rosa opacity-75"></span><span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rosa"></span></span>cupos limitados</span>
+                    </p>
+                    <p className="mt-1 text-center">
+                      No te quedes sin tu fecha y asegura tu mejor experiencia.
+                    </p>
+                  </div>
+              </div>
+            </div>
 
-            <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-10">
-               <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-4 py-2 rounded-full shadow-xl animate-bounce z-20 border-2 border-rosa/30">
+            {/* BOTÓN DE CTA CON ESPACIADO CORREGIDO */}
+            <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-8 md:mt-12">
+               <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-4 py-2 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30">
                  🎁 ¡Incluye Invitación Digital VIP!
                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0" />
                </div>
 
-               <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-2xl opacity-80 animate-pulse" />
+               <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse" />
                
                <Link href="/reservar" className="block w-full">
                  <Button className="group w-full sm:w-auto relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[16px] sm:text-xl h-auto min-h-[72px] py-4 px-8 sm:px-14 rounded-full border border-white/40 shadow-2xl active:scale-95 transition-all duration-300 overflow-hidden">
@@ -394,21 +428,52 @@ export default function LandingPage() {
         </section>
       </div>
 
-      {/* --- FOOTER COMPACTO --- */}
-      <footer className="bg-[#081524] text-white pt-10 pb-28 lg:pb-10 border-t-4 border-amarillo relative z-10">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex flex-col items-center gap-4">
-             {/* LOGO FOOTER CORREGIDO: Sin bordes y scale-110 para pisar cualquier espacio en blanco */}
-             <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
-                <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" />
-             </div>
-             <div className="space-y-1">
-               <h4 className="text-xl font-bold tracking-wide">Al Agua Pato</h4>
-               <p className="text-xs text-white/60 font-medium">Predio de Eventos Mágicos</p>
-             </div>
-             <div className="w-8 h-px bg-white/10 my-1" />
-             <p className="text-[11px] text-white/40 font-medium">
-               © {new Date().getFullYear()} Todos los derechos reservados.
+      {/* --- FOOTER MINIMALISTA Y PROFESIONAL --- */}
+      <footer className="bg-[#040A12] text-white py-12 relative z-10 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            {/* Izquierda: Logo y Nombre */}
+            <div className="flex items-center gap-4">
+               <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 bg-transparent">
+                  <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" />
+               </div>
+               <div className="flex flex-col text-left">
+                 <h4 className="text-lg font-bold tracking-wide text-white">Al Agua Pato</h4>
+                 <p className="text-[11px] text-white/50 uppercase tracking-widest font-semibold">Predio de Eventos</p>
+               </div>
+            </div>
+
+            {/* Medio: Enlaces en línea (Solo en Escritorio) */}
+            <div className="hidden md:flex items-center gap-8">
+              {footerLinks.map((link) => (
+                <Link key={link.name} href={link.href} className="text-sm text-white/60 hover:text-amarillo transition-colors font-medium">
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Derecha: Redes/Contacto rápido */}
+            <div className="flex items-center gap-6">
+               <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
+                  <MapPin className="w-4 h-4" />
+                  <span className="hidden sm:inline">Santiago del Estero</span>
+               </a>
+               <a href="tel:5493854470103" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
+                  <Phone className="w-4 h-4" />
+                  <span className="hidden sm:inline">Contacto</span>
+               </a>
+            </div>
+
+          </div>
+
+          {/* Copyright Inferior */}
+          <div className="mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+             <p className="text-xs text-white/40 font-medium text-center sm:text-left">
+               © {new Date().getFullYear()} Al Agua Pato. Todos los derechos reservados.
+             </p>
+             <p className="text-xs text-white/30 font-medium text-center sm:text-right flex items-center gap-1">
+               Diseñado con <span className="text-rosa">❤</span> por Ignacio
              </p>
           </div>
         </div>
