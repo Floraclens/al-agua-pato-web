@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Nunito } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import Script from 'next/script' // Importamos Script de Next.js
+import Script from 'next/script'
 import './globals.css'
 
 const nunito = Nunito({ 
@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     siteName: 'Al Agua Pato',
     images: [
       {
-        url: '/logo-circular.png', 
+        url: '/og-image.jpg', // ACA APUNTAMOS A LA NUEVA IMAGEN
         width: 1200,
-        height: 1200,
+        height: 630, // Tamaño perfecto para WhatsApp y Facebook
         alt: 'Predio de Eventos Al Agua Pato',
       },
     ],
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     type: 'website',
   },
   icons: {
-    icon: '/logo-circular.png',
+    icon: '/logo-circular.png', // Tu Favicon sigue siendo el logo
     apple: '/logo-circular.png',
   },
 }
