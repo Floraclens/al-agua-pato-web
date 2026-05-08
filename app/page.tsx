@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ServiciosIncluidos } from "@/components/servicios-incluidos"
@@ -20,9 +20,37 @@ import {
 
 export default function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // Estado y Ref para controlar el botón flotante
+  const [showFloatingButton, setShowFloatingButton] = useState(true);
+  const reservaFinalRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Si la sección final es visible (intersecting), ocultamos el botón
+        setShowFloatingButton(!entry.isIntersecting);
+      },
+      { threshold: 0.1 } // Se activa cuando al menos el 10% de la sección final es visible
+    );
+
+    if (reservaFinalRef.current) {
+      observer.observe(reservaFinalRef.current);
+    }
+
+    return () => {
+      if (reservaFinalRef.current) {
+        observer.unobserve(reservaFinalRef.current);
+      }
+    };
+  }, []);
 
   const scrollToGaleria = () => {
     document.getElementById('galeria')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const scrollToReserva = () => {
+    document.getElementById('reserva-final')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   // Enlaces rápidos para el footer
@@ -54,11 +82,19 @@ export default function LandingPage() {
                   <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1 hidden sm:block">Predio de Eventos</span>
                 </div>
               </div>
-              <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border-2 border-azul-marino text-azul-marino hover:bg-azul-marino hover:text-white transition-all duration-200 font-bold text-xs md:text-sm rounded-full shadow-sm hover:shadow-md active:scale-95">
-                <MapPin className="h-4 w-4" />
-                <span className="hidden sm:inline">Ver en Maps</span>
-                <span className="sm:hidden">Ubicación</span>
-              </a>
+              <div className="flex items-center gap-3 md:gap-4">
+                <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border-2 border-azul-marino text-azul-marino hover:bg-azul-marino hover:text-white transition-all duration-200 font-bold text-xs md:text-sm rounded-full shadow-sm hover:shadow-md active:scale-95">
+                  <MapPin className="h-4 w-4" />
+                  <span className="hidden sm:inline">Ver en Maps</span>
+                  <span className="sm:hidden">Ubicación</span>
+                </a>
+                
+                {/* BOTÓN RESERVAR SOLO PARA DESKTOP/TABLET */}
+                <button onClick={scrollToReserva} className="hidden md:flex items-center gap-2 px-5 py-2 bg-azul-marino text-white hover:bg-azul-marino/90 transition-all duration-200 font-bold text-sm rounded-full shadow-md hover:shadow-lg active:scale-95">
+                  <Sparkles className="h-4 w-4 text-amarillo" />
+                  Reservar Fecha
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -70,11 +106,8 @@ export default function LandingPage() {
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
 
-          {/* OVERLAY OSCURO PARA LEGIBILIDAD */}
           <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
-
-          {/* ICONOS FLOTANTES ELIMINADOS PARA MAYOR LIMPIEZA EN MÓVIL Y ESCRITORIO */}
 
           <div className="relative z-20 max-w-5xl mx-auto space-y-10">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-black text-sm uppercase tracking-widest">
@@ -118,7 +151,6 @@ export default function LandingPage() {
 
             <div className="mt-10 flex flex-col items-center gap-8">
               <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0">
-                <Star className="absolute -top-2 right-0 sm:-right-10 w-6 h-6 text-amarillo animate-bounce opacity-90 z-20 hidden sm:block" />
                 <div className="relative inline-block w-full sm:w-fit">
                   <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
                   <Button 
@@ -138,7 +170,7 @@ export default function LandingPage() {
                   <Sparkles className="w-5 h-5 text-rosa animate-pulse" />
                 </div>
                 <p className="text-sm md:text-base font-bold text-white leading-tight drop-shadow-md">
-                  ¡Con tu seña te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-amarillo font-black">Invitación Digital Interactiva</strong>! 🎁
+                  ¡Con tu reserva te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-amarillo font-black">Invitación Digital Personalizada</strong>! 🎁
                 </p>
               </div>
             </div>
@@ -177,9 +209,9 @@ export default function LandingPage() {
 
             <div className="flex overflow-x-auto md:grid md:grid-cols-4 snap-x snap-mandatory gap-5 pb-6 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {[
-                { nombre: "Laura G.", tiempo: "Hace 2 semanas", texto: "Festejamos los 5 de Mateo y salió todo perfecto. El predio es hermoso, súper limpio y los animadores unos genios totales. ¡Los chicos no pararon de jugar!", color: "bg-rosa text-white" },
+                { nombre: "Laura G.", tiempo: "Hace 2 semanas", texto: "Festejamos los 5 de Mateo y salió todo perfecto. El predio es hermoso, súper limpio y el parque acuático es genial. ¡Los chicos no pararon de jugar!", color: "bg-rosa text-white" },
                 { nombre: "Martín P.", tiempo: "Hace 1 mes", texto: "Excelente atención de principio a fin. El show del Robot LED fue una locura, todos los invitados quedaron alucinados. Cero estrés para nosotros.", color: "bg-azul-claro text-white" },
-                { nombre: "Sabrina V.", tiempo: "Hace 3 meses", texto: "Súper recomendable. La comida, la organización, las chicas que atienden... de 10. Pagás y te olvidás de todo, ellos se encargan. Volveremos el año que viene.", color: "bg-lavanda text-white" },
+                { nombre: "Sabrina V.", tiempo: "Hace 3 meses", texto: "Súper recomendable. Las instalaciones, la pileta y los juegos son de 10. Los chicos se divirtieron toda la tarde y nosotros estuvimos súper cómodos.", color: "bg-lavanda text-white" },
                 { nombre: "Julieta F.", tiempo: "Hace 4 meses", texto: "El mejor lugar al que fuimos. La ambientación es soñada y el pelotero es gigante. Estuvimos súper cómodos y nos atendieron como reyes.", color: "bg-amarillo text-azul-marino" }
               ].map((review, i) => (
                 <div key={i} className="min-w-[85%] sm:min-w-[60%] md:min-w-0 snap-center bg-white p-6 rounded-3xl shadow-sm border border-border/50 relative flex flex-col hover:-translate-y-1 transition-transform duration-300">
@@ -252,7 +284,7 @@ export default function LandingPage() {
                 <div className="absolute bottom-6 left-6 right-6">
                   <span className="bg-amarillo text-azul-marino text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block shadow-lg shadow-amarillo/20">El más pedido</span>
                   <h3 className="text-2xl md:text-4xl font-black text-white mb-2 drop-shadow-md">Show Robot LED</h3>
-                  <p className="text-white/80 text-sm md:text-lg font-medium line-clamp-2">Luces, humo y pura energía para hacer bailar a todos los invitados.</p>
+                  <p className="text-white/80 text-sm md:text-lg font-medium line-clamp-2">Luces, color y pura energía para hacer bailar a todos los invitados.</p>
                 </div>
               </div>
 
@@ -333,8 +365,8 @@ export default function LandingPage() {
               {[
                 { q: "¿Con cuánta anticipación debo reservar?", a: "Recomendamos reservar con al menos 2 o 3 meses de anticipación, especialmente para fines de semana o fechas en temporada alta, para asegurar tu lugar." },
                 { q: "¿El salón cuenta con climatización?", a: "Sí, el quincho principal está totalmente cerrado y equipado con aire acondicionado y ventiladores de techo para garantizar la comodidad en cualquier época del año." },
-                { q: "¿Qué sucede si llueve el día de mi evento?", a: "¡No te preocupes! Nuestras instalaciones principales son techadas y climatizadas. Los juegos de exterior son los únicos que podrían verse afectados, pero la fiesta continúa perfectamente dentro del salón." },
-                { q: "¿Puedo llevar mi propia decoración o comida?", a: "¡Claro! Podés personalizar el evento a tu gusto. Contamos con asador y cocina equipada si decidís traer tu propio catering. También ofrecemos extras para facilitarte todo." },
+                { q: "¿Qué sucede si llueve el día de mi evento?", a: "¡No te preocupes! Nuestras instalaciones principales son techadas y climatizadas. De todas formas, en caso de lluvia, siempre damos la opción de reprogramar el evento para fechas posteriores disponibles." },
+                { q: "¿El salón incluye decoración u ornamentación?", a: "No, el servicio de ornamentación no está incluido. El espacio se entrega limpio y listo para que cada familia pueda traer su propia decoración o contratar a un ambientador para personalizar la fiesta a su gusto." },
                 { q: "¿Cómo se confirma la reserva de la fecha?", a: "La fecha se bloquea únicamente con el pago de la seña. Una vez realizada a través de nuestra web, nos envías el comprobante por WhatsApp y ¡listo!, tu lugar está asegurado." }
               ].map((faq, i) => (
                 <AccordionItem key={i} value={`item-${i}`} className="bg-white border border-border/50 rounded-2xl px-6 shadow-sm overflow-hidden">
@@ -350,8 +382,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- SÚPER BANNER FINAL --- */}
-        <section className="relative py-24 overflow-hidden bg-azul-marino text-white">
+        {/* --- SÚPER BANNER FINAL (SECCIÓN REFERENCIADA PARA EL BOTÓN MÓVIL) --- */}
+        <section id="reserva-final" ref={reservaFinalRef} className="relative py-24 overflow-hidden bg-azul-marino text-white">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 z-0" />
           <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-amarillo/30 blur-[120px] rounded-full z-0" />
           <div className="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-rosa/30 blur-[120px] rounded-full z-0" />
@@ -378,10 +410,8 @@ export default function LandingPage() {
                   <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-balance relative">
                     Nuestro espacio te ofrece una oferta única que te hará sentir que
                     <span className="block mt-4 md:mt-6">
-                       {/* CONTENEDOR INLINE-BLOCK PARA AJUSTAR LA LUZ AL TEXTO. whitespace-nowrap EVITA QUE SE ROMPA EN DOS RENGLONES */}
                        <span className="relative inline-block whitespace-nowrap">
                          <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
-                         {/* THE TEXT: text-3xl en movil para que entre en una linea */}
                          <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text px-1">
                           "la magia se vive aquí"
                          </strong>
@@ -472,14 +502,15 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* --- BOTÓN FLOTANTE MÓVIL --- */}
-      <div className="fixed bottom-4 left-4 right-4 z-50 lg:hidden">
-         <Link href="/reservar" className="block w-full">
-            <Button className="w-full h-14 bg-azul-marino hover:bg-azul-marino/90 text-white font-extrabold text-base rounded-full shadow-[0_10px_30px_rgba(12,35,60,0.5)] border border-white/10 active:scale-95 transition-all flex items-center justify-center gap-2 overflow-hidden relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] animate-[shimmer_2s_infinite]" />
-              <Sparkles className="w-5 h-5 text-amarillo" /> Reservar Fecha
-            </Button>
-         </Link>
+      {/* --- BOTÓN FLOTANTE MÓVIL (Con animación para desaparecer) --- */}
+      <div className={`fixed bottom-4 left-4 right-4 z-50 lg:hidden transition-all duration-500 ease-in-out ${showFloatingButton ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}`}>
+         <Button 
+           onClick={scrollToReserva}
+           className="w-full h-14 bg-azul-marino hover:bg-azul-marino/90 text-white font-extrabold text-base rounded-full shadow-[0_10px_30px_rgba(12,35,60,0.5)] border border-white/10 active:scale-95 transition-all flex items-center justify-center gap-2 overflow-hidden relative group"
+         >
+           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] animate-[shimmer_2s_infinite]" />
+           <Sparkles className="w-5 h-5 text-amarillo" /> Reservar Fecha
+         </Button>
       </div>
 
       {/* --- BOTÓN FLOTANTE WHATSAPP --- */}
