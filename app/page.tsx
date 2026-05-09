@@ -383,21 +383,21 @@ export default function LandingPage() {
         </section>
 
         {/* --- SÚPER BANNER FINAL (SECCIÓN REFERENCIADA PARA EL BOTÓN MÓVIL) --- */}
-        <section id="reserva-final" ref={reservaFinalRef} className="relative py-24 overflow-hidden bg-azul-marino text-white">
+        <section id="reserva-final" ref={reservaFinalRef} className="relative py-24 md:py-32 overflow-hidden bg-azul-marino text-white flex flex-col items-center justify-center">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 z-0" />
           <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-amarillo/30 blur-[120px] rounded-full z-0" />
           <div className="absolute -bottom-[200px] -left-[200px] w-[500px] h-[500px] bg-rosa/30 blur-[120px] rounded-full z-0" />
           
-          <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center text-center">
             
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-10 shadow-lg">
+            <div className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-10 shadow-lg">
               <ShieldCheck className="w-5 h-5 text-verde" />
               <span className="text-sm font-bold tracking-wide">Reserva online 100% segura</span>
             </div>
 
-            <h2 className="text-4xl md:text-6xl font-black mb-16 tracking-tight drop-shadow-lg">
-              ¿Listos para vivir la <br className="sm:hidden" />
-              <span className="relative inline-block mt-2 sm:mt-0 sm:ml-3">
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-12 md:mb-16 tracking-tight drop-shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 w-full">
+              <span>¿Listos para vivir la</span>
+              <span className="relative inline-flex justify-center mt-1 sm:mt-0">
                 <span className="absolute -inset-2 bg-gradient-to-r from-rosa via-amarillo to-azul-claro blur-2xl opacity-50 animate-pulse"></span>
                 <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-rosa via-naranja to-amarillo drop-shadow-sm">
                   magia?
@@ -405,43 +405,46 @@ export default function LandingPage() {
               </span>
             </h2>
             
-            <div className="max-w-4xl mx-auto flex flex-col items-center justify-center mb-10 text-center">
-              <div className="flex flex-col gap-8 max-w-3xl">
-                  <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-balance relative">
-                    Nuestro espacio te ofrece una oferta única que te hará sentir que
-                    <span className="block mt-4 md:mt-6">
-                       <span className="relative inline-block whitespace-nowrap">
-                         <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
-                         <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text px-1">
-                          "la magia se vive aquí"
-                         </strong>
-                       </span>
+            <div className="flex flex-col items-center justify-center mb-12 w-full">
+                <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-center max-w-3xl mx-auto flex flex-col items-center justify-center">
+                  Nuestro espacio te ofrece una oferta única que te hará sentir que
+                  <span className="relative inline-flex justify-center whitespace-nowrap mt-5 md:mt-8">
+                     <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
+                     <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text">
+                      "la magia se vive aquí"
+                     </strong>
+                  </span>
+                </p>
+                
+                <div className="flex flex-col items-center justify-center gap-4 text-lg md:text-xl text-white/90 font-medium mt-10 md:mt-14 max-w-2xl mx-auto">
+                  <p className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center leading-relaxed">
+                    <span>Consulta disponibilidad,</span>
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rosa/20 border border-rosa/50 text-white font-black text-sm md:text-base shadow-inner shrink-0">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rosa opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-rosa"></span>
+                      </span>
+                      cupos limitados
                     </span>
                   </p>
-                  
-                  <div className="flex flex-col gap-4 justify-center text-xl text-white/90 font-medium mt-4">
-                    <p className="text-center">
-                      Consulta disponibilidad, <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rosa/20 border border-rosa/50 text-white font-black text-base mx-1 relative shadow-inner"><span className="relative flex h-3.5 w-3.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rosa opacity-75"></span><span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rosa"></span></span>cupos limitados</span>
-                    </p>
-                    <p className="mt-1 text-center">
-                      No te quedes sin tu fecha y asegura tu mejor experiencia.
-                    </p>
-                  </div>
-              </div>
+                  <p className="text-center text-white/80">
+                    No te quedes sin tu fecha y asegura tu mejor experiencia.
+                  </p>
+                </div>
             </div>
 
-            <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mt-8 md:mt-12">
-               <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-4 py-2 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30">
-                 🎁 ¡Incluye Invitación Digital VIP!
+            <div className="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 md:mt-12">
+               <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-5 py-2.5 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30 flex items-center justify-center">
+                 🎁 ¡Incluye Invitación Digital Personalizada!
                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0" />
                </div>
 
-               <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse" />
+               <div className="absolute -inset-x-6 -top-2 -bottom-6 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse pointer-events-none" />
                
-               <Link href="/reservar" className="block w-full">
-                 <Button className="group w-full sm:w-auto relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[16px] sm:text-xl h-auto min-h-[72px] py-4 px-8 sm:px-14 rounded-full border border-white/40 shadow-2xl active:scale-95 transition-all duration-300 overflow-hidden">
+               <Link href="/reservar" className="relative w-[90%] sm:w-auto max-w-md mx-auto block z-10">
+                 <Button className="group w-full relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[16px] sm:text-xl h-auto min-h-[72px] py-4 px-8 sm:px-14 rounded-full border border-white/40 shadow-2xl active:scale-95 transition-all duration-300 overflow-hidden">
                    <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100" />
-                   <span className="relative z-10 flex items-center justify-center gap-3 uppercase tracking-wide text-center leading-tight">
+                   <span className="relative flex items-center justify-center gap-3 uppercase tracking-wide text-center leading-tight">
                      Ver Fechas Disponibles <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                    </span>
                  </Button>
