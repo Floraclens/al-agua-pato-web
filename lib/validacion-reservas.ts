@@ -3,7 +3,7 @@
  * Este archivo contiene todas las validaciones de negocio para las reservas
  */
 
-import { obtenerReglasParaFecha, determinarTemporada } from "./config-reservas"
+import { obtenerReglasParaFecha, obtenerReglasEgresaditos, determinarTemporada } from "./config-reservas"
 import type { Turno } from "./turno"
 
 export interface ValidationError {
@@ -19,7 +19,7 @@ export interface ValidationResult {
 /**
  * Valida que una fecha y turno sean válidos según las reglas configuradas
  */
-export function validarFechaYTurno(fecha: Date, turno: Turno): ValidationResult {
+export function validarFechaYTurno(fecha: Date, turno: Turno, isEgresadito: boolean = false): ValidationResult {
   const errors: ValidationError[] = []
 
   // Validar que la fecha no sea en el pasado
@@ -41,8 +41,8 @@ export function validarFechaYTurno(fecha: Date, turno: Turno): ValidationResult 
     return { isValid: false, errors }
   }
 
-  // Obtener reglas para la fecha
-  const reglas = obtenerReglasParaFecha(fecha)
+  // Obtener reglas para la fecha según si es egresadito o no
+  const reglas = isEgresadito ? obtenerReglasEgresaditos(fecha) : obtenerReglasParaFecha(fecha)
 
   // Validar compatibilidad del turno con la modalidad
   if (reglas.modalidad === 'doble_turno_fijo') {
@@ -50,7 +50,7 @@ export function validarFechaYTurno(fecha: Date, turno: Turno): ValidationResult 
     if (typeof turno === 'object' && turno.id === 'lun_vie') {
       errors.push({
         field: 'turno',
-        message: `En ${reglas.temporada.replace('_', ' ')}, solo se permiten turnos fijos (Turno 1 o Turno 2)`
+        message: `En ${reglas.temporada?.replace('_', ' ') || 'esta fecha'}, solo se permiten turnos fijos (Turno 1 o Turno 2)`
       })
     }
   } else {
@@ -109,31 +109,30 @@ export function validarFechaYTurno(fecha: Date, turno: Turno): ValidationResult 
 /**
  * Valida que el precio calculado sea correcto según la configuración
  */
-export function validarPrecio(fecha: Date, turno: Turno, precioCalculado: number): ValidationResult {
+export function validarPrecio(fecha: Date, turno: Turno, precioCalculado: number, isEgresadito: boolean = false): ValidationResult {
   const errors: ValidationError[] = []
 
   if (!turno) {
     return { isValid: false, errors: [{ field: 'precio', message: 'No hay turno seleccionado' }] }
   }
 
-  const reglas = obtenerReglasParaFecha(fecha)
+  const reglas = isEgresadito ? obtenerReglasEgresaditos(fecha) : obtenerReglasParaFecha(fecha)
   let precioEsperado = 0
 
   if (reglas.modalidad === 'doble_turno_fijo') {
     if (reglas.precios) {
-      // Temporada alta
+      // Temporada alta o media fin de semana
       if (turno === 'primero') {
         precioEsperado = reglas.precios.turno_1
       } else if (turno === 'segundo') {
         precioEsperado = reglas.precios.turno_2
       }
     } else {
-      // Temporada media fines de semana
-      precioEsperado = reglas.precio
+      precioEsperado = reglas.precio || 0
     }
   } else {
     // Turno flexible
-    precioEsperado = reglas.precio
+    precioEsperado = reglas.precio || 0
   }
 
   if (precioCalculado !== precioEsperado) {
@@ -159,13 +158,17 @@ export function validarReservaCompleta(
     nombre: string
     telefono: string
     email: string
+    institucion?: string // NUEVO CAMPO OPCIONAL
+    sala?: string        // NUEVO CAMPO OPCIONAL
+    turno_colegio?: string // NUEVO CAMPO OPCIONAL
   },
-  metodoPago: string
+  metodoPago: string,
+  isEgresadito: boolean = false // NUEVO PARÁMETRO PARA ACTIVAR LAS REGLAS DE EGRESADOS
 ): ValidationResult {
   const errors: ValidationError[] = []
 
   // Validar fecha y turno
-  const validacionFechaTurno = validarFechaYTurno(fecha, turno)
+  const validacionFechaTurno = validarFechaYTurno(fecha, turno, isEgresadito)
   errors.push(...validacionFechaTurno.errors)
 
   // Validar datos del cliente
@@ -198,6 +201,19 @@ export function validarReservaCompleta(
       field: 'metodo_pago',
       message: 'Debe seleccionar un método de pago válido'
     })
+  }
+
+  // REGLAS ESPECÍFICAS DE EGRESADITOS
+  if (isEgresadito) {
+    if (!datosCliente.institucion || datosCliente.institucion.trim() === '') {
+      errors.push({ field: 'institucion', message: 'El nombre de la institución es obligatorio' })
+    }
+    if (!datosCliente.sala || datosCliente.sala.trim() === '') {
+      errors.push({ field: 'sala', message: 'La sala o curso es obligatoria' })
+    }
+    if (!datosCliente.turno_colegio || datosCliente.turno_colegio.trim() === '') {
+      errors.push({ field: 'turno_colegio', message: 'El turno del colegio es obligatorio' })
+    }
   }
 
   return {

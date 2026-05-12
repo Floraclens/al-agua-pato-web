@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import type { Turno, LunVieTurno } from "@/lib/turno"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { obtenerReglasParaFecha, determinarTemporada } from "@/lib/config-reservas"
+import { obtenerReglasParaFecha, obtenerReglasEgresaditos, determinarTemporada } from "@/lib/config-reservas"
 import { FERIADOS } from "@/lib/config-reservas"
 
 const LABEL_MANANA = "12:00 a 16:00 hs"
@@ -32,9 +32,10 @@ function isLunVieTurn(t: NonNullable<Turno>): t is LunVieTurno {
   return typeof t === "object" && t !== null && "id" in t && t.id === "lun_vie"
 }
 
-function showDualFixedSlots(date: Date): boolean {
-  const reglas = obtenerReglasParaFecha(date)
-  return reglas.modalidad === 'doble_turno_fijo'
+// MODIFICADO: Ahora puede leer las reglas de egresaditos si se lo piden
+function showDualFixedSlots(date: Date, isEgresadito: boolean = false): boolean {
+  const reglas = isEgresadito ? obtenerReglasEgresaditos(date) : obtenerReglasParaFecha(date)
+  return reglas?.modalidad === 'doble_turno_fijo'
 }
 
 function parseTimeStringToMinutes(timeStr: string): number {
@@ -61,14 +62,16 @@ interface ReservationCalendarProps {
   selectedDate: Date | undefined
   onSelectDate: (date: Date | undefined) => void
   onTurnoBooked: (turno: Turno) => void
-  ignoreReservaId?: number // NUEVO PROP PARA IGNORAR RESERVA AL REPROGRAMAR
+  ignoreReservaId?: number
+  isEgresadito?: boolean // NUEVO PROP AÑADIDO
 }
 
 export function ReservationCalendar({
   selectedDate,
   onSelectDate,
   onTurnoBooked,
-  ignoreReservaId
+  ignoreReservaId,
+  isEgresadito = false // Por defecto es falso (reserva normal)
 }: ReservationCalendarProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [activeBubble, setActiveBubble] = useState<string | number | null>(null)
@@ -84,7 +87,6 @@ export function ReservationCalendar({
     async function fetchAllReservations() {
       const supabase = createBrowserClient()
       
-      // Armamos la query. Si viene ignoreReservaId, traemos todas menos esa.
       let query = supabase.from("reservas").select("id, fecha, turno")
       if (ignoreReservaId) {
         query = query.neq("id", ignoreReservaId)
@@ -103,7 +105,7 @@ export function ReservationCalendar({
       }
     }
     fetchAllReservations()
-  }, [ignoreReservaId]) // Volver a ejecutar si cambia el ID a ignorar
+  }, [ignoreReservaId])
 
   useEffect(() => {
     if (!selectedDate) {
@@ -122,7 +124,6 @@ export function ReservationCalendar({
 
       let query = supabase.from("reservas").select("turno").eq("fecha", dateStr)
       
-      // Si estamos reprogramando, ignoramos el ID en la búsqueda de turnos ocupados
       if (ignoreReservaId) {
         query = query.neq("id", ignoreReservaId)
       }
@@ -143,8 +144,21 @@ export function ReservationCalendar({
   const disabledDays = useCallback((date: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    return date <= today
-  }, [])
+    
+    // Regla universal: No se puede reservar en el pasado
+    if (date <= today) return true
+
+    // REGLA EXCLUSIVA PARA EGRESADITOS
+    if (isEgresadito) {
+      const month = date.getMonth() + 1 // getMonth es 0-indexado
+      // Si el mes NO ES Noviembre (11) ni Diciembre (12), bloqueamos el día
+      if (month !== 11 && month !== 12) {
+        return true
+      }
+    }
+
+    return false
+  }, [isEgresadito])
 
   const isDayFullyBooked = useCallback((date: Date) => {
     const today = new Date()
@@ -159,13 +173,14 @@ export function ReservationCalendar({
     const bookings = globalBookings[dateStr] || []
     if (bookings.length === 0) return false
 
-    const isDual = showDualFixedSlots(date)
+    // Ahora le pasamos isEgresadito para que sepa qué regla de turnos usar
+    const isDual = showDualFixedSlots(date, isEgresadito)
     if (isDual) {
       return bookings.length >= 2 
     } else {
       return bookings.length >= 1 
     }
-  }, [globalBookings])
+  }, [globalBookings, isEgresadito])
 
   const handleSelectDate = useCallback(
     (date: Date | undefined) => {
@@ -179,21 +194,40 @@ export function ReservationCalendar({
     (turno: NonNullable<Turno>, bubbleId: string | number) => {
       if (!selectedDate) return
 
-      const dual = showDualFixedSlots(selectedDate)
+      const dual = showDualFixedSlots(selectedDate, isEgresadito)
       if (dual && isLunVieTurn(turno)) return
       if (!dual && (turno === "primero" || turno === "segundo")) return
 
       setActiveBubble(bubbleId)
       onTurnoBooked(turno)
     },
-    [selectedDate, onTurnoBooked]
+    [selectedDate, onTurnoBooked, isEgresadito]
   )
+
+  // LOGICA PARA QUE ARRANQUE EN NOVIEMBRE SI ES EGRESADITOS
+  const defaultMonth = useMemo(() => {
+    if (!isEgresadito) return undefined; // Para cumples normales, arranca en el mes actual
+
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+
+    // Si estamos en enero a octubre, mostramos noviembre de este año
+    if (currentMonth < 11) {
+      return new Date(currentYear, 10, 1); // 10 = Noviembre (0-indexado)
+    } 
+    // Si estamos en noviembre o diciembre, mostramos el mes actual
+    else {
+      return today;
+    }
+  }, [isEgresadito]);
+
 
   if (!isMounted) {
     return <div className="flex justify-center min-h-[350px]" />
   }
 
-  const isDual = selectedDate ? showDualFixedSlots(selectedDate) : false
+  const isDual = selectedDate ? showDualFixedSlots(selectedDate, isEgresadito) : false
 
   const isPrimeroBooked = isDual ? checkOverlap(12 * 60, 16 * 60, bookedSlots) : false
   const isSegundoBooked = isDual ? checkOverlap(18 * 60 + 30, 22 * 60 + 30, bookedSlots) : false
@@ -201,9 +235,10 @@ export function ReservationCalendar({
 
   const lunVieStartOptions: number[] = []
   if (selectedDate) {
-    const reglas = obtenerReglasParaFecha(selectedDate)
+    // Si estamos en egresaditos, leemos sus propias reglas
+    const reglas = isEgresadito ? obtenerReglasEgresaditos(selectedDate) : obtenerReglasParaFecha(selectedDate)
     
-    if (reglas.modalidad === 'turno_flexible' && reglas.ultimo_inicio_permitido) {
+    if (reglas && reglas.modalidad === 'turno_flexible' && reglas.ultimo_inicio_permitido) {
       const [horaInicio] = reglas.franja_horaria.inicio.split(':').map(Number)
       const [horaUltimoInicio, minutoUltimoInicio] = reglas.ultimo_inicio_permitido.split(':').map(Number)
       const ultimoInicioMinutos = horaUltimoInicio * 60 + minutoUltimoInicio
@@ -231,6 +266,7 @@ export function ReservationCalendar({
           selected={selectedDate}
           onSelect={handleSelectDate}
           disabled={(date) => disabledDays(date) || isDayFullyBooked(date)}
+          defaultMonth={defaultMonth} // <--- ACÁ LE PASAMOS EL MES POR DEFECTO CALCULADO
           locale={es}
           className="rounded-xl border border-border/50 bg-background p-3"
           modifiers={{

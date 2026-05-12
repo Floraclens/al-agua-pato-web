@@ -6,9 +6,9 @@ import Link from "next/link"
 import { ServiciosIncluidos } from "@/components/servicios-incluidos"
 import { PhotoGallery } from "@/components/photo-gallery"
 import { 
-  Sparkles, MapPin, CheckCircle2, Star, Quote, ArrowDown, 
+  Sparkles, MapPin, CheckCircle2, Star, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
-  HelpCircle, ChevronDown, Phone, Mail
+  HelpCircle, Phone, Mail, GraduationCap, School, ChevronDown // <--- AGREGAR ESTE
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,18 +20,16 @@ import {
 
 export default function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
-  // Estado y Ref para controlar el botón flotante
   const [showFloatingButton, setShowFloatingButton] = useState(true);
+  const [showEventMenu, setShowEventMenu] = useState(false); // NUEVO ESTADO PARA EL MENÚ
   const reservaFinalRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Si la sección final es visible (intersecting), ocultamos el botón
         setShowFloatingButton(!entry.isIntersecting);
       },
-      { threshold: 0.1 } // Se activa cuando al menos el 10% de la sección final es visible
+      { threshold: 0.1 } 
     );
 
     if (reservaFinalRef.current) {
@@ -53,13 +51,13 @@ export default function LandingPage() {
     document.getElementById('reserva-final')?.scrollIntoView({ behavior: 'smooth' });
   }
 
-  // Enlaces rápidos para el footer
   const footerLinks = [
     { name: "Inicio", href: "#top" },
     { name: "Galería", href: "#galeria" },
     { name: "Servicios", href: "#servicios" },
     { name: "Preguntas Frecuentes", href: "#faq" },
     { name: "Reservar", href: "/reservar" },
+    { name: "Egresaditos", href: "/egresaditos" },
   ]
 
   return (
@@ -70,7 +68,6 @@ export default function LandingPage() {
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
-                {/* LOGO HEADER */}
                 <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
                   <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" priority />
                 </div>
@@ -89,7 +86,10 @@ export default function LandingPage() {
                   <span className="sm:hidden">Ubicación</span>
                 </a>
                 
-                {/* BOTÓN RESERVAR SOLO PARA DESKTOP/TABLET */}
+                <Link href="/egresaditos" className="hidden lg:flex items-center gap-1.5 text-rosa hover:text-lavanda font-extrabold text-sm transition-colors">
+                  <GraduationCap className="w-5 h-5" /> Egresaditos
+                </Link>
+
                 <button onClick={scrollToReserva} className="hidden md:flex items-center gap-2 px-5 py-2 bg-azul-marino text-white hover:bg-azul-marino/90 transition-all duration-200 font-bold text-sm rounded-full shadow-md hover:shadow-lg active:scale-95">
                   <Sparkles className="h-4 w-4 text-amarillo" />
                   Reservar Fecha
@@ -99,13 +99,10 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* --- PORTADA CON VIDEO DE FONDO --- */}
         <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
-          
           <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
-
           <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
 
@@ -181,7 +178,6 @@ export default function LandingPage() {
           <PhotoGallery />
         </div>
 
-        {/* --- TESTIMONIOS --- */}
         <section className="py-16 md:py-24 bg-azul-claro/5 border-b border-border/50 overflow-hidden">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex flex-col items-center text-center mb-12">
@@ -243,7 +239,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- SECCIÓN QUÉ INCLUYE --- */}
         <div id="servicios" className="container mx-auto px-4 py-16 md:py-24">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-black text-azul-marino mb-4 flex flex-col md:flex-row items-center justify-center gap-3">
@@ -256,7 +251,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* --- MAGIA A LA CARTA --- */}
         <section className="bg-azul-marino py-20 md:py-28 overflow-hidden relative">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20" />
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-lavanda/10 blur-[150px] rounded-full pointer-events-none" />
@@ -330,7 +324,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- PASO A PASO --- */}
         <section className="py-20 md:py-28 container mx-auto px-4 max-w-6xl text-center">
           <h2 className="text-3xl md:text-5xl font-black text-azul-marino mb-20">El camino a la fiesta perfecta</h2>
           <div className="grid md:grid-cols-3 gap-12 relative">
@@ -351,7 +344,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- PREGUNTAS FRECUENTES (FAQ) --- */}
         <section id="faq" className="py-20 bg-slate-50 border-t border-border/50">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center mb-12">
@@ -382,7 +374,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* --- SÚPER BANNER FINAL (SECCIÓN REFERENCIADA PARA EL BOTÓN MÓVIL) --- */}
         <section id="reserva-final" ref={reservaFinalRef} className="relative py-24 md:py-32 overflow-hidden bg-azul-marino text-white flex flex-col items-center justify-center">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 z-0" />
           <div className="absolute -top-[200px] -right-[200px] w-[500px] h-[500px] bg-amarillo/30 blur-[120px] rounded-full z-0" />
@@ -433,7 +424,7 @@ export default function LandingPage() {
                 </div>
             </div>
 
-            <div className="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 md:mt-12">
+            <div className="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 md:mt-12 min-h-[140px]">
                <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-5 py-2.5 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30 flex items-center justify-center">
                  🎁 ¡Incluye Invitación Digital Personalizada!
                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0" />
@@ -441,25 +432,61 @@ export default function LandingPage() {
 
                <div className="absolute -inset-x-6 -top-2 -bottom-6 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse pointer-events-none" />
                
-               <Link href="/reservar" className="relative w-[90%] sm:w-auto max-w-md mx-auto block z-10">
-                 <Button className="group w-full relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[16px] sm:text-xl h-auto min-h-[72px] py-4 px-8 sm:px-14 rounded-full border border-white/40 shadow-2xl active:scale-95 transition-all duration-300 overflow-hidden">
-                   <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100" />
-                   <span className="relative flex items-center justify-center gap-3 uppercase tracking-wide text-center leading-tight">
-                     Ver Fechas Disponibles <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                   </span>
-                 </Button>
-               </Link>
+               {/* MENÚ DE SELECCIÓN DE EVENTO */}
+               {!showEventMenu ? (
+                 <div className="relative flex flex-col items-center justify-center w-full z-10 animate-in fade-in zoom-in duration-300">
+                   <Button 
+                     onClick={() => setShowEventMenu(true)}
+                     className="group w-[90%] sm:w-auto min-w-[320px] relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[16px] sm:text-xl h-auto min-h-[72px] py-4 px-8 rounded-full border border-white/40 shadow-2xl active:scale-95 transition-all duration-300 overflow-hidden"
+                   >
+                     <span className="absolute inset-0 bg-white/30 scale-0 rounded-full group-hover:scale-125 transition-transform duration-500 opacity-0 group-hover:opacity-100" />
+                     <span className="relative flex items-center justify-center gap-3 uppercase tracking-wide text-center leading-tight">
+                       Elige tu evento <ChevronDown className="w-6 h-6 group-hover:translate-y-1 transition-transform" />
+                     </span>
+                   </Button>
+                 </div>
+               ) : (
+                 <div className="relative flex flex-col items-center gap-6 w-full z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                   <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full items-center justify-center">
+                     <Link href="/reservar" className="w-[90%] sm:w-auto min-w-[220px]">
+                       <Button className="group w-full relative bg-gradient-to-r from-amarillo to-naranja text-azul-marino font-extrabold text-[15px] sm:text-lg h-auto min-h-[64px] py-3 px-6 rounded-full border border-white/40 shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300">
+                         <PartyPopper className="w-5 h-5 mr-2" /> Cumple
+                       </Button>
+                     </Link>
+                     
+                     <Link href="/egresaditos" className="w-[90%] sm:w-auto min-w-[220px]">
+                       <Button className="group w-full relative bg-gradient-to-r from-lavanda to-rosa text-white font-extrabold text-[15px] sm:text-lg h-auto min-h-[64px] py-3 px-6 rounded-full border border-white/40 shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300">
+                         <GraduationCap className="w-6 h-6 mr-2" /> Egresaditos
+                       </Button>
+                     </Link>
+                     
+                     <div className="w-[90%] sm:w-auto min-w-[220px]">
+                       <Button 
+                         onClick={() => window.alert("¡Próximamente habilitaremos la opción para eventos escolares!")}
+                         className="group w-full relative bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-extrabold text-[15px] sm:text-lg h-auto min-h-[64px] py-3 px-6 rounded-full border border-white/40 shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300"
+                       >
+                         <School className="w-5 h-5 mr-2" /> Escolar
+                       </Button>
+                     </div>
+                   </div>
+                   
+                   <button 
+                     onClick={() => setShowEventMenu(false)}
+                     className="text-white/60 hover:text-white text-sm font-bold flex items-center gap-1 transition-colors"
+                   >
+                     <X className="w-4 h-4" /> Cancelar
+                   </button>
+                 </div>
+               )}
             </div>
           </div>
         </section>
       </div>
 
-      {/* --- FOOTER MINIMALISTA Y PROFESIONAL --- */}
       <footer className="bg-[#040A12] text-white py-12 relative z-10 border-t border-white/10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             
-            {/* Izquierda: Logo y Nombre */}
             <div className="flex items-center gap-4">
                <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 bg-transparent">
                   <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" />
@@ -470,16 +497,14 @@ export default function LandingPage() {
                </div>
             </div>
 
-            {/* Medio: Enlaces en línea (Solo en Escritorio) */}
             <div className="hidden md:flex items-center gap-8">
               {footerLinks.map((link) => (
-                <Link key={link.name} href={link.href} className="text-sm text-white/60 hover:text-amarillo transition-colors font-medium">
+                <Link key={link.name} href={link.href} className={`text-sm font-medium transition-colors ${link.name === 'Egresaditos' ? 'text-rosa hover:text-lavanda font-bold' : 'text-white/60 hover:text-amarillo'}`}>
                   {link.name}
                 </Link>
               ))}
             </div>
 
-            {/* Derecha: Redes/Contacto rápido */}
             <div className="flex items-center gap-6">
                <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
                   <MapPin className="w-4 h-4" />
@@ -493,7 +518,6 @@ export default function LandingPage() {
 
           </div>
 
-          {/* Copyright Inferior */}
           <div className="mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
              <p className="text-xs text-white/40 font-medium text-center sm:text-left">
                © {new Date().getFullYear()} Al Agua Pato. Todos los derechos reservados.
@@ -505,8 +529,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* --- BOTÓN FLOTANTE MÓVIL (Con animación para desaparecer) --- */}
-      <div className={`fixed bottom-4 left-4 right-4 z-50 lg:hidden transition-all duration-500 ease-in-out ${showFloatingButton ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}`}>
+      <div className={`fixed bottom-4 left-4 right-4 z-50 lg:hidden transition-all duration-500 ease-in-out ${showFloatingButton ? 'translate-y-0 opacity-100' : 'translate-y-32 opacity-0 pointer-events-none'}`}>
          <Button 
            onClick={scrollToReserva}
            className="w-full h-14 bg-azul-marino hover:bg-azul-marino/90 text-white font-extrabold text-base rounded-full shadow-[0_10px_30px_rgba(12,35,60,0.5)] border border-white/10 active:scale-95 transition-all flex items-center justify-center gap-2 overflow-hidden relative group"
@@ -516,7 +539,6 @@ export default function LandingPage() {
          </Button>
       </div>
 
-      {/* --- BOTÓN FLOTANTE WHATSAPP --- */}
       <a 
         href="https://wa.me/5493854470103?text=Hola!%20Estoy%20viendo%20la%20página%20web%20y%20tengo%20una%20consulta%20sobre%20el%20salón..." 
         target="_blank" 
@@ -529,7 +551,6 @@ export default function LandingPage() {
         </span>
       </a>
 
-      {/* --- MODAL DE IMAGEN (ZOOM) --- */}
       {selectedImage && (
         <div 
           className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300"

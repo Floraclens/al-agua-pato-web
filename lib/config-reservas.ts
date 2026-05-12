@@ -1,7 +1,5 @@
 /**
  * Configuración centralizada de precios y reglas de reservas
- * Este archivo contiene todas las variables que el dueño del código puede modificar
- * sin necesidad de tocar la lógica de negocio.
  */
 
 // Feriados estáticos de Argentina (Año 2026)
@@ -12,39 +10,42 @@ export const FERIADOS: string[] = [
   "2026-11-23", "2026-12-07", "2026-12-08", "2026-12-25"
 ]
 
-// PRECIOS CENTRALIZADOS
-// PRECIOS CENTRALIZADOS
+// PRECIOS CENTRALIZADOS (CUMPLES NORMALES)
 export const PRECIOS = {
-  // Temporadas de Predio
   temporada_baja: { lunes_a_viernes: 700000, fines_de_semana: 700000 },
-  temporada_media: { lunes_a_viernes: 710000, fines_de_semana: 710000 },
-  temporada_alta: { turno_1_fijo: 730000, turno_2_fijo: 740000 },
+  temporada_media: { 
+    lunes_a_viernes: 1000000, 
+    turno_1_fijo: 930000, 
+    turno_2_fijo: 1000000 
+  },
+  temporada_alta: { turno_1_fijo: 930000, turno_2_fijo: 1000000 },
 
-  // --- SERVICIOS OPCIONALES (Personalizá tu evento) ---
   opcionales: {
     adultosAdicionales: 7000,
     animacion: 70000,
     horaExtra: 200000,
-    robot_led: { // ACÁ ESTABA EL ERROR (antes decía robotLed)
-      uno: 200000,
-      dos: 350000,
-      detalle: "1 hora de servicio"
-    },
-    zancos_led: { // ACÁ TAMBIÉN (antes decía zancosLed)
-      precio_unidad: 200000,
-      max: 2,
-      detalle: "1 hora de servicio"
-    },
-    personaje: {
-      precio_unidad: 125000,
-      detalle: "1 hora de servicio"
-    },
+    robot_led: { uno: 200000, dos: 350000, detalle: "1 hora de servicio" },
+    zancos_led: { precio_unidad: 200000, max: 2, detalle: "1 hora de servicio" },
+    personaje: { precio_unidad: 125000, detalle: "1 hora de servicio" },
     mozoAdicional: 40000,
     pileta: {
       precio: 250000,
-      meses_disponibles: [4, 5, 6, 7, 8], // Abril a Agosto
+      meses_disponibles: [4, 5, 6, 7, 8],
       detalle: "Solo disponible de Abril a Agosto"
     }
+  }
+}
+
+// NUEVO: PRECIOS EXCLUSIVOS EGRESADITOS
+export const PRECIOS_EGRESADITOS = {
+  nov_a_dic14: {
+    lunes_a_viernes: 1000000,
+    turno_1_fijo: 930000,
+    turno_2_fijo: 1000000
+  },
+  dic15_a_fin: {
+    turno_1_fijo: 930000,
+    turno_2_fijo: 1000000
   }
 }
 
@@ -100,9 +101,7 @@ export function obtenerReglasParaFecha(fecha: Date) {
   const esFinde = esFinDeSemanaOFeriado(fecha)
   const mesActual = fecha.getMonth() + 1
   
-  // Verificamos si la pileta está disponible para el mes de la fecha seleccionada
   const pileta_disponible = PRECIOS.opcionales.pileta.meses_disponibles.includes(mesActual)
-
   let baseReglas: any = { temporada, pileta_disponible }
 
   if (temporada === 'temporada_baja') {
@@ -111,10 +110,59 @@ export function obtenerReglasParaFecha(fecha: Date) {
   
   if (temporada === 'temporada_media') {
     if (esFinde) {
-      return { ...baseReglas, modalidad: HORARIOS.temporada_media.sabados_domingos_feriados.modalidad, precio: PRECIOS.temporada_media.fines_de_semana, turnos: HORARIOS.temporada_media.sabados_domingos_feriados.turnos }
+      return { 
+        ...baseReglas, 
+        modalidad: HORARIOS.temporada_media.sabados_domingos_feriados.modalidad, 
+        turnos: HORARIOS.temporada_media.sabados_domingos_feriados.turnos,
+        precios: { turno_1: PRECIOS.temporada_media.turno_1_fijo, turno_2: PRECIOS.temporada_media.turno_2_fijo }
+      }
     }
     return { ...baseReglas, modalidad: HORARIOS.temporada_media.lunes_a_viernes.modalidad, precio: PRECIOS.temporada_media.lunes_a_viernes, franja_horaria: HORARIOS.temporada_media.lunes_a_viernes.franja_horaria, ultimo_inicio_permitido: HORARIOS.temporada_media.lunes_a_viernes.ultimo_inicio_permitido }
   }
 
-  return { ...baseReglas, modalidad: HORARIOS.temporada_alta.modalidad, precio: PRECIOS.temporada_alta.turno_1_fijo, franja_horaria: { inicio: "12:00", fin: "22:30" }, turnos: HORARIOS.temporada_alta.turnos, precios: { turno_1: PRECIOS.temporada_alta.turno_1_fijo, turno_2: PRECIOS.temporada_alta.turno_2_fijo } }
+  return { ...baseReglas, modalidad: HORARIOS.temporada_alta.modalidad, franja_horaria: { inicio: "12:00", fin: "22:30" }, turnos: HORARIOS.temporada_alta.turnos, precios: { turno_1: PRECIOS.temporada_alta.turno_1_fijo, turno_2: PRECIOS.temporada_alta.turno_2_fijo } }
+}
+
+// NUEVA FUNCIÓN MÁGICA PARA EGRESADITOS
+export function obtenerReglasEgresaditos(fecha: Date) {
+  const mes = fecha.getMonth() + 1
+  const dia = fecha.getDate()
+  const esFinde = esFinDeSemanaOFeriado(fecha)
+  const pileta_disponible = PRECIOS.opcionales.pileta.meses_disponibles.includes(mes)
+
+  let baseReglas: any = { pileta_disponible, es_egresadito: true }
+
+  // Si no es Noviembre (11) ni Diciembre (12), bloqueamos el calendario
+  if (mes < 11) return { ...baseReglas, disponible: false }
+
+  // Del 15 de Dic al 31 de Dic (Todo Fijo)
+  if (mes === 12 && dia >= 15) {
+    return { 
+      ...baseReglas, 
+      disponible: true,
+      modalidad: HORARIOS.temporada_alta.modalidad, 
+      turnos: HORARIOS.temporada_alta.turnos,
+      precios: { turno_1: PRECIOS_EGRESADITOS.dic15_a_fin.turno_1_fijo, turno_2: PRECIOS_EGRESADITOS.dic15_a_fin.turno_2_fijo }
+    }
+  }
+
+  // Del 1 de Nov al 14 de Dic
+  if (esFinde) {
+    return { 
+      ...baseReglas, 
+      disponible: true,
+      modalidad: HORARIOS.temporada_media.sabados_domingos_feriados.modalidad, 
+      turnos: HORARIOS.temporada_media.sabados_domingos_feriados.turnos,
+      precios: { turno_1: PRECIOS_EGRESADITOS.nov_a_dic14.turno_1_fijo, turno_2: PRECIOS_EGRESADITOS.nov_a_dic14.turno_2_fijo }
+    }
+  }
+  
+  return { 
+    ...baseReglas, 
+    disponible: true,
+    modalidad: HORARIOS.temporada_media.lunes_a_viernes.modalidad, 
+    precio: PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes, 
+    franja_horaria: HORARIOS.temporada_media.lunes_a_viernes.franja_horaria, 
+    ultimo_inicio_permitido: HORARIOS.temporada_media.lunes_a_viernes.ultimo_inicio_permitido 
+  }
 }

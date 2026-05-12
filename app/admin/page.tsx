@@ -194,7 +194,13 @@ export default function AdminPage() {
       textoCopiar += `⏰ Horario: ${r.turno}\n`
       textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
       if (r.nombre_cumpleanero) {
-        textoCopiar += `🎂 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
+        // Lógica de separación para Egresaditos en el portapapeles
+        if (r.nombre_cumpleanero.includes("🎓")) {
+          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").trim()
+          textoCopiar += `🎓 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
+        } else {
+          textoCopiar += `🎂 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
+        }
       }
       textoCopiar += `🎈 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
       textoCopiar += `-----------------------------------\n\n`
@@ -417,6 +423,9 @@ export default function AdminPage() {
               const isActiva = isSenado || isCompletado
 
               const isPagoTotalidadDesdeInicio = reserva.sena >= reserva.total || (reserva.metodo_pago && reserva.metodo_pago.includes("Totalidad"))
+              
+              // DETERMINAR SI ES EGRESADITO PARA RENDERIZAR DISTINTO
+              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓")
 
               return (
                 <div key={reserva.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between transition-all hover:shadow-md ${isActiva ? "border-transparent" : "border-orange-200"}`}>
@@ -460,9 +469,17 @@ export default function AdminPage() {
 
                     <div className="space-y-2">
                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Detalles del Evento</p>
-                      <p className="text-sm text-slate-700">
-                        <span className="font-bold text-azul-marino">Cumpleañero:</span> {reserva.nombre_cumpleanero || "N/A"} ({reserva.edad_cumple ? reserva.edad_cumple + " años" : "-"})
-                      </p>
+                      
+                      {isEgresadito ? (
+                        <p className="text-sm text-slate-700">
+                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").trim()} ({reserva.edad_cumple || "-"})
+                        </p>
+                      ) : (
+                        <p className="text-sm text-slate-700">
+                          <span className="font-bold text-azul-marino">Cumpleañero:</span> {reserva.nombre_cumpleanero || "N/A"} ({reserva.edad_cumple ? reserva.edad_cumple + " años" : "-"})
+                        </p>
+                      )}
+
                       <p className="text-sm text-slate-700">
                         <span className="font-bold text-azul-marino">Extras:</span> {reserva.extras_elegidos || "Ninguno"}
                       </p>
@@ -505,7 +522,7 @@ export default function AdminPage() {
                         </Button>
                         <Button 
                           variant="outline" 
-                          className="w-full h-10 text-sm font-bold border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors"
+                          className="w-full h-10 text-sm font-bold border-orange-200 text-orange-600 hover:bg-orange-50 hover:text-orange-700 transition-colors shadow-sm"
                           onClick={() => handleCambiarEstado(reserva.id, 'pendiente')}
                         >
                           Deshacer Seña
@@ -523,7 +540,8 @@ export default function AdminPage() {
                       </Button>
                     )}
 
-                    {reserva.telefono && (
+                    {/* MODIFICACIÓN: No mostramos el botón de WhatsApp si es Egresadito y ya está activa */}
+                    {reserva.telefono && !(isActiva && isEgresadito) && (
                       <a 
                         href={getWhatsAppLink(reserva, isActiva, fechaFormateada)} 
                         target="_blank" 
@@ -563,6 +581,7 @@ export default function AdminPage() {
         )}
       </div>
 
+      {/* --- MODAL PARA REPROGRAMAR CON CALENDARIO INTERACTIVO --- */}
       {modalReprogramar && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">

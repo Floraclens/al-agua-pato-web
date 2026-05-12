@@ -42,6 +42,7 @@ interface ResumenReservaProps {
   }
   canSubmit: boolean
   pagoTotalidad: boolean
+  isEgresadito?: boolean // NUEVO: Permite distinguir entre Cumple y Egresaditos
 }
 
 function formatPrice(price: number): string {
@@ -74,7 +75,8 @@ export function ResumenReserva({
   datosCliente,
   calculos,
   canSubmit,
-  pagoTotalidad
+  pagoTotalidad,
+  isEgresadito = false // Por defecto es false (Cumples normales)
 }: ResumenReservaProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -147,7 +149,8 @@ export function ResumenReserva({
   const handleReserva = useCallback(async () => {
     if (!selectedDate || !selectedTurno || !metodoPago) return
 
-    const validacion = validarReservaCompleta(selectedDate, selectedTurno, datosCliente, metodoPago)
+    // Le pasamos el isEgresadito al validador para que sepa qué exigir
+    const validacion = validarReservaCompleta(selectedDate, selectedTurno, datosCliente, metodoPago, isEgresadito)
     
     if (!validacion.isValid) {
       window.alert(`Error de validación:\n${formatearErroresValidacion(validacion.errors)}`)
@@ -164,6 +167,16 @@ export function ResumenReserva({
 
       const supabase = createBrowserClient()
       
+      // LÓGICA DE GUARDADO INTELIGENTE (Para no tocar la base de datos)
+      // Si es egresadito, guardamos la info del colegio en las columnas de cumpleañero/edad
+      const nombreDB = isEgresadito 
+        ? `🎓 ${datosCliente.institucion} - Sala: ${datosCliente.sala}`
+        : datosCliente.nombreCumpleanero
+
+      const edadDB = isEgresadito
+        ? `Turno: ${datosCliente.turno_colegio}`
+        : datosCliente.edadCumple
+
       const { data, error } = await supabase.from("reservas").insert({
         fecha: toLocalDateString(selectedDate),
         turno: getTurnoLabel(selectedTurno),
@@ -174,8 +187,8 @@ export function ResumenReserva({
         nombre: datosCliente.nombre,
         telefono: datosCliente.telefono,
         email: datosCliente.email || null,
-        nombre_cumpleanero: datosCliente.nombreCumpleanero || null,
-        edad_cumple: datosCliente.edadCumple || null,
+        nombre_cumpleanero: nombreDB || null,
+        edad_cumple: edadDB || null,
         estado: 'pendiente'
       }).select('id').single()
 
@@ -192,7 +205,33 @@ export function ResumenReserva({
       const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM", { locale: es })
       const turnoLabel = getTurnoLabel(selectedTurno)
       
-      const mensajeWhatsApp = 
+      let mensajeWhatsApp = ""
+
+      if (isEgresadito) {
+        mensajeWhatsApp = 
+`¡Hola Al Agua Pato! 🦆🎓 Acabo de solicitar una reserva de EGRESADITOS desde la web.
+
+*Detalles del evento:*
+📅 Fecha: ${fechaFormateada}
+⏰ Turno: ${turnoLabel}
+🎈 Extras: ${extras_elegidos}
+
+*Resumen de pago:*
+💵 Método: ${textoMetodoPago}
+💰 Total: ${formatPrice(calculos.total)}
+💸 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
+
+*Datos del Colegio:*
+🏫 Institución: ${datosCliente.institucion}
+✏️ Sala/Curso: ${datosCliente.sala}
+☀️ Turno: ${datosCliente.turno_colegio}
+👤 A nombre de: ${datosCliente.nombre}
+
+*(ID interno de reserva: ${reservaId})*
+
+¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
+      } else {
+        mensajeWhatsApp = 
 `¡Hola Al Agua Pato! 🦆✨ Acabo de solicitar una reserva desde la página web.
 
 *Detalles del evento:*
@@ -212,6 +251,7 @@ export function ResumenReserva({
 *(ID interno de reserva: ${reservaId})*
 
 ¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
+      }
 
       const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP_SALON}?text=${encodeURIComponent(mensajeWhatsApp)}`
       
@@ -227,7 +267,7 @@ export function ResumenReserva({
       window.alert(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }
-  }, [selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad])
+  }, [selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad, isEgresadito])
 
   const faltaElegirPersonaje = extras.personaje && extras.personajesSeleccionados.length === 0;
 
@@ -328,7 +368,8 @@ export function ResumenReserva({
       <div 
         id="resumen-final" 
         ref={summaryRef} 
-        className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-8 relative scroll-mt-24"
+        // ACHICAMOS EL mb-8 A mb-2 PARA QUITAR ESPACIO EN BLANCO ABAJO
+        className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-2 relative scroll-mt-24"
       >
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amarillo/20 mb-3">
@@ -471,7 +512,7 @@ export function ResumenReserva({
           </p>
         )}
 
-        {/* TEXTO DEL BOTÓN MÁS CORTO Y ADAPTATIVO */}
+        {/* AJUSTE: BOTÓN MÁS CHICO EN CELULARES (text-base) PARA QUE NO DESBORDE Y TEXTO CORTADO */}
         <Button
           type="button"
           size="lg"
@@ -519,7 +560,7 @@ export function ResumenReserva({
         </div>
       </div>
 
-      {/* BOTÓN FLOTANTE */}
+      {/* BOTÓN FLOTANTE: Ahora tiene animación para ocultarse si isSummaryVisible es true */}
       <div 
         className={`fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border/50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 lg:hidden flex flex-col pb-safe transition-all duration-300 ${
           isSummaryVisible ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"

@@ -5,9 +5,9 @@ import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
-import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown } from "lucide-react"
+import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, GraduationCap, School } from "lucide-react"
 import { type Turno } from "@/lib/turno"
-import { obtenerReglasParaFecha, PRECIOS } from "@/lib/config-reservas"
+import { obtenerReglasEgresaditos, PRECIOS, PRECIOS_EGRESADITOS } from "@/lib/config-reservas"
 import Link from "next/link"
 
 export type { Turno } from "@/lib/turno"
@@ -26,7 +26,6 @@ export interface Extras {
   pileta: boolean
 }
 
-// NUEVO: Agregamos los campos de Egresaditos como opcionales (?)
 export interface DatosCliente {
   nombre: string
   telefono: string
@@ -41,12 +40,11 @@ export interface DatosCliente {
 const SENIA = 400000
 const DESCUENTO_EFECTIVO = 0.1
 
-// FORMATEADOR DE DINERO DINÁMICO
 const formatMoneyUI = (amount: number) => {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
 }
 
-export default function PaginaReserva() {
+export default function PaginaReservaEgresaditos() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTurno, setSelectedTurno] = useState<Turno>(null)
 
@@ -69,7 +67,7 @@ export default function PaginaReserva() {
   })
   
   const reglasFecha = useMemo(() => {
-    return selectedDate ? obtenerReglasParaFecha(selectedDate) : null
+    return selectedDate ? obtenerReglasEgresaditos(selectedDate) : null
   }, [selectedDate])
 
   useEffect(() => {
@@ -81,13 +79,13 @@ export default function PaginaReserva() {
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(null)
   const [pagoTotalidad, setPagoTotalidad] = useState<boolean>(false)
 
-  // NUEVO: Inicializamos el estado con los campos vacíos
+  // INICIALIZAMOS TODOS LOS DATOS VACÍOS, INCLUYENDO LOS DEL COLEGIO
   const [datosCliente, setDatosCliente] = useState<DatosCliente>({
     nombre: "",
     telefono: "",
     email: "",
-    nombreCumpleanero: "",
-    edadCumple: "",
+    nombreCumpleanero: "", 
+    edadCumple: "", 
     institucion: "",
     sala: "",
     turno_colegio: ""
@@ -113,32 +111,15 @@ export default function PaginaReserva() {
       subtotal += precioTurno
     }
 
-    if (extras.adultosAdicionales > 0) {
-      precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
-    }
-    if (extras.mozoAdicional && extras.cantidadMozos > 0) {
-      precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
-    }
-    if (extras.personaje && extras.personajesSeleccionados.length > 0) {
-      precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
-    }
-    if (extras.animacion) {
-      precioExtras += PRECIOS.opcionales.animacion
-    }
-    if (extras.horaExtra) {
-      precioExtras += PRECIOS.opcionales.horaExtra
-    }
-    if (extras.robotLed === 1) {
-      precioExtras += PRECIOS.opcionales.robot_led.uno
-    } else if (extras.robotLed === 2) {
-      precioExtras += PRECIOS.opcionales.robot_led.dos
-    }
-    if (extras.zancosLed > 0) {
-      precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
-    }
-    if (extras.pileta) {
-      precioExtras += PRECIOS.opcionales.pileta.precio
-    }
+    if (extras.adultosAdicionales > 0) precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
+    if (extras.mozoAdicional && extras.cantidadMozos > 0) precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
+    if (extras.personaje && extras.personajesSeleccionados.length > 0) precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
+    if (extras.animacion) precioExtras += PRECIOS.opcionales.animacion
+    if (extras.horaExtra) precioExtras += PRECIOS.opcionales.horaExtra
+    if (extras.robotLed === 1) precioExtras += PRECIOS.opcionales.robot_led.uno
+    else if (extras.robotLed === 2) precioExtras += PRECIOS.opcionales.robot_led.dos
+    if (extras.zancosLed > 0) precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
+    if (extras.pileta) precioExtras += PRECIOS.opcionales.pileta.precio
 
     subtotal += precioExtras
 
@@ -149,14 +130,7 @@ export default function PaginaReserva() {
     const total = subtotal - descuento
     const senaFinal = pagoTotalidad ? total : SENIA
 
-    return {
-      precioTurno,
-      precioExtras,
-      subtotal,
-      descuento,
-      total,
-      sena: senaFinal,
-    }
+    return { precioTurno, precioExtras, subtotal, descuento, total, sena: senaFinal }
   }, [selectedTurno, selectedDate, extras, metodoPago, pagoTotalidad, reglasFecha])
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -169,6 +143,7 @@ export default function PaginaReserva() {
   const isValidPersonaje = !extras.personaje || hasSeleccionados;
   const errorPersonajeVacio = extras.personaje && !hasSeleccionados;
 
+  // NUEVA VALIDACIÓN: Exige que Institución, Sala y Turno estén completos
   const canSubmit = 
     selectedDate && 
     selectedTurno && 
@@ -176,7 +151,10 @@ export default function PaginaReserva() {
     datosCliente.nombre.trim().length >= 3 && 
     isValidPhone(datosCliente.telefono) &&
     isValidEmail(datosCliente.email) &&
-    isValidPersonaje 
+    isValidPersonaje &&
+    (datosCliente.institucion?.trim() ?? "").length > 0 &&
+    (datosCliente.sala?.trim() ?? "").length > 0 &&
+    (datosCliente.turno_colegio?.trim() ?? "").length > 0
 
   const handleSelectMetodoPago = (metodo: MetodoPago) => {
     if (metodoPago === metodo) {
@@ -184,9 +162,7 @@ export default function PaginaReserva() {
       setPagoTotalidad(false)
     } else {
       setMetodoPago(metodo)
-      if (metodo !== "efectivo") {
-        setPagoTotalidad(false)
-      }
+      if (metodo !== "efectivo") setPagoTotalidad(false)
     }
   }
 
@@ -195,72 +171,56 @@ export default function PaginaReserva() {
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="inline-flex items-center gap-2 text-azul-marino font-bold hover:text-azul-marino/80 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            Volver al inicio
+            <ArrowLeft className="w-5 h-5" /> Volver al inicio
           </Link>
         </div>
       </header>
 
       <div className="container mx-auto px-4 pt-8 md:pt-12">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-5xl font-black text-azul-marino mb-3">Tu Reserva</h1>
-          <p className="text-muted-foreground text-lg">Completá los datos y asegurá tu fecha mágica.</p>
+          <div className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-lavanda/10 border border-lavanda/30 mb-6 shadow-sm">
+             <GraduationCap className="w-5 h-5 text-lavanda" />
+             <span className="text-sm font-bold tracking-wide text-azul-marino uppercase">Exclusivo Colegios</span>
+          </div>
+          <h1 className="text-3xl md:text-5xl font-black text-lavanda mb-3">Egresaditos</h1>
+          <p className="text-muted-foreground text-lg">Completá los datos y asegurá la mejor despedida.</p>
         </div>
 
-        <div className="max-w-3xl mx-auto mb-10 bg-azul-claro/5 border border-azul-claro/20 rounded-3xl p-5 md:p-6 text-left flex flex-col shadow-sm">
+        <div className="max-w-3xl mx-auto mb-10 bg-lavanda/5 border border-lavanda/20 rounded-3xl p-5 md:p-6 text-left flex flex-col shadow-sm">
           <div className="flex flex-col sm:flex-row gap-4 items-start w-full">
-            <div className="w-12 h-12 rounded-full bg-azul-claro/20 flex items-center justify-center shrink-0">
-              <Info className="w-6 h-6 text-azul-marino" />
+            <div className="w-12 h-12 rounded-full bg-lavanda/20 flex items-center justify-center shrink-0">
+              <Info className="w-6 h-6 text-lavanda" />
             </div>
             <div className="w-full">
-              <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de tu evento</h4>
+              <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de la Promo</h4>
               
               <div className="space-y-2 w-full">
-                
-                {/* Temporada Baja (DINÁMICA) */}
-                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                <details className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <span className="font-bold text-azul-marino text-sm md:text-base">📅 Temporada Baja <span className="font-medium opacity-70 text-xs ml-1">(1 Abr - 31 Ago)</span></span>
-                    <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
-                  </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
-                    <p><span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span></p>
-                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm">
-                      <li><strong>Turno de 4 horas</strong> a elección.</li>
-                      <li>Franja horaria disponible: <strong>12:00 a 19:00 hs</strong>.</li>
-                      <li className="text-muted-foreground italic">* El último turno puede comenzar a las 15:00 hs como máximo.</li>
-                    </ul>
-                  </div>
-                </details>
-
-                {/* Temporada Media (DINÁMICA) */}
-                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <span className="font-bold text-azul-marino text-sm md:text-base">⭐ Temporada Media <span className="font-medium opacity-70 text-xs ml-1">(1 Sep - 14 Dic)</span></span>
+                    <span className="font-bold text-azul-marino text-sm md:text-base">📅 1 de Noviembre al 14 de Diciembre</span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
                     <ul className="list-disc pl-4 space-y-3 text-xs md:text-sm">
                       <li>
-                        <strong>Lunes a Viernes:</strong> <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span> <br/>
+                        <strong>Lunes a Viernes:</strong> <span className="font-extrabold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span> <br/>
                         <span className="inline-block mt-1">Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</span> <br/>
                         <span className="text-muted-foreground italic">* El último turno puede comenzar a las 18:30 hs.</span>
                       </li>
                       <li>
                         <strong>Sábados, Domingos y Feriados (Turnos fijos):</strong>
                         <ul className="list-[circle] pl-5 mt-2 space-y-1.5">
-                          <li>Turno 1 (12:00 a 16:00 hs): <strong className="text-azul-marino text-sm">{formatMoneyUI(PRECIOS.temporada_media.turno_1_fijo)}</strong></li>
-                          <li>Turno 2 (18:30 a 22:30 hs): <strong className="text-azul-marino text-sm">{formatMoneyUI(PRECIOS.temporada_media.turno_2_fijo)}</strong></li>
+                          <li>Turno 1 (12:00 a 16:00 hs): <strong className="text-lavanda text-sm">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_1_fijo)}</strong></li>
+                          <li>Turno 2 (18:30 a 22:30 hs): <strong className="text-lavanda text-sm">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_2_fijo)}</strong></li>
                         </ul>
                       </li>
                     </ul>
                   </div>
                 </details>
 
-                {/* Temporada Alta (DINÁMICA) */}
-                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                <details className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
+                    <span className="font-bold text-azul-marino text-sm md:text-base">🔥 15 de Diciembre a Fin de Mes</span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-3 mt-1">
@@ -268,24 +228,14 @@ export default function PaginaReserva() {
                       Todos los días (Turnos fijos):
                     </div>
                     <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
-                      <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_alta.turno_1_fijo)}</span></li>
-                      <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_alta.turno_2_fijo)}</span></li>
+                      <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_1_fijo)}</span></li>
+                      <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_2_fijo)}</span></li>
                     </ul>
                   </div>
                 </details>
 
               </div>
             </div>
-          </div>
-          
-          <div className="mt-6 p-3.5 bg-gradient-to-r from-amarillo/40 to-naranja/20 rounded-xl border-2 border-amarillo/50 shadow-sm flex items-start sm:items-center gap-3 ml-0 sm:ml-16 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/30 blur-2xl rounded-full"></div>
-             <div className="bg-white p-2 rounded-lg shadow-sm shrink-0">
-               <PartyPopper className="w-5 h-5 text-naranja" />
-             </div>
-             <p className="text-[13px] md:text-sm text-slate-800 font-medium leading-snug relative z-10">
-               <strong className="font-extrabold text-azul-marino">✨ Bonus Exclusivo:</strong> Tu reserva incluye automáticamente el acceso a nuestro panel VIP para crear y descargar la <strong className="text-naranja">Invitación Digital Interactiva</strong> para tus invitados.
-             </p>
           </div>
         </div>
 
@@ -297,7 +247,7 @@ export default function PaginaReserva() {
                 <span className="w-8 h-8 rounded-full bg-rosa/20 flex items-center justify-center text-rosa text-sm font-extrabold">1</span>
                 Elegí la fecha y turno
               </h3>
-              <ReservationCalendar selectedDate={selectedDate} onSelectDate={handleSelectDate} onTurnoBooked={setSelectedTurno} />
+              <ReservationCalendar selectedDate={selectedDate} onSelectDate={handleSelectDate} onTurnoBooked={setSelectedTurno} isEgresadito={true} />
             </section>
 
             <section className="bg-white rounded-3xl p-6 shadow-sm border border-border/50">
@@ -315,44 +265,41 @@ export default function PaginaReserva() {
             <section className="bg-white rounded-3xl p-6 shadow-sm border border-border/50">
               <h3 className="text-xl font-bold text-azul-marino mb-6 flex items-center gap-3 pb-4 border-b border-border/50">
                 <span className="w-8 h-8 rounded-full bg-verde/20 flex items-center justify-center text-verde text-sm font-extrabold">3</span>
-                Tus Datos
+                Datos de los Egresaditos
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Nombre y Apellido *</label>
+                  <label className="text-sm font-bold text-azul-marino">Tu Nombre y Apellido *</label>
                   <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: María Gómez" value={datosCliente.nombre} onChange={(e) => setDatosCliente({...datosCliente, nombre: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-azul-marino">Teléfono / WhatsApp *</label>
                   <input type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${datosCliente.telefono && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); }} />
                   {datosCliente.telefono && !isValidPhone(datosCliente.telefono) ? (
-                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>
+                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un número válido.</p>
                   ) : (
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
-                      <Lock className="w-3 h-3" /> Solo para enviarte tu confirmación.
-                    </p>
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> Privado.</p>
                   )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-bold text-azul-marino">Email *</label>
                   <input type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${datosCliente.email && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => setDatosCliente({...datosCliente, email: e.target.value})} />
-                  {datosCliente.email && !isValidEmail(datosCliente.email) ? (
-                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>
-                  ) : (
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
-                      <Lock className="w-3 h-3" /> 100% privado. Sin spam.
-                    </p>
-                  )}
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Nombre del Cumpleañero/a</label>
-                  <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Lucas" value={datosCliente.nombreCumpleanero} onChange={(e) => setDatosCliente({...datosCliente, nombreCumpleanero: e.target.value})} />
+
+              <div className="pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-bold text-azul-marino flex items-center gap-2"><School className="w-4 h-4 text-lavanda"/> Nombre de la Institución *</label>
+                  <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Colegio San José" value={datosCliente.institucion} onChange={(e) => setDatosCliente({...datosCliente, institucion: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">¿Cuántos años cumple?</label>
-                  <input type="text" inputMode="numeric" maxLength={2} className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: 5" value={datosCliente.edadCumple} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, edadCumple: soloNumeros}); }} />
+                  <label className="text-sm font-bold text-azul-marino">Sala / Curso *</label>
+                  <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Salita de 5 Verde" value={datosCliente.sala} onChange={(e) => setDatosCliente({...datosCliente, sala: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-azul-marino">Turno (Mañana/Tarde) *</label>
+                  <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Tarde" value={datosCliente.turno_colegio} onChange={(e) => setDatosCliente({...datosCliente, turno_colegio: e.target.value})} />
                 </div>
               </div>
             </section>
@@ -382,6 +329,7 @@ export default function PaginaReserva() {
                 calculos={calculos}
                 canSubmit={!!canSubmit}
                 pagoTotalidad={pagoTotalidad}
+                isEgresadito={true} 
               />
               
               {errorPersonajeVacio && (
@@ -395,7 +343,7 @@ export default function PaginaReserva() {
       </div>
 
       <a 
-        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20en%20la%20página%20de%20reservas%20y%20tengo%20una%20duda..." 
+        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20en%20la%20página%20de%20reservas%20de%20Egresaditos%20y%20tengo%20una%20duda..." 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"
