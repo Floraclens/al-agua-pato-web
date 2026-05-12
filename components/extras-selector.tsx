@@ -4,21 +4,12 @@ import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { PartyPopper, Clock, UserPlus, Users, Minus, Plus } from "lucide-react"
-import type { Extras } from "@/app/page"
+import { PRECIOS } from "@/lib/config-reservas"
 
 interface ExtrasSelectorProps {
-  extras: Extras
-  onChangeExtras: (extras: Extras) => void
-  precios: {
-    adultosAdicionales: number
-    animacion: number
-    horaExtra: number
-    robotLed: number
-    zancosLed: number
-    astronautasLed: number
-    personaje: number
-    mozoAdicional: number
-  }
+  extras: any
+  onChangeExtras: (extras: any) => void
+  showPileta?: boolean 
 }
 
 function formatPrice(price: number): string {
@@ -33,7 +24,7 @@ function formatPrice(price: number): string {
 export function ExtrasSelector({
   extras,
   onChangeExtras,
-  precios,
+  showPileta = false,
 }: ExtrasSelectorProps) {
   
   const updateAdults = (e: React.MouseEvent, delta: number) => {
@@ -48,157 +39,164 @@ export function ExtrasSelector({
     onChangeExtras({ ...extras, cantidadMozos: newVal })
   }
 
-  const updatePersonajesConsulta = (e: React.MouseEvent, delta: number) => {
-    e.stopPropagation() 
-    const newVal = Math.max(1, Math.min(10, extras.cantidadPersonajeConsulta + delta))
-    onChangeExtras({ ...extras, cantidadPersonajeConsulta: newVal })
+  const updateRobot = (e: React.MouseEvent, delta: number) => {
+    e.stopPropagation()
+    const current = typeof extras.robotLed === 'number' ? extras.robotLed : (extras.robotLed ? 1 : 0)
+    const newVal = Math.max(1, Math.min(2, current + delta))
+    onChangeExtras({ ...extras, robotLed: newVal })
+  }
+
+  const updateZancos = (e: React.MouseEvent, delta: number) => {
+    e.stopPropagation()
+    const current = typeof extras.zancosLed === 'number' ? extras.zancosLed : (extras.zancosLed ? 1 : 0)
+    const newVal = Math.max(1, Math.min(2, current + delta))
+    onChangeExtras({ ...extras, zancosLed: newVal })
   }
 
   const togglePersonaje = (e: React.MouseEvent, personaje: string) => {
     e.stopPropagation()
-    const actuales = extras.personajesSeleccionados
+    const actuales = extras.personajesSeleccionados || []
     if (actuales.includes(personaje)) {
-      onChangeExtras({ ...extras, personajesSeleccionados: actuales.filter(p => p !== personaje) })
+      onChangeExtras({ ...extras, personajesSeleccionados: actuales.filter((p: string) => p !== personaje) })
     } else {
       onChangeExtras({ ...extras, personajesSeleccionados: [...actuales, personaje] })
     }
   }
 
-  const isConsulting = extras.consultasPersonajes.length > 0
-
-  const toggleConsultar = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (isConsulting) {
-      onChangeExtras({ ...extras, consultasPersonajes: [] }) 
-    } else {
-      onChangeExtras({ ...extras, consultasPersonajes: [""] }) 
-    }
-  }
-
-  const updateCantConsultas = (e: React.MouseEvent, delta: number) => {
-    e.stopPropagation()
-    const current = [...extras.consultasPersonajes]
-    const newLength = Math.max(1, Math.min(10, current.length + delta))
-    
-    if (newLength > current.length) {
-      current.push("") 
-    } else if (newLength < current.length) {
-      current.pop() 
-    }
-    onChangeExtras({ ...extras, consultasPersonajes: current })
-  }
-
-  const updateConsultaText = (index: number, text: string) => {
-    const current = [...extras.consultasPersonajes]
-    current[index] = text
-    onChangeExtras({ ...extras, consultasPersonajes: current })
-  }
-
   const personajesDisponibles = [
-    "Huggy Wuggy", "Woody", "Mickey Mouse", "Minnie Mouse", "Peppa Pig",
-    "Elsa", "Spider-Man", "Guardia de Squid Game", "Muñeca unicornio", "Vaca", "Gallo"
+    "ALEGRIA", "AMONG US", "BATMAN", "BIZARRAP", "CAPIBARA", "CAPITAN AMERICA", 
+    "DADY YANKEE", "DEADPOOL", "DINOSAURIO T-REX", "DOCTORA JUGUETE", "EL JUEGO DEL CALAMAR", 
+    "ELSA", "FROZEN", "GOKU", "GRANJA DE ZENON", "HARLEY QUINN", "HELLO KITTY", 
+    "HUGGY WUGGY", "HULK", "HUNTRIX (GUERRERAS K-POP)", "IRONMAN", "KUROMI", 
+    "LADYBUG", "LOL", "MARIO BROS", "MESSI", "MICKEY Y MINNIE", "MINNION", 
+    "MOANA", "MUJER MARAVILLA", "PAPÁ NOEL", "PATRULLA CANINA", "PEPPA PIG", 
+    "PJ MASKS", "PLIM-PLIM", "PRINCESITA SOFÍA", "SIRENITA", "SONIC", 
+    "SPIDERMAN", "STICH", "SUPERMAN", "THOR", "UNICORNIO", "VISION", "WOLVERINE"
   ]
 
-  const extrasOptions = [
+  let extrasOptions = [
     {
-      id: "adultosAdicionales" as const, 
+      id: "adultosAdicionales", 
       titulo: "Adultos Extra",
-      descripcion: "Agregá hasta 10 invitados adultos adicionales a tu evento.",
-      precio: precios.adultosAdicionales,
+      descripcion: "Agregá invitados adultos extra (Límite máximo: 10 adultos).", // TEXTO ACTUALIZADO AQUÍ
+      precio: PRECIOS.opcionales.adultosAdicionales,
       icon: Users,
       bgColor: "bg-emerald-500/10",
       iconColor: "text-emerald-500",
       needsAdultsCounter: true, 
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.adultosAdicionales)} c/u`
     },
     {
-      id: "animacion" as const,
+      id: "animacion",
       titulo: "Animación",
       descripcion: "Globología, pinta cara, baile, juegos adentro/fuera pileta.",
-      precio: precios.animacion,
+      precio: PRECIOS.opcionales.animacion,
       icon: PartyPopper,
       bgColor: "bg-rosa/20",
       iconColor: "text-rosa",
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.animacion)}`
     },
     {
-      id: "horaExtra" as const,
+      id: "horaExtra",
       titulo: "Hora Extra",
       descripcion: "Extiende tu fiesta una hora más para seguir disfrutando.",
-      precio: precios.horaExtra,
+      precio: PRECIOS.opcionales.horaExtra,
       icon: Clock,
       bgColor: "bg-azul-claro/20",
       iconColor: "text-azul-claro",
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.horaExtra)}`
     },
     {
-      id: "mozoAdicional" as const,
+      id: "mozoAdicional",
       titulo: "Mozo Adicional",
-      descripcion: "Agregá mozos extra si tenés muchos invitados (hasta 10).",
-      precio: precios.mozoAdicional,
+      descripcion: "Agregá mozos extra si tenés muchos invitados.",
+      precio: PRECIOS.opcionales.mozoAdicional,
       icon: UserPlus,
       bgColor: "bg-indigo-500/10",
       iconColor: "text-indigo-500",
       needsMozoCounter: true,
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.mozoAdicional)} c/u`
     },
     {
-      id: "robotLed" as const,
+      id: "robotLed",
       titulo: "Robot LED",
-      descripcion: "Show interactivo de Robot LED para sorprender a todos.",
-      precio: precios.robotLed,
+      descripcion: "Show interactivo de Robot LED. 1 hora de servicio.",
+      precio: PRECIOS.opcionales.robot_led.uno,
       imagen: "/extras/robot.jpg",
+      needsRobotCounter: true,
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.robot_led.uno)} (o 2 x ${formatPrice(PRECIOS.opcionales.robot_led.dos)})`
     },
     {
-      id: "zancosLed" as const,
+      id: "zancosLed",
       titulo: "Zancos LED",
-      descripcion: "Artista en zancos con traje de luces LED.",
-      precio: precios.zancosLed,
+      descripcion: "Artista en zancos con traje de luces LED. 1 hora de servicio.",
+      precio: PRECIOS.opcionales.zancos_led.precio_unidad,
       imagen: "/extras/zancos.jpg",
+      needsZancosCounter: true,
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.zancos_led.precio_unidad)} c/u`
     },
     {
-      id: "astronautasLed" as const,
-      titulo: "Astronautas LED",
-      descripcion: "Equipo de astronautas con trajes LED luminosos.",
-      precio: precios.astronautasLed,
-      imagen: "/extras/astronautas.jpg",
-    },
-    {
-      id: "personaje" as const,
+      id: "personaje",
       titulo: "Personajes a elección",
-      descripcion: "Podes elegir 1 o más personajes para animar la fiesta, o consultar por otro.",
-      precio: precios.personaje,
+      descripcion: "Podes elegir 1 o más personajes para animar la fiesta. 1 hora de servicio.",
+      precio: PRECIOS.opcionales.personaje.precio_unidad,
       imagen: "/extras/personajes.jpg",
       needsMultiSelect: true,
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.personaje.precio_unidad)} c/u`
     },
   ]
+
+  if (showPileta) {
+    extrasOptions.push({
+      id: "pileta",
+      titulo: "Acceso a la Pileta",
+      descripcion: PRECIOS.opcionales.pileta.detalle,
+      precio: PRECIOS.opcionales.pileta.precio,
+      imagen: "/extras/pileta.jpg", 
+      bgColor: "bg-cyan-500/10",
+      iconColor: "text-cyan-500",
+      precioTexto: `+${formatPrice(PRECIOS.opcionales.pileta.precio)}`
+    })
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {extrasOptions.map((extra) => {
         
         const isAdultos = extra.id === "adultosAdicionales"
-        const isChecked = isAdultos ? extras.adultosAdicionales > 0 : extras[extra.id as keyof Extras] === true
+        const isRobot = extra.id === "robotLed"
+        const isZancos = extra.id === "zancosLed"
+        
+        const isChecked = 
+          isAdultos ? extras.adultosAdicionales > 0 : 
+          isRobot ? extras.robotLed > 0 :
+          isZancos ? extras.zancosLed > 0 :
+          extras[extra.id] === true
+
         const Icon = extra.icon
 
         return (
           <div
             key={extra.id}
             onClick={() => {
-              if (extra.id === "adultosAdicionales") {
-                onChangeExtras({
-                  ...extras,
-                  adultosAdicionales: isChecked ? 0 : 1 
-                })
+              if (isAdultos) {
+                onChangeExtras({ ...extras, adultosAdicionales: isChecked ? 0 : 1 })
+              } else if (isRobot) {
+                onChangeExtras({ ...extras, robotLed: isChecked ? 0 : 1 })
+              } else if (isZancos) {
+                onChangeExtras({ ...extras, zancosLed: isChecked ? 0 : 1 })
               } else {
-                const updates: Partial<Extras> = { [extra.id]: !extras[extra.id as keyof Extras] }
+                const updates: any = { [extra.id]: !extras[extra.id] }
                 
                 if (extra.id === "personaje" && isChecked) {
                   updates.personajesSeleccionados = []
-                  updates.consultasPersonajes = [] 
                 }
                 
                 if (extra.id === "mozoAdicional" && isChecked) {
                   updates.cantidadMozos = 1
                 }
 
-                onChangeExtras({ ...extras, ...updates } as Extras)
+                onChangeExtras({ ...extras, ...updates })
               }
             }}
             className={cn(
@@ -214,7 +212,6 @@ export function ExtrasSelector({
             )}>
               {extra.imagen ? (
                 <>
-                  {/* EFECTO CINE: Imagen de fondo desenfocada */}
                   <div className="absolute inset-0 z-0 opacity-60">
                     <Image 
                       src={extra.imagen} 
@@ -223,8 +220,6 @@ export function ExtrasSelector({
                       className="object-cover blur-xl scale-125 saturate-150"
                     />
                   </div>
-
-                  {/* IMAGEN PRINCIPAL: Contenida y completa */}
                   <div className="absolute inset-0 z-10 p-3">
                     <Image 
                       src={extra.imagen} 
@@ -236,8 +231,6 @@ export function ExtrasSelector({
                       )}
                     />
                   </div>
-                  
-                  {/* Degradado oscuro inferior para que el texto resalte */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent z-10 pointer-events-none" />
                 </>
               ) : (
@@ -255,7 +248,7 @@ export function ExtrasSelector({
               </div>
 
               <div className="absolute bottom-3 right-3 z-20 bg-azul-marino text-white px-3 py-1.5 rounded-full text-sm font-extrabold shadow-md border border-white/10">
-                +{formatPrice(extra.precio)} {(extra.needsAdultsCounter || extra.needsMozoCounter || extra.needsMultiSelect) ? "c/u" : ""}
+                {extra.precioTexto}
               </div>
             </div>
 
@@ -272,11 +265,39 @@ export function ExtrasSelector({
               {extra.needsAdultsCounter && isChecked && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-4 bg-white border border-emerald-200 shadow-sm rounded-lg p-1.5 w-fit">
-                    <button type="button" onClick={(e) => updateAdults(e, -1)} disabled={extras.adultosAdicionales <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 hover:shadow-sm disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateAdults(e, -1)} disabled={extras.adultosAdicionales <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
                     <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.adultosAdicionales}</span>
-                    <button type="button" onClick={(e) => updateAdults(e, 1)} disabled={extras.adultosAdicionales >= 10} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 hover:shadow-sm disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateAdults(e, 1)} disabled={extras.adultosAdicionales >= 10} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {extra.needsRobotCounter && isChecked && (
+                <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-4 bg-white border border-blue-200 shadow-sm rounded-lg p-1.5 w-fit">
+                    <button type="button" onClick={(e) => updateRobot(e, -1)} disabled={(extras.robotLed || 0) <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                      <Minus className="w-5 h-5" />
+                    </button>
+                    <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.robotLed || 1}</span>
+                    <button type="button" onClick={(e) => updateRobot(e, 1)} disabled={(extras.robotLed || 0) >= 2} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {extra.needsZancosCounter && isChecked && (
+                <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-4 bg-white border border-purple-200 shadow-sm rounded-lg p-1.5 w-fit">
+                    <button type="button" onClick={(e) => updateZancos(e, -1)} disabled={(extras.zancosLed || 0) <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                      <Minus className="w-5 h-5" />
+                    </button>
+                    <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.zancosLed || 1}</span>
+                    <button type="button" onClick={(e) => updateZancos(e, 1)} disabled={(extras.zancosLed || 0) >= 2} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
@@ -286,11 +307,11 @@ export function ExtrasSelector({
               {extra.needsMozoCounter && isChecked && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-4 bg-white border border-indigo-200 shadow-sm rounded-lg p-1.5 w-fit">
-                    <button type="button" onClick={(e) => updateMozos(e, -1)} disabled={extras.cantidadMozos <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 hover:shadow-sm disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateMozos(e, -1)} disabled={extras.cantidadMozos <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
                     <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.cantidadMozos}</span>
-                    <button type="button" onClick={(e) => updateMozos(e, 1)} disabled={extras.cantidadMozos >= 10} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 hover:shadow-sm disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateMozos(e, 1)} disabled={extras.cantidadMozos >= 10} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
@@ -299,67 +320,22 @@ export function ExtrasSelector({
 
               {extra.needsMultiSelect && extras.personaje && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full space-y-4 pt-3 border-t border-slate-200" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto pr-2 pb-2">
                     {personajesDisponibles.map((personaje) => (
                       <button
                         key={personaje}
                         onClick={(e) => togglePersonaje(e, personaje)}
                         className={cn(
                           "px-3 py-1.5 rounded-full text-xs font-bold border transition-colors w-auto text-left whitespace-normal h-auto break-words",
-                          extras.personajesSeleccionados.includes(personaje)
-                            ? "bg-amarillo text-azul-marino border-amarillo"
-                            : "bg-white text-muted-foreground border-slate-200 hover:border-amarillo"
+                          (extras.personajesSeleccionados || []).includes(personaje)
+                            ? "bg-amarillo text-azul-marino border-amarillo shadow-sm"
+                            : "bg-white text-muted-foreground border-slate-200 hover:border-amarillo hover:bg-slate-50"
                         )}
                       >
                         {personaje}
                       </button>
                     ))}
                   </div>
-                  
-                  <div className="pt-2 border-t border-slate-100">
-                    <button
-                      onClick={toggleConsultar}
-                      className={cn(
-                        "w-full text-sm font-bold rounded-lg px-4 py-2.5 transition-all text-left border-2",
-                        isConsulting 
-                          ? "bg-azul-claro/10 text-azul-marino border-azul-claro/40" 
-                          : "bg-slate-50 text-muted-foreground border-slate-200 hover:border-amarillo hover:text-azul-marino"
-                      )}
-                    >
-                      {isConsulting ? "✓ Ocultar consulta de personajes" : "+ Consultar por otro personaje"}
-                    </button>
-
-                    {isConsulting && (
-                      <div className="mt-3 space-y-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2 duration-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">¿Cuántos querés consultar?</span>
-                          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg p-1 h-[36px]">
-                            <button type="button" onClick={(e) => updateCantConsultas(e, -1)} disabled={extras.consultasPersonajes.length <= 1} className="w-8 h-full flex items-center justify-center rounded-md hover:bg-slate-200 disabled:opacity-50 text-azul-marino transition-all">
-                              <Minus className="w-4 h-4" />
-                            </button>
-                            <span className="w-6 text-center font-extrabold text-azul-marino text-sm">{extras.consultasPersonajes.length}</span>
-                            <button type="button" onClick={(e) => updateCantConsultas(e, 1)} disabled={extras.consultasPersonajes.length >= 5} className="w-8 h-full flex items-center justify-center rounded-md hover:bg-slate-200 disabled:opacity-50 text-azul-marino transition-all">
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2 mt-2">
-                          {extras.consultasPersonajes.map((consulta, idx) => (
-                            <input
-                              key={idx}
-                              type="text"
-                              placeholder={`Nombre del personaje ${idx + 1}...`}
-                              className="w-full text-sm border-2 border-slate-200 focus:border-amarillo bg-slate-50 focus:bg-white rounded-lg px-3 py-2 outline-none text-azul-marino font-medium transition-all"
-                              value={consulta}
-                              onChange={(e) => updateConsultaText(idx, e.target.value)}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
                 </div>
               )}
             </div>

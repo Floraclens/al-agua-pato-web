@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +14,8 @@ import {
   Timer,
   CheckCircle2,
   MessageCircle,
-  ShieldCheck
+  ShieldCheck,
+  ArrowDown
 } from "lucide-react"
 import Image from "next/image"
 import type { MetodoPago, Extras, DatosCliente } from "@/app/reservar/page"
@@ -23,6 +24,7 @@ import { getTurnoLabel } from "@/lib/turno"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { createBrowserClient } from "@/lib/supabase/client"
+import { validarReservaCompleta, formatearErroresValidacion } from "@/lib/validacion-reservas"
 
 interface ResumenReservaProps {
   selectedDate: Date | undefined
@@ -57,16 +59,6 @@ const metodoPagoLabels: Record<NonNullable<MetodoPago>, string> = {
   tarjeta: "Tarjeta",
 }
 
-const extraLabels: Record<keyof Omit<Extras, "adultosAdicionales" | "cantidadMozos" | "personajesSeleccionados" | "consultasPersonajes">, string> = {
-  animacion: "Animación",
-  horaExtra: "Hora Extra",
-  robotLed: "Robot LED",
-  zancosLed: "Zancos LED",
-  astronautasLed: "Astronautas LED",
-  personaje: "Personajes",
-  mozoAdicional: "Mozo",
-}
-
 function toLocalDateString(date: Date) {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, "0")
@@ -87,6 +79,26 @@ export function ResumenReserva({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [waUrl, setWaUrl] = useState("")
+  
+  const [isSummaryVisible, setIsSummaryVisible] = useState(false)
+  const summaryRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSummaryVisible(entry.isIntersecting)
+      },
+      { threshold: 0.1 } 
+    )
+
+    if (summaryRef.current) {
+      observer.observe(summaryRef.current)
+    }
+
+    return () => {
+      if (summaryRef.current) observer.unobserve(summaryRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (isSuccess) {
@@ -104,37 +116,28 @@ export function ResumenReserva({
       labels.push(`+${extras.adultosAdicionales} Adulto/s`)
     }
 
-    if (extras.mozoAdicional) {
+    if (extras.mozoAdicional && extras.cantidadMozos > 0) {
       labels.push(`+${extras.cantidadMozos} Mozo/s`)
     }
 
-    Object.entries(extras).forEach(([key, value]) => {
-      if (key === "adultosAdicionales" || key === "mozoAdicional" || key === "cantidadMozos" || key === "personajesSeleccionados" || key === "consultasPersonajes") return
+    if (extras.animacion) labels.push("Animación")
+    if (extras.horaExtra) labels.push("Hora Extra")
+    
+    if (extras.robotLed > 0) {
+      labels.push(`Robot LED (x${extras.robotLed})`)
+    }
+    
+    if (extras.zancosLed > 0) {
+      labels.push(`Zancos LED (x${extras.zancosLed})`)
+    }
+    
+    if (extras.pileta) {
+      labels.push("Acceso a la Pileta")
+    }
 
-      if (value === true) {
-        let label = extraLabels[key as keyof typeof extraLabels]
-        
-        if (key === "personaje") {
-           const descripciones = []
-           if (extras.personajesSeleccionados.length > 0) {
-               descripciones.push(extras.personajesSeleccionados.join(", "))
-           }
-           
-           const consultasValidas = extras.consultasPersonajes.filter(c => c.trim() !== "")
-           if (consultasValidas.length > 0) {
-               descripciones.push(`Consultar: ${consultasValidas.join(", ")}`)
-           }
-           
-           if (descripciones.length > 0) {
-               label += ` (${descripciones.join(" | ")})`
-           } else {
-               return; 
-           }
-        }
-        
-        labels.push(label)
-      }
-    })
+    if (extras.personaje && extras.personajesSeleccionados.length > 0) {
+      labels.push(`Personajes (${extras.personajesSeleccionados.join(", ")})`)
+    }
 
     return labels
   }, [extras])
@@ -143,6 +146,13 @@ export function ResumenReserva({
 
   const handleReserva = useCallback(async () => {
     if (!selectedDate || !selectedTurno || !metodoPago) return
+
+    const validacion = validarReservaCompleta(selectedDate, selectedTurno, datosCliente, metodoPago)
+    
+    if (!validacion.isValid) {
+      window.alert(`Error de validación:\n${formatearErroresValidacion(validacion.errors)}`)
+      return
+    }
 
     setIsSubmitting(true)
     try {
@@ -217,18 +227,9 @@ export function ResumenReserva({
       window.alert(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }
-  }, [
-    selectedDate,
-    selectedTurno,
-    metodoPago,
-    datosCliente,
-    calculos.total,
-    calculos.sena,
-    selectedExtras,
-    pagoTotalidad
-  ])
+  }, [selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad])
 
-  const faltaElegirPersonaje = extras.personaje && extras.personajesSeleccionados.length === 0 && !extras.consultasPersonajes.some(c => c.trim().length > 0);
+  const faltaElegirPersonaje = extras.personaje && extras.personajesSeleccionados.length === 0;
 
   if (isSuccess && selectedDate && selectedTurno) {
     return (
@@ -237,32 +238,26 @@ export function ResumenReserva({
           <div className="absolute top-10 left-10 w-72 h-72 bg-rosa/20 rounded-full blur-3xl opacity-60" />
           <div className="absolute bottom-10 right-10 w-72 h-72 bg-azul-claro/20 rounded-full blur-3xl opacity-60" />
         </div>
-
         <div className="relative z-10 flex min-h-full p-4 py-12 sm:py-16">
           <div className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-emerald-100 text-center animate-in zoom-in-95 duration-500 overflow-hidden m-auto">
             <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-rosa via-amarillo to-azul-claro" />
-            
             <div className="relative w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/20 border-4 border-white mt-2 overflow-hidden">
               <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover" />
               <div className="absolute -right-2 -top-2 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white z-10">
                 <CheckCircle2 className="w-5 h-5 text-azul-marino" />
               </div>
             </div>
-
             <h3 className="text-2xl md:text-3xl font-extrabold text-azul-marino mb-3 flex items-center justify-center gap-2">
               <Sparkles className="w-6 h-6 text-amarillo animate-pulse" />
               ¡Reserva Solicitada!
               <Sparkles className="w-6 h-6 text-amarillo animate-pulse" />
             </h3>
-            
             <p className="text-muted-foreground mb-6 text-sm md:text-base font-medium px-2 leading-relaxed">
               ¡Qué emoción! Tu fecha ya está separada. Para confirmarla definitivamente, envianos el comprobante de pago.
             </p>
-            
             <div className="bg-slate-50 rounded-2xl p-5 mb-8 text-left border border-slate-200 space-y-3 relative overflow-hidden">
               <div className="absolute -left-4 top-[55%] w-8 h-8 bg-white rounded-full border border-slate-200" />
               <div className="absolute -right-4 top-[55%] w-8 h-8 bg-white rounded-full border border-slate-200" />
-              
               <div className="relative z-10 space-y-2.5">
                 <p className="text-sm flex justify-between">
                   <span className="font-semibold text-muted-foreground">Fecha:</span> 
@@ -277,9 +272,7 @@ export function ResumenReserva({
                   <span className="font-bold text-azul-marino text-right">{datosCliente.nombre}</span>
                 </p>
               </div>
-              
               <Separator className="my-4 border-dashed border-slate-300 relative z-10" />
-              
               <div className="relative z-10">
                 <p className="text-sm flex justify-between items-center mb-3">
                   <span className="font-semibold text-muted-foreground">Total:</span> 
@@ -293,7 +286,6 @@ export function ResumenReserva({
                 </div>
               </div>
             </div>
-
             <div className="space-y-4 mb-6">
               <a 
                 href={waUrl} 
@@ -305,7 +297,6 @@ export function ResumenReserva({
                 1. Enviar comprobante
               </a>
             </div>
-
             <div className="bg-azul-claro/10 border border-azul-claro/20 rounded-xl p-5 mb-8 text-left shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="bg-azul-claro/20 p-2.5 rounded-full shrink-0">
@@ -319,7 +310,6 @@ export function ResumenReserva({
                 </div>
               </div>
             </div>
-
             <Button 
               onClick={() => window.location.href = "/"}
               variant="ghost"
@@ -335,7 +325,11 @@ export function ResumenReserva({
 
   return (
     <>
-      <div className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-20 lg:mb-0 relative">
+      <div 
+        id="resumen-final" 
+        ref={summaryRef} 
+        className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-8 relative scroll-mt-24"
+      >
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amarillo/20 mb-3">
             <Sparkles className="w-4 h-4 text-amarillo" />
@@ -477,18 +471,21 @@ export function ResumenReserva({
           </p>
         )}
 
+        {/* TEXTO DEL BOTÓN MÁS CORTO Y ADAPTATIVO */}
         <Button
           type="button"
           size="lg"
           disabled={!canSubmit || isSubmitting}
           onClick={handleReserva}
-          className="hidden lg:flex w-full h-14 text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full mb-3"
+          className="w-full h-14 text-base sm:text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full mb-3"
         >
-          <Sparkles className="w-5 h-5 mr-2" />
-          {isSubmitting ? "Procesando reserva..." : "Solicitar Reserva"}
+          <Sparkles className="w-5 h-5 mr-2 shrink-0" />
+          <span className="truncate">
+            {isSubmitting ? "Procesando..." : "Confirmar Reserva"}
+          </span>
         </Button>
 
-        <div className="hidden lg:flex flex-col items-center justify-center gap-1.5 mb-6 opacity-70">
+        <div className="flex flex-col items-center justify-center gap-1.5 mb-6 opacity-70">
           <div className="flex items-center gap-1.5 text-azul-marino font-semibold text-xs">
             <ShieldCheck className="w-4 h-4 text-verde" />
             <span>Transacción segura y protegida</span>
@@ -522,7 +519,12 @@ export function ResumenReserva({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border/50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 lg:hidden flex flex-col pb-safe">
+      {/* BOTÓN FLOTANTE */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border/50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 lg:hidden flex flex-col pb-safe transition-all duration-300 ${
+          isSummaryVisible ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+        }`}
+      >
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total</span>
@@ -532,20 +534,21 @@ export function ResumenReserva({
           </div>
           <Button
             type="button"
-            disabled={!canSubmit || isSubmitting}
-            onClick={handleReserva}
-            className="h-12 px-6 font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
+            onClick={() => {
+              document.getElementById("resumen-final")?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }}
+            className="h-12 px-6 font-bold bg-azul-marino hover:bg-azul-marino/90 text-white shadow-md transition-all duration-200 rounded-full"
           >
-            <Sparkles className="w-4 h-4 mr-2 shrink-0" />
+            <ArrowDown className="w-4 h-4 mr-2 shrink-0 animate-bounce" />
             <span className="truncate max-w-[120px]">
-              {isSubmitting ? "Procesando..." : "Reservar"}
+              Ver Resumen
             </span>
           </Button>
         </div>
         
         <div className="flex items-center justify-center gap-1.5 mt-1 opacity-80">
           <ShieldCheck className="w-3.5 h-3.5 text-verde" />
-          <span className="text-[10px] text-azul-marino font-semibold">Reserva segura y encriptada</span>
+          <span className="text-[10px] text-azul-marino font-semibold">Leé el resumen antes de continuar</span>
         </div>
       </div>
     </>

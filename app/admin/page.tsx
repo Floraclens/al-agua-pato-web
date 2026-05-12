@@ -25,11 +25,23 @@ import {
   AlertCircle,
   MessageCircle,
   PartyPopper,
-  CheckCircle
+  CheckCircle,
+  CalendarDays,
+  Share2,
+  X
 } from "lucide-react"
 
-// AGREGADO: Nuevo estado de filtro para "completadas" (Pago Total)
+import { ReservationCalendar } from "@/components/reservation-calendar"
+import { getTurnoLabel, type Turno } from "@/lib/turno"
+
 type FiltroEstado = "todas" | "pendiente" | "confirmadas" | "completadas"
+
+function toLocalDateString(date: Date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
 
 export default function AdminPage() {
   const [supabase] = useState(() => createBrowserClient())
@@ -41,6 +53,10 @@ export default function AdminPage() {
   const [reservas, setReservas] = useState<any[]>([])
   const [isFetching, setIsFetching] = useState(true)
   const [filtroActivo, setFiltroActivo] = useState<FiltroEstado>("todas")
+
+  const [modalReprogramar, setModalReprogramar] = useState<any>(null)
+  const [reprogramDate, setReprogramDate] = useState<Date | undefined>(undefined)
+  const [reprogramTurno, setReprogramTurno] = useState<Turno>(null)
 
   const fetchReservas = useCallback(async () => {
     setIsFetching(true)
@@ -104,7 +120,7 @@ export default function AdminPage() {
 
   const handleLogout = async () => await supabase.auth.signOut()
 
-  const handleEliminarReserva = async (id: number, nombre: string, fecha: string) => {
+  const handleEliminarReserva = async (id: number, nombre: string) => {
     const confirmar = window.confirm(`¿Estás segura de que querés ELIMINAR la reserva de ${nombre}?`)
     if (!confirmar) return
 
@@ -126,16 +142,78 @@ export default function AdminPage() {
     }
   }
 
-  // --- LÓGICA DE FILTRADO Y MÉTRICAS (SaaS Dashboard) ---
+  const abrirModalReprogramar = (reserva: any) => {
+    setModalReprogramar(reserva)
+    setReprogramDate(undefined)
+    setReprogramTurno(null)
+  }
+
+  const guardarReprogramacion = async () => {
+    if (!reprogramDate || !reprogramTurno) {
+      window.alert("Por favor, elegí una nueva fecha y un horario disponible en el calendario para reprogramar.")
+      return
+    }
+
+    const nuevaFechaStr = toLocalDateString(reprogramDate)
+    const nuevoTurnoStr = getTurnoLabel(reprogramTurno)
+
+    const { error } = await supabase
+      .from("reservas")
+      .update({ fecha: nuevaFechaStr, turno: nuevoTurnoStr })
+      .eq("id", modalReprogramar.id)
+
+    if (error) {
+      window.alert("Ocurrió un error al reprogramar la reserva.")
+    } else {
+      window.alert("¡Reserva reprogramada con éxito!")
+      setModalReprogramar(null)
+      fetchReservas() 
+    }
+  }
+
+  const handleCompartirMes = () => {
+    const activas = reservas.filter(r => {
+      const est = (r.estado || "").toLowerCase()
+      return est === "senado" || est === "completado" || est === "confirmada"
+    })
+
+    if (activas.length === 0) {
+      window.alert("No hay reservas confirmadas para compartir.")
+      return
+    }
+
+    let textoCopiar = `🦆 *RESERVAS CONFIRMADAS - AL AGUA PATO* 🦆\n(Generado automáticamente)\n\n`
+    
+    activas.forEach(r => {
+      let fechaFmt = r.fecha
+      try { 
+        fechaFmt = format(parseISO(r.fecha), "EEEE d 'de' MMMM", { locale: es }).toUpperCase() 
+      } catch (e) {}
+      
+      textoCopiar += `📅 *${fechaFmt}*\n`
+      textoCopiar += `⏰ Horario: ${r.turno}\n`
+      textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
+      if (r.nombre_cumpleanero) {
+        textoCopiar += `🎂 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
+      }
+      textoCopiar += `🎈 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
+      textoCopiar += `-----------------------------------\n\n`
+    })
+
+    navigator.clipboard.writeText(textoCopiar).then(() => {
+      window.alert("¡Resumen copiado al portapapeles! Ya podés pegarlo en tu grupo de WhatsApp con los empleados.")
+    }).catch(err => {
+      window.alert("Error al copiar. Tu navegador no lo permite automáticamente.")
+    })
+  }
+
   const reservasFiltradas = useMemo(() => {
     if (filtroActivo === "todas") return reservas
     if (filtroActivo === "pendiente") return reservas.filter(r => (r.estado || "pendiente").toLowerCase() === "pendiente")
-    // Confirmadas: Muestra SOLO las que tienen seña
     if (filtroActivo === "confirmadas") return reservas.filter(r => {
       const est = (r.estado || "").toLowerCase()
       return est === "senado" || est === "confirmada"
     })
-    // Completadas: Muestra SOLO las de pago total
     if (filtroActivo === "completadas") return reservas.filter(r => (r.estado || "").toLowerCase() === "completado")
     
     return reservas
@@ -149,7 +227,6 @@ export default function AdminPage() {
     })
     const completadas = reservas.filter(r => (r.estado || "").toLowerCase() === "completado")
     
-    // El contador de "Activas" en las tarjetas de arriba sumará las confirmadas + completadas
     const activas = confirmadas.length + completadas.length
 
     const ingresosTotales = reservas.reduce((acc, r) => {
@@ -161,10 +238,10 @@ export default function AdminPage() {
 
     return {
       total: reservas.length,
-      activas: activas, // Confirmadas + Completadas
-      confirmadas: confirmadas.length, // Solo señadas
+      activas: activas, 
+      confirmadas: confirmadas.length, 
       pendientes: pendientes.length,
-      completadas: completadas.length, // Pago total
+      completadas: completadas.length, 
       ingresos: ingresosTotales
     }
   }, [reservas])
@@ -186,7 +263,6 @@ export default function AdminPage() {
     }
     return `https://wa.me/549${phone}?text=${encodeURIComponent(mensaje)}`
   }
-
 
   if (!session) {
     return (
@@ -228,8 +304,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12 font-sans">
-      <nav className="bg-azul-marino text-white p-4 shadow-md sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 pb-12 font-sans relative">
+      <nav className="bg-azul-marino text-white p-4 shadow-md sticky top-0 z-40">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Waves className="h-6 w-6 text-amarillo" />
@@ -243,7 +319,6 @@ export default function AdminPage() {
 
       <div className="container mx-auto px-4 mt-8 max-w-7xl">
         
-        {/* --- TARJETAS DE MÉTRICAS (KPIs) --- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-5 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
@@ -278,7 +353,6 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* --- FILTROS DE ESTADO --- */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 bg-white p-2 rounded-2xl border border-border/50 shadow-sm">
           <div className="flex w-full md:w-auto gap-2 p-1 bg-slate-100 rounded-xl overflow-x-auto">
             <button 
@@ -299,7 +373,6 @@ export default function AdminPage() {
             >
               <CheckCircle2 className="w-4 h-4" /> Confirmadas ({metricas.confirmadas})
             </button>
-            {/* NUEVO FILTRO: PAGO TOTAL */}
             <button 
               onClick={() => setFiltroActivo("completadas")}
               className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all whitespace-nowrap flex items-center gap-2 ${filtroActivo === "completadas" ? "bg-white text-green-600 shadow-sm" : "text-slate-500 hover:text-green-600"}`}
@@ -307,12 +380,20 @@ export default function AdminPage() {
               <CheckCircle className="w-4 h-4" /> Pago Total ({metricas.completadas})
             </button>
           </div>
-          <div className="px-4 hidden md:flex items-center gap-2 text-sm font-bold text-muted-foreground">
-            <Filter className="w-4 h-4" /> Mostrando {reservasFiltradas.length} resultados
+
+          <div className="flex items-center gap-3 w-full md:w-auto pr-2">
+            <Button 
+              onClick={handleCompartirMes}
+              className="w-full md:w-auto bg-azul-claro hover:bg-azul-claro/90 text-white font-bold rounded-lg shadow-sm"
+            >
+              <Share2 className="w-4 h-4 mr-2" /> Copiar Resumen
+            </Button>
+            <div className="hidden md:flex items-center gap-2 text-sm font-bold text-muted-foreground whitespace-nowrap">
+              <Filter className="w-4 h-4" /> {reservasFiltradas.length} res.
+            </div>
           </div>
         </div>
 
-        {/* --- LISTADO DE RESERVAS --- */}
         {isFetching ? (
           <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-azul-claro" /></div>
         ) : reservasFiltradas.length === 0 ? (
@@ -341,7 +422,6 @@ export default function AdminPage() {
                 <div key={reserva.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between transition-all hover:shadow-md ${isActiva ? "border-transparent" : "border-orange-200"}`}>
                   <div className="grid sm:grid-cols-2 gap-4 lg:gap-8 flex-1 w-full">
                     
-                    {/* FECHA Y ESTADO */}
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-1">
                         {isPendiente && (
@@ -366,7 +446,6 @@ export default function AdminPage() {
                       </p>
                     </div>
 
-                    {/* CLIENTE */}
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-azul-marino font-extrabold text-lg">
                         <User className="h-5 w-5 text-lavanda" /> {reserva.nombre}
@@ -379,7 +458,6 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* DETALLES */}
                     <div className="space-y-2">
                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Detalles del Evento</p>
                       <p className="text-sm text-slate-700">
@@ -390,7 +468,6 @@ export default function AdminPage() {
                       </p>
                     </div>
 
-                    {/* FINANZAS */}
                     <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100 relative">
                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Resumen Financiero</p>
                       <div className="flex items-center justify-between text-sm mb-1">
@@ -407,7 +484,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* CONTROLES ADMINISTRATIVOS INTELLIGENTES */}
                   <div className="flex flex-col gap-2.5 w-full lg:w-48 mt-2 lg:mt-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
                     
                     {isPendiente && (
@@ -447,7 +523,7 @@ export default function AdminPage() {
                       </Button>
                     )}
 
-                    {reserva.telefono ? (
+                    {reserva.telefono && (
                       <a 
                         href={getWhatsAppLink(reserva, isActiva, fechaFormateada)} 
                         target="_blank" 
@@ -461,11 +537,24 @@ export default function AdminPage() {
                         {isActiva ? <PartyPopper className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />} 
                         {isActiva ? "Enviar Invitación VIP" : "Reclamar Seña"}
                       </a>
-                    ) : null}
+                    )}
                     
-                    <Button variant="ghost" className="text-red-400 hover:text-red-600 hover:bg-red-50 w-full justify-start h-10 mt-1" onClick={() => handleEliminarReserva(reserva.id, reserva.nombre, reserva.fecha)}>
-                      <Trash2 className="h-4 w-4 mr-2" /> Eliminar Reserva
-                    </Button>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 h-10 border-azul-claro/40 text-azul-claro hover:bg-azul-claro/10" 
+                        onClick={() => abrirModalReprogramar(reserva)}
+                      >
+                        <CalendarDays className="h-4 w-4 shrink-0" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 h-10 border-red-200 text-red-500 hover:bg-red-50" 
+                        onClick={() => handleEliminarReserva(reserva.id, reserva.nombre)}
+                      >
+                        <Trash2 className="h-4 w-4 shrink-0" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )
@@ -473,6 +562,51 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* --- MODAL PARA REPROGRAMAR CON CALENDARIO INTERACTIVO --- */}
+      {modalReprogramar && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
+            <div className="bg-azul-marino p-4 flex items-center justify-between text-white shrink-0">
+              <h3 className="font-bold flex items-center gap-2">
+                <CalendarDays className="w-5 h-5" /> Reprogramar Evento
+              </h3>
+              <button onClick={() => setModalReprogramar(null)} className="hover:bg-white/20 p-1 rounded-md transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-5">
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4">
+                <p className="text-sm text-slate-500 font-medium">Cliente: <strong className="text-azul-marino">{modalReprogramar.nombre}</strong></p>
+                <p className="text-sm text-slate-500 font-medium">Fecha Actual: <strong className="text-red-500">{modalReprogramar.fecha} ({modalReprogramar.turno})</strong></p>
+              </div>
+
+              {/* PASAMOS EL ID AL CALENDARIO PARA QUE LO IGNORE */}
+              <div className="border border-slate-200 rounded-xl p-2 md:p-4">
+                <ReservationCalendar
+                  selectedDate={reprogramDate}
+                  onSelectDate={(d) => {
+                    setReprogramDate(d)
+                    setReprogramTurno(null)
+                  }}
+                  onTurnoBooked={setReprogramTurno}
+                  ignoreReservaId={modalReprogramar.id}
+                />
+              </div>
+
+              <Button 
+                onClick={guardarReprogramacion}
+                disabled={!reprogramDate || !reprogramTurno}
+                className="w-full h-12 bg-amarillo hover:bg-amarillo/90 text-azul-marino font-extrabold text-base mt-4 shadow-md disabled:opacity-50"
+              >
+                Guardar Nueva Fecha
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }

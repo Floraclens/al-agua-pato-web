@@ -1,29 +1,29 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
-import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock } from "lucide-react" // Importé MessageCircle y Lock
-import { precioTurnoKey, type Turno } from "@/lib/turno"
+import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown } from "lucide-react"
+import { type Turno } from "@/lib/turno"
+import { obtenerReglasParaFecha, PRECIOS } from "@/lib/config-reservas"
 import Link from "next/link"
 
-export type { Turno, LunVieTurno } from "@/lib/turno"
+export type { Turno } from "@/lib/turno"
 export type MetodoPago = "efectivo" | "transferencia" | "tarjeta" | null
 
 export interface Extras {
   adultosAdicionales: number
   cantidadMozos: number
   personajesSeleccionados: string[]
-  consultasPersonajes: string[] 
   animacion: boolean
   horaExtra: boolean
-  robotLed: boolean
-  zancosLed: boolean
-  astronautasLed: boolean
+  robotLed: number
+  zancosLed: number
   personaje: boolean
   mozoAdicional: boolean
+  pileta: boolean
 }
 
 export interface DatosCliente {
@@ -34,25 +34,8 @@ export interface DatosCliente {
   edadCumple: string
 }
 
-const PRECIOS = {
-  turnos: {
-    primero: 710000,
-    segundo: 790000,
-    lun_vie: 710000,
-  },
-  extras: {
-    adultosAdicionales: 7000,
-    animacion: 60000,
-    horaExtra: 200000,
-    robotLed: 50000,
-    zancosLed: 40000,
-    astronautasLed: 60000,
-    personaje: 30000,
-    mozoAdicional: 40000,
-  },
-  sena: 400000,
-  descuentoEfectivo: 0.1,
-}
+const SENIA = 400000
+const DESCUENTO_EFECTIVO = 0.1
 
 export default function PaginaReserva() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -66,17 +49,26 @@ export default function PaginaReserva() {
   const [extras, setExtras] = useState<Extras>({
     adultosAdicionales: 0,
     cantidadMozos: 1,
-    personajesSeleccionados: [],
-    consultasPersonajes: [], 
+    personajesSeleccionados: [], 
     animacion: false,
     horaExtra: false,
-    robotLed: false,
-    zancosLed: false,
-    astronautasLed: false,
+    robotLed: 0,
+    zancosLed: 0,
     personaje: false,
     mozoAdicional: false,
+    pileta: false,
   })
   
+  const reglasFecha = useMemo(() => {
+    return selectedDate ? obtenerReglasParaFecha(selectedDate) : null
+  }, [selectedDate])
+
+  useEffect(() => {
+    if (reglasFecha && !reglasFecha.pileta_disponible && extras.pileta) {
+      setExtras(prev => ({ ...prev, pileta: false }))
+    }
+  }, [reglasFecha, extras.pileta])
+
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(null)
   const [pagoTotalidad, setPagoTotalidad] = useState<boolean>(false)
 
@@ -94,39 +86,55 @@ export default function PaginaReserva() {
     let precioExtras = 0
     let descuento = 0
 
-    if (selectedTurno) {
-      precioTurno = PRECIOS.turnos[precioTurnoKey(selectedTurno)]
+    if (selectedTurno && selectedDate && reglasFecha) {
+      if (reglasFecha.modalidad === 'doble_turno_fijo') {
+        if (reglasFecha.precios) {
+          if (selectedTurno === "primero") precioTurno = reglasFecha.precios.turno_1
+          else if (selectedTurno === "segundo") precioTurno = reglasFecha.precios.turno_2
+        } else {
+          precioTurno = reglasFecha.precio
+        }
+      } else {
+        precioTurno = reglasFecha.precio
+      }
       subtotal += precioTurno
     }
 
-    Object.keys(extras).forEach((key) => {
-      if (key === "adultosAdicionales") {
-        precioExtras += extras.adultosAdicionales * PRECIOS.extras.adultosAdicionales
-      } else if (key === "mozoAdicional") {
-        if (extras.mozoAdicional) {
-          precioExtras += extras.cantidadMozos * PRECIOS.extras.mozoAdicional
-        }
-      } else if (key === "personaje") {
-         if (extras.personaje) {
-             const numSeleccionados = extras.personajesSeleccionados.length
-             const numConsultas = extras.consultasPersonajes.length 
-             const cantidadCobrable = numSeleccionados + numConsultas
-             precioExtras += cantidadCobrable * PRECIOS.extras.personaje
-         }
-      } else if (key === "cantidadMozos" || key === "personajesSeleccionados" || key === "consultasPersonajes") {
-        // Ignorados, se calculan arriba
-      } else if (extras[key as keyof Extras] === true) {
-        precioExtras += PRECIOS.extras[key as keyof typeof PRECIOS.extras]
-      }
-    })
+    if (extras.adultosAdicionales > 0) {
+      precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
+    }
+    if (extras.mozoAdicional && extras.cantidadMozos > 0) {
+      precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
+    }
+    if (extras.personaje && extras.personajesSeleccionados.length > 0) {
+      precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
+    }
+    if (extras.animacion) {
+      precioExtras += PRECIOS.opcionales.animacion
+    }
+    if (extras.horaExtra) {
+      precioExtras += PRECIOS.opcionales.horaExtra
+    }
+    if (extras.robotLed === 1) {
+      precioExtras += PRECIOS.opcionales.robot_led.uno
+    } else if (extras.robotLed === 2) {
+      precioExtras += PRECIOS.opcionales.robot_led.dos
+    }
+    if (extras.zancosLed > 0) {
+      precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
+    }
+    if (extras.pileta) {
+      precioExtras += PRECIOS.opcionales.pileta.precio
+    }
+
     subtotal += precioExtras
 
     if (metodoPago === "efectivo" && pagoTotalidad && subtotal > 0) {
-      descuento = subtotal * PRECIOS.descuentoEfectivo
+      descuento = subtotal * DESCUENTO_EFECTIVO
     }
 
     const total = subtotal - descuento
-    const senaFinal = pagoTotalidad ? total : PRECIOS.sena
+    const senaFinal = pagoTotalidad ? total : SENIA
 
     return {
       precioTurno,
@@ -136,7 +144,7 @@ export default function PaginaReserva() {
       total,
       sena: senaFinal,
     }
-  }, [selectedTurno, extras, metodoPago, pagoTotalidad])
+  }, [selectedTurno, selectedDate, extras, metodoPago, pagoTotalidad, reglasFecha])
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValidPhone = (phone: string) => {
@@ -144,15 +152,9 @@ export default function PaginaReserva() {
     return numbers.length >= 10;
   };
 
-  const isConsulting = extras.consultasPersonajes.length > 0;
   const hasSeleccionados = extras.personajesSeleccionados.length > 0;
-  const allConsultasFilled = extras.consultasPersonajes.every(c => c.trim().length > 0);
-
-  const isValidPersonaje = !extras.personaje || 
-    ((hasSeleccionados || isConsulting) && (!isConsulting || allConsultasFilled));
-
-  const errorPersonajeVacio = extras.personaje && !hasSeleccionados && !isConsulting;
-  const errorConsultaIncompleta = extras.personaje && isConsulting && !allConsultasFilled;
+  const isValidPersonaje = !extras.personaje || hasSeleccionados;
+  const errorPersonajeVacio = extras.personaje && !hasSeleccionados;
 
   const canSubmit = 
     selectedDate && 
@@ -177,8 +179,6 @@ export default function PaginaReserva() {
 
   return (
     <main className="min-h-screen bg-slate-50 font-sans pb-16">
-      
-      {/* Navbar simplificado para la página de reservas */}
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="inline-flex items-center gap-2 text-azul-marino font-bold hover:text-azul-marino/80 transition-colors">
@@ -195,23 +195,77 @@ export default function PaginaReserva() {
         </div>
 
         <div className="max-w-3xl mx-auto mb-10 bg-azul-claro/5 border border-azul-claro/20 rounded-3xl p-5 md:p-6 text-left flex flex-col shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
+          <div className="flex flex-col sm:flex-row gap-4 items-start w-full">
             <div className="w-12 h-12 rounded-full bg-azul-claro/20 flex items-center justify-center shrink-0">
               <Info className="w-6 h-6 text-azul-marino" />
             </div>
-            <div>
-              <h4 className="text-lg font-extrabold text-azul-marino mb-2">Valores del Predio</h4>
-              <p className="text-sm md:text-base text-azul-marino/80 leading-relaxed">
-                El valor general del predio es de <strong className="text-azul-marino bg-white px-2 py-0.5 rounded-md shadow-sm border border-border/50">$710.000</strong>.<br className="hidden sm:block" />
-                <span className="block mt-2 text-xs md:text-sm bg-white/60 p-3 rounded-lg border border-azul-claro/10">
-                  <strong className="text-azul-marino">Excepción:</strong> El turno de las <strong>18:30 a 22:30hs</strong> tiene un valor de <strong className="text-azul-marino">$790.000</strong> aplicable <strong>exclusivamente</strong> los días Sábados, Domingos, Feriados y en Temporada Alta (del 15 de Diciembre hasta fines de Febrero).
-                </span>
-              </p>
+            <div className="w-full">
+              <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de tu evento</h4>
+              
+              <div className="space-y-2 w-full">
+                
+                {/* Temporada Baja */}
+                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <span className="font-bold text-azul-marino text-sm md:text-base">📅 Temporada Baja <span className="font-medium opacity-70 text-xs ml-1">(1 Abr - 31 Ago)</span></span>
+                    <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
+                  </summary>
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
+                    <p><span className="font-extrabold text-azul-marino text-base">$700.000</span></p>
+                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm">
+                      <li><strong>Turno de 4 horas</strong> a elección.</li>
+                      <li>Franja horaria disponible: <strong>12:00 a 19:00 hs</strong>.</li>
+                      <li className="text-muted-foreground italic">* El último turno puede comenzar a las 15:00 hs como máximo.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                {/* Temporada Media */}
+                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <span className="font-bold text-azul-marino text-sm md:text-base">⭐ Temporada Media <span className="font-medium opacity-70 text-xs ml-1">(1 Sep - 14 Dic)</span></span>
+                    <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
+                  </summary>
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
+                    <p><span className="font-extrabold text-azul-marino text-base">$710.000</span></p>
+                    <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
+                      <li>
+                        <strong>Lunes a Viernes:</strong> Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs). <br/>
+                        <span className="text-muted-foreground italic">* El último turno puede comenzar a las 18:30 hs.</span>
+                      </li>
+                      <li>
+                        <strong>Sábados, Domingos y Feriados (Turnos fijos):</strong>
+                        <ul className="list-[circle] pl-5 mt-1 space-y-1">
+                          <li>Turno 1: <strong>12:00 a 16:00 hs</strong></li>
+                          <li>Turno 2: <strong>18:30 a 22:30 hs</strong></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
+                </details>
+
+                {/* Temporada Alta */}
+                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
+                    <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
+                  </summary>
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-3 mt-1">
+                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm">
+                      Todos los días (Turnos fijos):
+                    </div>
+                    <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
+                      <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-azul-marino text-base">$730.000</span></li>
+                      <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-azul-marino text-base">$740.000</span></li>
+                    </ul>
+                  </div>
+                </details>
+
+              </div>
             </div>
           </div>
           
-          {/* --- Cartel VIP Intensificado --- */}
-          <div className="mt-5 p-3.5 bg-gradient-to-r from-amarillo/40 to-naranja/20 rounded-xl border-2 border-amarillo/50 shadow-sm flex items-start sm:items-center gap-3 ml-0 sm:ml-16 relative overflow-hidden">
+          <div className="mt-6 p-3.5 bg-gradient-to-r from-amarillo/40 to-naranja/20 rounded-xl border-2 border-amarillo/50 shadow-sm flex items-start sm:items-center gap-3 ml-0 sm:ml-16 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-white/30 blur-2xl rounded-full"></div>
              <div className="bg-white p-2 rounded-lg shadow-sm shrink-0">
                <PartyPopper className="w-5 h-5 text-naranja" />
@@ -238,7 +292,11 @@ export default function PaginaReserva() {
                 <span className="w-8 h-8 rounded-full bg-lavanda/20 flex items-center justify-center text-lavanda text-sm font-extrabold">2</span>
                 Personalizá tu evento (Opcional)
               </h3>
-              <ExtrasSelector extras={extras} onChangeExtras={setExtras} precios={PRECIOS.extras} />
+              <ExtrasSelector 
+                extras={extras} 
+                onChangeExtras={setExtras} 
+                showPileta={reglasFecha?.pileta_disponible || false} 
+              />
             </section>
 
             <section className="bg-white rounded-3xl p-6 shadow-sm border border-border/50">
@@ -257,7 +315,6 @@ export default function PaginaReserva() {
                   {datosCliente.telefono && !isValidPhone(datosCliente.telefono) ? (
                     <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>
                   ) : (
-                    // MICRO-TEXTO DE CONFIANZA
                     <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
                       <Lock className="w-3 h-3" /> Solo para enviarte tu confirmación.
                     </p>
@@ -269,7 +326,6 @@ export default function PaginaReserva() {
                   {datosCliente.email && !isValidEmail(datosCliente.email) ? (
                     <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>
                   ) : (
-                    // MICRO-TEXTO DE CONFIANZA
                     <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
                       <Lock className="w-3 h-3" /> 100% privado. Sin spam.
                     </p>
@@ -315,15 +371,9 @@ export default function PaginaReserva() {
                 pagoTotalidad={pagoTotalidad}
               />
               
-              {/* MENSAJES DE ERROR DE VALIDACIÓN */}
               {errorPersonajeVacio && (
                 <p className="text-red-500 text-xs font-bold text-center mt-4 bg-red-50 p-2 rounded-lg border border-red-200 shadow-sm">
                   * Marcaste la opción de Personajes pero no elegiste ninguno. Seleccionalo o destildá la opción.
-                </p>
-              )}
-              {errorConsultaIncompleta && (
-                <p className="text-red-500 text-xs font-bold text-center mt-4 bg-red-50 p-2 rounded-lg border border-red-200 shadow-sm">
-                  * Por favor, completá los nombres de todos los personajes que querés consultar.
                 </p>
               )}
             </div>
@@ -331,7 +381,6 @@ export default function PaginaReserva() {
         </div>
       </div>
 
-      {/* --- BOTÓN FLOTANTE WHATSAPP (SALVAVIDAS) --- */}
       <a 
         href="https://wa.me/5493854470103?text=Hola!%20Estoy%20en%20la%20página%20de%20reservas%20y%20tengo%20una%20duda..." 
         target="_blank" 
@@ -343,7 +392,6 @@ export default function PaginaReserva() {
           ¿Dudas con tu reserva?
         </span>
       </a>
-
     </main>
   )
 }

@@ -7,23 +7,11 @@ import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import type { Turno, LunVieTurno } from "@/lib/turno"
 import { createBrowserClient } from "@/lib/supabase/client"
+import { obtenerReglasParaFecha, determinarTemporada } from "@/lib/config-reservas"
+import { FERIADOS } from "@/lib/config-reservas"
 
 const LABEL_MANANA = "12:00 a 16:00 hs"
 const LABEL_NOCHE = "18:30 a 22:30 hs"
-
-const LUN_VIE_FIRST_START = 12 * 60
-
-const FERIADOS: string[] = [
-  "2026-05-01",
-  "2026-05-25",
-  "2026-06-17",
-  "2026-06-20",
-  "2026-07-09",
-  "2026-10-12",
-  "2026-11-20",
-  "2026-12-08",
-  "2026-12-25"
-]
 
 function pad2(n: number) {
   return String(n).padStart(2, "0")
@@ -44,30 +32,9 @@ function isLunVieTurn(t: NonNullable<Turno>): t is LunVieTurno {
   return typeof t === "object" && t !== null && "id" in t && t.id === "lun_vie"
 }
 
-// Alta temporada: Del 15 de Diciembre hasta fines de Marzo
-function isHighSeason(date: Date): boolean {
-  const m = date.getMonth() + 1
-  const d = date.getDate()
-  if (m === 12 && d >= 15) return true
-  if (m >= 1 && m <= 3) return true 
-  return false
-}
-
-function isWeekend(date: Date): boolean {
-  const day = date.getDay()
-  return day === 0 || day === 6
-}
-
-function isHoliday(date: Date): boolean {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return FERIADOS.includes(`${y}-${m}-${d}`)
-}
-
-// Define si el día tiene 2 turnos fijos (Fines de semana, Feriados o Temporada Alta)
 function showDualFixedSlots(date: Date): boolean {
-  return isWeekend(date) || isHighSeason(date) || isHoliday(date)
+  const reglas = obtenerReglasParaFecha(date)
+  return reglas.modalidad === 'doble_turno_fijo'
 }
 
 function parseTimeStringToMinutes(timeStr: string): number {
@@ -94,12 +61,14 @@ interface ReservationCalendarProps {
   selectedDate: Date | undefined
   onSelectDate: (date: Date | undefined) => void
   onTurnoBooked: (turno: Turno) => void
+  ignoreReservaId?: number // NUEVO PROP PARA IGNORAR RESERVA AL REPROGRAMAR
 }
 
 export function ReservationCalendar({
   selectedDate,
   onSelectDate,
   onTurnoBooked,
+  ignoreReservaId
 }: ReservationCalendarProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [activeBubble, setActiveBubble] = useState<string | number | null>(null)
@@ -107,16 +76,22 @@ export function ReservationCalendar({
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
-  // Estado para guardar todas las reservas y pintar el calendario
   const [globalBookings, setGlobalBookings] = useState<Record<string, string[]>>({})
 
   useEffect(() => {
     setIsMounted(true)
     
-    // Buscar todas las reservas al iniciar para colorear el calendario
     async function fetchAllReservations() {
       const supabase = createBrowserClient()
-      const { data, error } = await supabase.from("reservas").select("fecha, turno")
+      
+      // Armamos la query. Si viene ignoreReservaId, traemos todas menos esa.
+      let query = supabase.from("reservas").select("id, fecha, turno")
+      if (ignoreReservaId) {
+        query = query.neq("id", ignoreReservaId)
+      }
+
+      const { data, error } = await query
+      
       if (!error && data) {
         const mapping: Record<string, string[]> = {}
         data.forEach((r) => {
@@ -128,7 +103,7 @@ export function ReservationCalendar({
       }
     }
     fetchAllReservations()
-  }, [])
+  }, [ignoreReservaId]) // Volver a ejecutar si cambia el ID a ignorar
 
   useEffect(() => {
     if (!selectedDate) {
@@ -145,8 +120,14 @@ export function ReservationCalendar({
       const d = String(selectedDate!.getDate()).padStart(2, "0")
       const dateStr = `${y}-${m}-${d}`
 
-      const { data, error } = await supabase
-        .rpc("obtener_turnos_ocupados", { fecha_busqueda: dateStr })
+      let query = supabase.from("reservas").select("turno").eq("fecha", dateStr)
+      
+      // Si estamos reprogramando, ignoramos el ID en la búsqueda de turnos ocupados
+      if (ignoreReservaId) {
+        query = query.neq("id", ignoreReservaId)
+      }
+
+      const { data, error } = await query
 
       if (!error && data) {
         setBookedSlots(data.map((r: { turno: string }) => r.turno))
@@ -157,10 +138,19 @@ export function ReservationCalendar({
     }
 
     fetchReservations()
-  }, [selectedDate])
+  }, [selectedDate, ignoreReservaId])
 
-  // Evalúa si un día está 100% ocupado para pintarlo de rojo
+  const disabledDays = useCallback((date: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date <= today
+  }, [])
+
   const isDayFullyBooked = useCallback((date: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (date <= today) return false
+
     const y = date.getFullYear()
     const m = String(date.getMonth() + 1).padStart(2, "0")
     const d = String(date.getDate()).padStart(2, "0")
@@ -176,13 +166,6 @@ export function ReservationCalendar({
       return bookings.length >= 1 
     }
   }, [globalBookings])
-
-  // MODIFICADO: Solo desactiva "hoy" y fechas pasadas. Permite reservar para mañana.
-  const disabledDays = useCallback((date: Date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return date <= today
-  }, [])
 
   const handleSelectDate = useCallback(
     (date: Date | undefined) => {
@@ -216,41 +199,23 @@ export function ReservationCalendar({
   const isSegundoBooked = isDual ? checkOverlap(18 * 60 + 30, 22 * 60 + 30, bookedSlots) : false
   const isLunVieFullyBooked = !isDual && bookedSlots.length > 0
 
-  // Generación dinámica de horarios de Lunes a Viernes
   const lunVieStartOptions: number[] = []
   if (selectedDate) {
-    const m = selectedDate.getMonth() + 1
-    const d = selectedDate.getDate()
+    const reglas = obtenerReglasParaFecha(selectedDate)
     
-    let lastStart = 15 * 60 // Por defecto: Abril a Agosto (inicio máximo a las 15:00)
-    
-    // Si es de Septiembre al 14 de Diciembre, el horario se extiende (inicio máximo a las 18:30)
-    if ((m >= 9 && m <= 11) || (m === 12 && d <= 14)) {
-      lastStart = 18 * 60 + 30 
-    }
-    
-    for (let min = LUN_VIE_FIRST_START; min <= lastStart; min += 30) {
-      lunVieStartOptions.push(min)
+    if (reglas.modalidad === 'turno_flexible' && reglas.ultimo_inicio_permitido) {
+      const [horaInicio] = reglas.franja_horaria.inicio.split(':').map(Number)
+      const [horaUltimoInicio, minutoUltimoInicio] = reglas.ultimo_inicio_permitido.split(':').map(Number)
+      const ultimoInicioMinutos = horaUltimoInicio * 60 + minutoUltimoInicio
+      
+      for (let min = horaInicio * 60; min <= ultimoInicioMinutos; min += 30) {
+        lunVieStartOptions.push(min)
+      }
     }
   }
 
   return (
     <div className="w-full space-y-6">
-      
-      {/* Tarjetas informativas de los horarios */}
-      <div className="grid sm:grid-cols-2 gap-3 mb-4">
-        <div className="bg-azul-claro/10 rounded-xl p-4 text-center border border-azul-claro/20 shadow-sm flex flex-col justify-center">
-          <span className="font-extrabold text-xs uppercase tracking-wider text-azul-marino mb-1">📅 Lunes a Viernes</span>
-          <span className="text-[10px] text-azul-marino/70 mb-2 uppercase font-semibold">(Abril al 14 de Dic)</span>
-          <span className="text-xs font-medium text-azul-marino">Un evento por día. Horario de 4hs a elección.</span>
-        </div>
-        <div className="bg-naranja/10 rounded-xl p-4 text-center border border-naranja/20 shadow-sm flex flex-col justify-center">
-          <span className="font-extrabold text-xs uppercase tracking-wider text-azul-marino mb-1">⭐ Sáb/Dom, Feriados y Verano</span>
-          <span className="text-[10px] text-azul-marino/70 mb-2 uppercase font-semibold">(15 Dic a fines de Marzo)</span>
-          <span className="text-xs font-medium text-azul-marino">Dos turnos fijos: 12:00 a 16:00 o 18:30 a 22:30.</span>
-        </div>
-      </div>
-
       <div className="flex items-center justify-center gap-6 text-xs font-bold text-slate-500 uppercase mb-2">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-white border border-slate-300 shadow-sm" /> Disponible
