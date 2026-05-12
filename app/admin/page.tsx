@@ -504,8 +504,8 @@ export default function AdminPage() {
                           Pago Total Recibido
                         </Button>
                         <Button 
-                          variant="ghost" 
-                          className="w-full h-8 text-xs font-semibold text-slate-400 hover:text-slate-600"
+                          variant="outline" 
+                          className="w-full h-10 text-sm font-bold border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors"
                           onClick={() => handleCambiarEstado(reserva.id, 'pendiente')}
                         >
                           Deshacer Seña
@@ -563,7 +563,6 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* --- MODAL PARA REPROGRAMAR CON CALENDARIO INTERACTIVO --- */}
       {modalReprogramar && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
@@ -582,7 +581,6 @@ export default function AdminPage() {
                 <p className="text-sm text-slate-500 font-medium">Fecha Actual: <strong className="text-red-500">{modalReprogramar.fecha} ({modalReprogramar.turno})</strong></p>
               </div>
 
-              {/* PASAMOS EL ID AL CALENDARIO PARA QUE LO IGNORE */}
               <div className="border border-slate-200 rounded-xl p-2 md:p-4">
                 <ReservationCalendar
                   selectedDate={reprogramDate}
