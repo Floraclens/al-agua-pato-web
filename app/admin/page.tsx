@@ -292,7 +292,6 @@ export default function AdminPage() {
               <Label>Usuario</Label>
               <Input 
                 type="text" 
-                placeholder="Ej: LorenaAdmin"
                 value={usuario} 
                 onChange={(e) => setUsuario(e.target.value)} 
                 required 
