@@ -17,16 +17,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  // Reemplazá esta partecita en app/layout.tsx:
   openGraph: {
     title: 'Al Agua Pato | Fiestas Infantiles en Sgo. del Estero',
-    description: 'Parque acuático, shows LED y todo incluido en Los Flores. Elegí tu fecha y reservá tu evento inolvidable.',
+    description: 'Parque acuático, shows LED y todo incluido en este mágico lugar. Elegí tu fecha y reservá tu evento inolvidable.',
     url: 'https://al-agua-pato-web.vercel.app', 
     siteName: 'Al Agua Pato',
     images: [
       {
-        url: '/og-image.jpg', // ACA APUNTAMOS A LA NUEVA IMAGEN
+        url: 'https://al-agua-pato-web.vercel.app/og-image.jpg', // ABSOLUTA: Agregamos el https://...
         width: 1200,
-        height: 630, // Tamaño perfecto para WhatsApp y Facebook
+        height: 630, 
         alt: 'Predio de Eventos Al Agua Pato',
       },
     ],
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Al Agua Pato | Fiestas Infantiles',
     description: 'El mejor salón de fiestas infantiles en Santiago del Estero.',
-    images: ['/og-image.jpg'],
+    images: ['https://al-agua-pato-web.vercel.app/og-image.jpg'], // ABSOLUTA ACÁ TAMBIÉN
   },
   icons: {
     icon: '/logo-circular.png', // Tu Favicon sigue siendo el logo
