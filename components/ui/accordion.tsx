@@ -55,7 +55,8 @@ function AccordionContent({
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"
-      className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+      // OPTIMIZACIÓN: transform-gpu y will-change fuerzan el uso de la placa de video del celular
+      className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm transform-gpu will-change-[height]"
       {...props}
     >
       <div className={cn('pt-0 pb-4', className)}>{children}</div>
