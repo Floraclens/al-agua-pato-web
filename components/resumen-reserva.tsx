@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "sonner" // <-- IMPORTAMOS SONNER
 import {
   CalendarDays,
   Clock,
@@ -42,7 +43,7 @@ interface ResumenReservaProps {
   }
   canSubmit: boolean
   pagoTotalidad: boolean
-  isEgresadito?: boolean // NUEVO: Permite distinguir entre Cumple y Egresaditos
+  isEgresadito?: boolean 
 }
 
 function formatPrice(price: number): string {
@@ -76,7 +77,7 @@ export function ResumenReserva({
   calculos,
   canSubmit,
   pagoTotalidad,
-  isEgresadito = false // Por defecto es false (Cumples normales)
+  isEgresadito = false 
 }: ResumenReservaProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -149,11 +150,13 @@ export function ResumenReserva({
   const handleReserva = useCallback(async () => {
     if (!selectedDate || !selectedTurno || !metodoPago) return
 
-    // Le pasamos el isEgresadito al validador para que sepa qué exigir
     const validacion = validarReservaCompleta(selectedDate, selectedTurno, datosCliente, metodoPago, isEgresadito)
     
     if (!validacion.isValid) {
-      window.alert(`Error de validación:\n${formatearErroresValidacion(validacion.errors)}`)
+      // REEMPLAZO DE WINDOW.ALERT POR TOAST DE SONNER
+      toast.error("Faltan datos obligatorios", {
+        description: formatearErroresValidacion(validacion.errors)
+      })
       return
     }
 
@@ -167,8 +170,6 @@ export function ResumenReserva({
 
       const supabase = createBrowserClient()
       
-      // LÓGICA DE GUARDADO INTELIGENTE (Para no tocar la base de datos)
-      // Si es egresadito, guardamos la info del colegio en las columnas de cumpleañero/edad
       const nombreDB = isEgresadito 
         ? `🎓 ${datosCliente.institucion} - Sala: ${datosCliente.sala}`
         : datosCliente.nombreCumpleanero
@@ -194,7 +195,8 @@ export function ResumenReserva({
 
       if (error) {
         console.error("[reservas] Error al guardar:", error.message, error)
-        window.alert(`No se pudo completar la reserva: ${error.message}`)
+        // REEMPLAZO DE WINDOW.ALERT
+        toast.error(`No se pudo completar la reserva: ${error.message}`)
         setIsSubmitting(false)
         return
       }
@@ -264,7 +266,8 @@ export function ResumenReserva({
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
       console.error("[reservas] Error inesperado:", e)
-      window.alert(`Error al procesar la reserva: ${msg}`)
+      // REEMPLAZO DE WINDOW.ALERT
+      toast.error(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }
   }, [selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad, isEgresadito])
@@ -368,7 +371,6 @@ export function ResumenReserva({
       <div 
         id="resumen-final" 
         ref={summaryRef} 
-        // ACHICAMOS EL mb-8 A mb-2 PARA QUITAR ESPACIO EN BLANCO ABAJO
         className="bg-gradient-to-b from-azul-claro/10 to-lavanda/10 rounded-2xl p-6 shadow-lg border border-azul-claro/20 mb-2 relative scroll-mt-24"
       >
         <div className="text-center mb-6">
@@ -512,7 +514,6 @@ export function ResumenReserva({
           </p>
         )}
 
-        {/* AJUSTE: BOTÓN MÁS CHICO EN CELULARES (text-base) PARA QUE NO DESBORDE Y TEXTO CORTADO */}
         <Button
           type="button"
           size="lg"
@@ -560,7 +561,7 @@ export function ResumenReserva({
         </div>
       </div>
 
-      {/* BOTÓN FLOTANTE: Ahora tiene animación para ocultarse si isSummaryVisible es true */}
+      {/* BOTÓN FLOTANTE */}
       <div 
         className={`fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border/50 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 lg:hidden flex flex-col pb-safe transition-all duration-300 ${
           isSummaryVisible ? "translate-y-[150%] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"

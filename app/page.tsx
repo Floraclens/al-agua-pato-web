@@ -8,7 +8,8 @@ import { PhotoGallery } from "@/components/photo-gallery"
 import { 
   Sparkles, MapPin, CheckCircle2, Star, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
-  HelpCircle, Phone, Mail, GraduationCap, School, ChevronDown 
+  HelpCircle, Phone, Mail, GraduationCap, School, ChevronDown,
+  Instagram, Facebook // <-- NUEVOS ICONOS IMPORTADOS
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -69,7 +70,7 @@ export default function LandingPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
                 <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden shrink-0 bg-transparent">
-                  <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" priority />
+                  <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill sizes="(max-width: 768px) 48px, 56px" className="object-cover scale-110" priority />
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
@@ -96,7 +97,7 @@ export default function LandingPage() {
         </header>
 
         <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
-          <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
+          <video autoPlay loop muted playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />
@@ -269,7 +270,7 @@ export default function LandingPage() {
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-2 row-span-2 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/robot.jpg')}
               >
-                <Image src="/extras/robot.jpg" alt="Robot LED" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/extras/robot.jpg" alt="Robot LED" fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-azul-marino via-azul-marino/40 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
                   <span className="bg-amarillo text-azul-marino text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block shadow-lg shadow-amarillo/20">El más pedido</span>
@@ -282,7 +283,7 @@ export default function LandingPage() {
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/zancos.jpg')}
               >
-                <Image src="/extras/zancos.jpg" alt="Zancos LED" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/extras/zancos.jpg" alt="Zancos LED" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-lavanda/90 via-lavanda/30 to-transparent mix-blend-multiply" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -295,7 +296,7 @@ export default function LandingPage() {
                 className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/personajes.jpg')}
               >
-                <Image src="/extras/personajes.jpg" alt="Personajes" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Image src="/extras/personajes.jpg" alt="Personajes" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-rosa/90 via-rosa/30 to-transparent mix-blend-multiply" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -410,14 +411,12 @@ export default function LandingPage() {
 
             <div className="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 md:mt-12 min-h-[140px]">
                
-               {/* CARTEL SIEMPRE VISIBLE SIN FLECHA */}
                <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-5 py-2.5 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30 flex items-center justify-center">
                  🎁 ¡Incluye Invitación Digital Personalizada!
                </div>
 
                <div className="absolute -inset-x-6 -top-2 -bottom-6 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse pointer-events-none" />
                
-               {/* MENÚ DE SELECCIÓN DE EVENTO */}
                {!showEventMenu ? (
                  <div className="relative flex flex-col items-center justify-center w-full z-10 animate-in fade-in zoom-in duration-300">
                    <Button 
@@ -474,7 +473,7 @@ export default function LandingPage() {
             
             <div className="flex items-center gap-4">
                <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 bg-transparent">
-                  <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover scale-110" />
+                  <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill sizes="48px" className="object-cover scale-110" />
                </div>
                <div className="flex flex-col text-left">
                  <h4 className="text-lg font-bold tracking-wide text-white">Al Agua Pato</h4>
@@ -490,7 +489,7 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-6">
                <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
                   <MapPin className="w-4 h-4" />
                   <span className="hidden sm:inline">Santiago del Estero</span>
@@ -499,6 +498,16 @@ export default function LandingPage() {
                   <Phone className="w-4 h-4" />
                   <span className="hidden sm:inline">Contacto</span>
                </a>
+               
+               {/* NUEVOS ICONOS SOCIALES */}
+               <div className="flex items-center gap-4 border-l border-white/20 pl-6 ml-2">
+                 <a href="https://www.instagram.com/alaguapato.sgo/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-rosa transition-colors" aria-label="Instagram">
+                   <Instagram className="w-5 h-5" />
+                 </a>
+                 <a href="https://www.facebook.com/profile.php?id=100085114470943" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-blue-400 transition-colors" aria-label="Facebook">
+                   <Facebook className="w-5 h-5" />
+                 </a>
+               </div>
             </div>
 
           </div>
@@ -549,6 +558,7 @@ export default function LandingPage() {
               src={selectedImage} 
               alt="Vista previa" 
               fill 
+              sizes="100vw"
               className="object-contain animate-in zoom-in-95 duration-300"
             />
           </div>

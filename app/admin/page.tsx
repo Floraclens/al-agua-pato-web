@@ -7,6 +7,7 @@ import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { toast } from "sonner" // <-- IMPORTAMOS SONNER PARA LAS NOTIFICACIONES
 import { 
   Calendar, 
   Trash2, 
@@ -113,7 +114,9 @@ export default function AdminPage() {
     })
     
     if (error) {
-      window.alert("Error al iniciar sesión: Usuario o contraseña incorrectos")
+      toast.error("Usuario o contraseña incorrectos")
+    } else {
+      toast.success("¡Bienvenida al panel!")
     }
     setIsLoading(false)
   }
@@ -125,8 +128,12 @@ export default function AdminPage() {
     if (!confirmar) return
 
     const { error } = await supabase.from("reservas").delete().eq("id", id)
-    if (error) window.alert("Hubo un error al eliminar la reserva.")
-    else setReservas(reservas.filter((r) => r.id !== id))
+    if (error) {
+      toast.error("Hubo un error al eliminar la reserva.")
+    } else {
+      toast.success("Reserva eliminada correctamente.")
+      setReservas(reservas.filter((r) => r.id !== id))
+    }
   }
 
   const handleCambiarEstado = async (id: number, nuevoEstado: string) => {
@@ -136,8 +143,9 @@ export default function AdminPage() {
       .eq("id", id)
 
     if (error) {
-      window.alert("Error al actualizar el estado.")
+      toast.error("Error al actualizar el estado.")
     } else {
+      toast.success("Estado actualizado con éxito.")
       setReservas(reservas.map(r => r.id === id ? { ...r, estado: nuevoEstado } : r))
     }
   }
@@ -150,7 +158,7 @@ export default function AdminPage() {
 
   const guardarReprogramacion = async () => {
     if (!reprogramDate || !reprogramTurno) {
-      window.alert("Por favor, elegí una nueva fecha y un horario disponible en el calendario para reprogramar.")
+      toast.error("Por favor, elegí una nueva fecha y un horario disponible en el calendario.")
       return
     }
 
@@ -163,9 +171,9 @@ export default function AdminPage() {
       .eq("id", modalReprogramar.id)
 
     if (error) {
-      window.alert("Ocurrió un error al reprogramar la reserva.")
+      toast.error("Ocurrió un error al reprogramar la reserva.")
     } else {
-      window.alert("¡Reserva reprogramada con éxito!")
+      toast.success("¡Reserva reprogramada con éxito!")
       setModalReprogramar(null)
       fetchReservas() 
     }
@@ -178,7 +186,7 @@ export default function AdminPage() {
     })
 
     if (activas.length === 0) {
-      window.alert("No hay reservas confirmadas para compartir.")
+      toast.error("No hay reservas confirmadas para compartir.")
       return
     }
 
@@ -194,7 +202,6 @@ export default function AdminPage() {
       textoCopiar += `⏰ Horario: ${r.turno}\n`
       textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
       if (r.nombre_cumpleanero) {
-        // Lógica de separación para Egresaditos en el portapapeles
         if (r.nombre_cumpleanero.includes("🎓")) {
           const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").trim()
           textoCopiar += `🎓 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
@@ -207,9 +214,9 @@ export default function AdminPage() {
     })
 
     navigator.clipboard.writeText(textoCopiar).then(() => {
-      window.alert("¡Resumen copiado al portapapeles! Ya podés pegarlo en tu grupo de WhatsApp con los empleados.")
+      toast.success("¡Resumen copiado al portapapeles! Ya podés pegarlo en tu WhatsApp.")
     }).catch(err => {
-      window.alert("Error al copiar. Tu navegador no lo permite automáticamente.")
+      toast.error("Error al copiar. Tu navegador no lo permite automáticamente.")
     })
   }
 
@@ -424,7 +431,6 @@ export default function AdminPage() {
 
               const isPagoTotalidadDesdeInicio = reserva.sena >= reserva.total || (reserva.metodo_pago && reserva.metodo_pago.includes("Totalidad"))
               
-              // DETERMINAR SI ES EGRESADITO PARA RENDERIZAR DISTINTO
               const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓")
 
               return (
@@ -540,7 +546,6 @@ export default function AdminPage() {
                       </Button>
                     )}
 
-                    {/* MODIFICACIÓN: No mostramos el botón de WhatsApp si es Egresadito y ya está activa */}
                     {reserva.telefono && !(isActiva && isEgresadito) && (
                       <a 
                         href={getWhatsAppLink(reserva, isActiva, fechaFormateada)} 

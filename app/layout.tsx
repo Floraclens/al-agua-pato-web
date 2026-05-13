@@ -6,12 +6,17 @@ import './globals.css'
 
 const nunito = Nunito({ 
   subsets: ["latin"],
-  variable: '--font-nunito'
+  variable: '--font-nunito',
+  display: 'swap', // OPTIMIZACIÓN: Evita el parpadeo de texto en blanco (FOIT)
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://al-agua-pato-web.vercel.app'), // OPTIMIZACIÓN: Base para URLs relativas en SEO
   title: 'Al Agua Pato | Salón de Fiestas Infantiles en Santiago del Estero 🦆✨',
   description: 'El mejor salón de fiestas infantiles en Los Flores, Santiago del Estero. Pileta, parque acuático, shows LED y pelotero. ¡Reservá tu fecha online hoy!',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Al Agua Pato | Fiestas Infantiles en Sgo. del Estero',
     description: 'Parque acuático, shows LED y todo incluido en Los Flores. Elegí tu fecha y reservá tu evento inolvidable.',
@@ -27,6 +32,12 @@ export const metadata: Metadata = {
     ],
     locale: 'es_AR',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Al Agua Pato | Fiestas Infantiles',
+    description: 'El mejor salón de fiestas infantiles en Santiago del Estero.',
+    images: ['/og-image.jpg'],
   },
   icons: {
     icon: '/logo-circular.png', // Tu Favicon sigue siendo el logo
@@ -73,8 +84,8 @@ export default function RootLayout({
         {/* Vercel Analytics para tus métricas internas */}
         {process.env.NODE_ENV === 'production' && <Analytics />}
 
-        {/* INYECCIÓN DEL PÍXEL DE META (Solo carga en producción para no ensuciar datos) */}
-        {process.env.NODE_ENV === 'production' && (
+        {/* INYECCIÓN DEL PÍXEL DE META (Seguridad: Usando variables de entorno en vez de hardcodear) */}
+        {process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_META_PIXEL_ID && (
           <>
             <Script id="meta-pixel" strategy="afterInteractive">
               {`
@@ -86,7 +97,7 @@ export default function RootLayout({
                 t.src=v;s=b.getElementsByTagName(e)[0];
                 s.parentNode.insertBefore(t,s)}(window, document,'script',
                 'https://connect.facebook.net/en_US/fbevents.js');
-                fbq('init', 'TU_PIXEL_ID'); // REEMPLAZAR 'TU_PIXEL_ID' POR EL NÚMERO REAL
+                fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}'); 
                 fbq('track', 'PageView');
               `}
             </Script>
@@ -95,7 +106,7 @@ export default function RootLayout({
                 height="1" 
                 width="1" 
                 style={{ display: 'none' }}
-                src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"
+                src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
                 alt=""
               />
             </noscript>

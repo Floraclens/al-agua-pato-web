@@ -87,6 +87,7 @@ export function ReservationCalendar({
     async function fetchAllReservations() {
       const supabase = createBrowserClient()
       
+      // OPTIMIZACIÓN: Solo traemos las columnas estrictamente necesarias
       let query = supabase.from("reservas").select("id, fecha, turno")
       if (ignoreReservaId) {
         query = query.neq("id", ignoreReservaId)
@@ -122,6 +123,7 @@ export function ReservationCalendar({
       const d = String(selectedDate!.getDate()).padStart(2, "0")
       const dateStr = `${y}-${m}-${d}`
 
+      // OPTIMIZACIÓN: Solo traemos la columna 'turno'
       let query = supabase.from("reservas").select("turno").eq("fecha", dateStr)
       
       if (ignoreReservaId) {
