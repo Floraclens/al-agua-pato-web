@@ -12,7 +12,8 @@ import {
   Sparkles,
   AlertTriangle,
   CheckCircle2,
-  ChevronDown // <-- Agregado para la flechita del acordeón
+  ChevronDown,
+  Info // <-- Agregado para usar un ícono más amigable en las notas
 } from "lucide-react"
 
 interface ServiceItem {
@@ -115,20 +116,22 @@ const serviciosData: ServiceCategory[] = [
   },
   {
     id: "maquinas",
-    titulo: "Snacks",
+    titulo: "Servicio de Snacks",
     icon: Popcorn,
     color: "text-amarillo",
     bgColor: "bg-amarillo/10",
     borderColor: "border-amarillo/20",
     shadowColor: "hover:shadow-amarillo/10",
     items: [
-      { text: "2 Panchukeras" },
       { text: "Pochoclera" },
+      { text: "2 Panchukeras" },
       { text: "Cascada de Chocolate (incluye bowls)" },
+      { text: "Personal operador a cargo para los 3 servicios" },
     ],
     nota: {
-      text: "Solo las 3 primeras horas. NO incluye materia prima",
-      type: "warning",
+      // TEXTO SUAVIZADO Y CAMBIADO A TIPO "INFO" (Azul amigable en vez de rojo alerta)
+      text: "Para tener en cuenta: Los insumos corren por cuenta de la familia. Nuestro personal y las máquinas estarán a tu disposición durante las primeras 3 horas de la fiesta.",
+      type: "info",
     },
   },
   {
@@ -166,7 +169,6 @@ const serviciosData: ServiceCategory[] = [
 ]
 
 export function ServiciosIncluidos() {
-  // Estado para el Acordeón en móviles (Iniciamos con el primero abierto)
   const [openAccordion, setOpenAccordion] = useState<string | null>(serviciosData[0].id)
 
   return (
@@ -247,7 +249,11 @@ export function ServiciosIncluidos() {
                   {/* Nota */}
                   {servicio.nota && (
                     <div className={`mt-3 flex items-start gap-2.5 text-xs font-extrabold p-3 rounded-xl border ${servicio.nota.type === "warning" ? "text-red-800 bg-red-50/50 border-red-100" : "text-azul-marino bg-azul-claro/10 border-azul-claro/20"}`}>
-                      <AlertTriangle className={`w-4 h-4 shrink-0 ${servicio.nota.type === "warning" ? "text-red-600" : "text-azul-claro"}`} />
+                      {servicio.nota.type === "warning" ? (
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+                      ) : (
+                        <Info className="w-4 h-4 shrink-0 text-azul-claro" />
+                      )}
                       <p className="pt-0.5">{servicio.nota.text}</p>
                     </div>
                   )}
@@ -326,7 +332,11 @@ export function ServiciosIncluidos() {
                     }`}
                   >
                     <div className={`p-1.5 rounded-full shrink-0 ${servicio.nota.type === "warning" ? "bg-red-200" : "bg-azul-claro/20"}`}>
-                      <AlertTriangle className={`w-4 h-4 ${servicio.nota.type === "warning" ? "text-red-600" : "text-azul-claro"}`} />
+                      {servicio.nota.type === "warning" ? (
+                        <AlertTriangle className="w-4 h-4 text-red-600" />
+                      ) : (
+                        <Info className="w-4 h-4 text-azul-claro" />
+                      )}
                     </div>
                     <p className="pt-1 text-[13px] leading-tight">{servicio.nota.text}</p>
                   </div>
@@ -335,20 +345,6 @@ export function ServiciosIncluidos() {
             </div>
           )
         })}
-      </div>
-
-      {/* Súper Cartelito de Todo Incluido */}
-      <div className="relative overflow-hidden flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 p-8 rounded-[2.5rem] bg-gradient-to-r from-amarillo via-[#fbbf24] to-naranja border-4 border-white shadow-2xl group hover:scale-[1.02] transition-transform duration-500 max-w-4xl mx-auto mt-4">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay" />
-        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-white/20 blur-3xl rounded-full" />
-        
-        <div className="bg-white/20 backdrop-blur-md p-4 rounded-full shrink-0 relative z-10 shadow-[inset_0_2px_10px_rgba(255,255,255,0.5)] border border-white/30">
-          <Sparkles className="w-10 h-10 text-white animate-pulse" />
-        </div>
-        <div className="text-center md:text-left relative z-10 drop-shadow-md">
-          <h3 className="text-2xl md:text-3xl font-black text-white mb-1 tracking-tight">¡Todo esto está incluido!</h3>
-          <p className="text-white/90 text-base md:text-lg font-bold">Reserva sin costos ocultos ni sorpresas de último momento.</p>
-        </div>
       </div>
 
     </div>

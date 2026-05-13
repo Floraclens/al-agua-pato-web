@@ -8,7 +8,7 @@ import { PhotoGallery } from "@/components/photo-gallery"
 import { 
   Sparkles, MapPin, CheckCircle2, Star, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
-  HelpCircle, Phone, Mail, GraduationCap, School, ChevronDown // <--- AGREGAR ESTE
+  HelpCircle, Phone, Mail, GraduationCap, School, ChevronDown 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,7 +21,7 @@ import {
 export default function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showFloatingButton, setShowFloatingButton] = useState(true);
-  const [showEventMenu, setShowEventMenu] = useState(false); // NUEVO ESTADO PARA EL MENÚ
+  const [showEventMenu, setShowEventMenu] = useState(false); 
   const reservaFinalRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -85,10 +85,6 @@ export default function LandingPage() {
                   <span className="hidden sm:inline">Ver en Maps</span>
                   <span className="sm:hidden">Ubicación</span>
                 </a>
-                
-                <Link href="/egresaditos" className="hidden lg:flex items-center gap-1.5 text-rosa hover:text-lavanda font-extrabold text-sm transition-colors">
-                  <GraduationCap className="w-5 h-5" /> Egresaditos
-                </Link>
 
                 <button onClick={scrollToReserva} className="hidden md:flex items-center gap-2 px-5 py-2 bg-azul-marino text-white hover:bg-azul-marino/90 transition-all duration-200 font-bold text-sm rounded-full shadow-md hover:shadow-lg active:scale-95">
                   <Sparkles className="h-4 w-4 text-amarillo" />
@@ -267,10 +263,10 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[220px]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-[220px]">
               
               <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-2 lg:col-span-2 row-span-2 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
+                className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-2 row-span-2 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/robot.jpg')}
               >
                 <Image src="/extras/robot.jpg" alt="Robot LED" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -283,19 +279,7 @@ export default function LandingPage() {
               </div>
 
               <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-1 lg:col-span-2 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
-                onClick={() => setSelectedImage('/extras/astronautas.jpg')}
-              >
-                <Image src="/extras/astronautas.jpg" alt="Team Astronautas" fill className="object-cover object-[center_30%] transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0f19] via-[#0b0f19]/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6">
-                  <h3 className="text-xl md:text-2xl font-black text-white mb-1 drop-shadow-md">Team Astronautas LED</h3>
-                  <p className="text-white/80 text-sm md:text-base font-medium">Un show de otro planeta.</p>
-                </div>
-              </div>
-
-              <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
+                className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/zancos.jpg')}
               >
                 <Image src="/extras/zancos.jpg" alt="Zancos LED" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -308,7 +292,7 @@ export default function LandingPage() {
               </div>
 
               <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
+                className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
                 onClick={() => setSelectedImage('/extras/personajes.jpg')}
               >
                 <Image src="/extras/personajes.jpg" alt="Personajes" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -425,9 +409,10 @@ export default function LandingPage() {
             </div>
 
             <div className="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 md:mt-12 min-h-[140px]">
+               
+               {/* CARTEL SIEMPRE VISIBLE SIN FLECHA */}
                <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-5 py-2.5 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30 flex items-center justify-center">
                  🎁 ¡Incluye Invitación Digital Personalizada!
-                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0" />
                </div>
 
                <div className="absolute -inset-x-6 -top-2 -bottom-6 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse pointer-events-none" />

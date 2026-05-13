@@ -5,7 +5,7 @@ import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
-import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, GraduationCap, School } from "lucide-react"
+import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, GraduationCap, School, AlertCircle } from "lucide-react"
 import { type Turno } from "@/lib/turno"
 import { obtenerReglasEgresaditos, PRECIOS, PRECIOS_EGRESADITOS } from "@/lib/config-reservas"
 import Link from "next/link"
@@ -192,7 +192,7 @@ export default function PaginaReservaEgresaditos() {
               <Info className="w-6 h-6 text-lavanda" />
             </div>
             <div className="w-full">
-              <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de la Promo</h4>
+              <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de tu evento</h4>
               
               <div className="space-y-2 w-full">
                 <details className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
@@ -200,7 +200,18 @@ export default function PaginaReservaEgresaditos() {
                     <span className="font-bold text-azul-marino text-sm md:text-base">📅 1 de Noviembre al 14 de Diciembre</span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
+                    {/* CARTEL DE CONGELAMIENTO */}
+                    <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                      <p className="text-[13px] text-orange-900 leading-snug">
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
+                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                      </p>
+                    </div>
+
                     <ul className="list-disc pl-4 space-y-3 text-xs md:text-sm">
                       <li>
                         <strong>Lunes a Viernes:</strong> <span className="font-extrabold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span> <br/>
@@ -223,8 +234,19 @@ export default function PaginaReservaEgresaditos() {
                     <span className="font-bold text-azul-marino text-sm md:text-base">🔥 15 de Diciembre a Fin de Mes</span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-3 mt-1">
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm">
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
+                    {/* CARTEL DE CONGELAMIENTO */}
+                    <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                      <p className="text-[13px] text-orange-900 leading-snug">
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
+                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                      </p>
+                    </div>
+
+                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
                       Todos los días (Turnos fijos):
                     </div>
                     <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">

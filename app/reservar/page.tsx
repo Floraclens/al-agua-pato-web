@@ -5,7 +5,7 @@ import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
-import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown } from "lucide-react"
+import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react" // Añadimos AlertCircle
 import { type Turno } from "@/lib/turno"
 import { obtenerReglasParaFecha, PRECIOS } from "@/lib/config-reservas"
 import Link from "next/link"
@@ -26,7 +26,6 @@ export interface Extras {
   pileta: boolean
 }
 
-// NUEVO: Agregamos los campos de Egresaditos como opcionales (?)
 export interface DatosCliente {
   nombre: string
   telefono: string
@@ -41,7 +40,6 @@ export interface DatosCliente {
 const SENIA = 400000
 const DESCUENTO_EFECTIVO = 0.1
 
-// FORMATEADOR DE DINERO DINÁMICO
 const formatMoneyUI = (amount: number) => {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
 }
@@ -81,7 +79,6 @@ export default function PaginaReserva() {
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(null)
   const [pagoTotalidad, setPagoTotalidad] = useState<boolean>(false)
 
-  // NUEVO: Inicializamos el estado con los campos vacíos
   const [datosCliente, setDatosCliente] = useState<DatosCliente>({
     nombre: "",
     telefono: "",
@@ -224,9 +221,12 @@ export default function PaginaReserva() {
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
-                    <p><span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span></p>
+                    <p className="flex items-center gap-2">
+                      <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
+                      <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Costo Fijo</span>
+                    </p>
                     <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm">
-                      <li><strong>Turno de 4 horas</strong> a elección.</li>
+                      <li><strong>Turno de 4 horas.</strong></li>
                       <li>Franja horaria disponible: <strong>12:00 a 19:00 hs</strong>.</li>
                       <li className="text-muted-foreground italic">* El último turno puede comenzar a las 15:00 hs como máximo.</li>
                     </ul>
@@ -239,7 +239,18 @@ export default function PaginaReserva() {
                     <span className="font-bold text-azul-marino text-sm md:text-base">⭐ Temporada Media <span className="font-medium opacity-70 text-xs ml-1">(1 Sep - 14 Dic)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
+                    {/* CARTEL DE CONGELAMIENTO */}
+                    <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                      <p className="text-[13px] text-orange-900 leading-snug">
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
+                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                      </p>
+                    </div>
+
                     <ul className="list-disc pl-4 space-y-3 text-xs md:text-sm">
                       <li>
                         <strong>Lunes a Viernes:</strong> <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span> <br/>
@@ -263,8 +274,19 @@ export default function PaginaReserva() {
                     <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-3 mt-1">
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm">
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
+                    {/* CARTEL DE CONGELAMIENTO */}
+                    <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                      <p className="text-[13px] text-orange-900 leading-snug">
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
+                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                      </p>
+                    </div>
+
+                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
                       Todos los días (Turnos fijos):
                     </div>
                     <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
@@ -284,7 +306,7 @@ export default function PaginaReserva() {
                <PartyPopper className="w-5 h-5 text-naranja" />
              </div>
              <p className="text-[13px] md:text-sm text-slate-800 font-medium leading-snug relative z-10">
-               <strong className="font-extrabold text-azul-marino">✨ Bonus Exclusivo:</strong> Tu reserva incluye automáticamente el acceso a nuestro panel VIP para crear y descargar la <strong className="text-naranja">Invitación Digital Interactiva</strong> para tus invitados.
+               <strong className="font-extrabold text-azul-marino">✨ Bonus Exclusivo:</strong> Tu reserva incluye automáticamente el acceso a nuestro panel VIP para crear y descargar la <strong className="text-naranja">Invitación Digital Personalizada</strong> para tus invitados.
              </p>
           </div>
         </div>
