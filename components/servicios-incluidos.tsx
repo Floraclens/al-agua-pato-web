@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import {
   Users,
   Home,
@@ -12,9 +12,15 @@ import {
   Sparkles,
   AlertTriangle,
   CheckCircle2,
-  ChevronDown,
   Info 
 } from "lucide-react"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { cn } from "@/lib/utils"
 
 interface ServiceItem {
   text: string
@@ -168,87 +174,94 @@ const serviciosData: ServiceCategory[] = [
 ]
 
 export function ServiciosIncluidos() {
-  const [openAccordion, setOpenAccordion] = useState<string | null>(serviciosData[0].id)
-
   return (
     <div className="space-y-8 md:space-y-12">
       
-      {/* --- VISTA MÓVIL: ACORDEÓN INTUITIVO --- */}
-      <div className="md:hidden flex flex-col space-y-3 px-2">
-        <p className="text-center text-sm font-bold text-azul-marino/60 mb-2">Toca cada categoría para ver detalles 👇</p>
+      {/* --- VISTA MÓVIL: USANDO ACORDEÓN DE RADIX PARA MÁXIMA FLUIDEZ --- */}
+      <div className="md:hidden px-2">
+        <p className="text-center text-sm font-bold text-azul-marino/60 mb-4">
+          Toca cada categoría para ver detalles 👇
+        </p>
         
-        {serviciosData.map((servicio) => {
-          const isOpen = openAccordion === servicio.id;
-          const Icon = servicio.icon;
-
-          return (
-            <div
-              key={servicio.id}
-              className={`overflow-hidden bg-white rounded-2xl border-2 transition-all duration-300 ${
-                isOpen ? `${servicio.borderColor} shadow-md` : "border-slate-100 shadow-sm"
-              }`}
-            >
-              {/* Botón que despliega */}
-              <button
-                onClick={() => setOpenAccordion(isOpen ? null : servicio.id)}
-                className="w-full flex items-center justify-between p-4 text-left focus:outline-none"
+        <Accordion type="single" collapsible defaultValue="capacidad" className="flex flex-col space-y-3">
+          {serviciosData.map((servicio) => {
+            const Icon = servicio.icon;
+            
+            return (
+              <AccordionItem 
+                key={servicio.id} 
+                value={servicio.id}
+                className={cn(
+                  "bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden",
+                  "border-slate-100 shadow-sm",
+                  "data-[state=open]:shadow-md",
+                  // Aplicamos el color de borde solo cuando está abierto según el ID
+                  servicio.id === "capacidad" && "data-[state=open]:border-rosa/20",
+                  (servicio.id === "instalaciones" || servicio.id === "juegos") && "data-[state=open]:border-azul-claro/20",
+                  (servicio.id === "mobiliario" || servicio.id === "candybar") && "data-[state=open]:border-naranja/20",
+                  servicio.id === "maquinas" && "data-[state=open]:border-amarillo/20",
+                  servicio.id === "decoracion" && "data-[state=open]:border-rosa/20"
+                )}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl ${servicio.bgColor} border border-white flex items-center justify-center shrink-0 shadow-inner`}>
-                    <Icon className={`w-6 h-6 ${servicio.color}`} />
+                <AccordionTrigger className="px-4 py-4 hover:no-underline [&>svg]:size-5 [&>svg]:text-slate-400">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-12 h-12 rounded-xl border border-white flex items-center justify-center shrink-0 shadow-inner",
+                      servicio.bgColor
+                    )}>
+                      <Icon className={cn("w-6 h-6", servicio.color)} />
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <h3 className="text-[17px] font-black text-azul-marino leading-tight">
+                        {servicio.titulo}
+                      </h3>
+                      <span className={cn(
+                        "inline-block mt-1 text-[10px] font-extrabold bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider",
+                        servicio.color
+                      )}>
+                        {servicio.items.length} incluidos
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-[17px] font-black text-azul-marino leading-tight">
-                      {servicio.titulo}
-                    </h3>
-                    <span className={`inline-block mt-1 text-[10px] font-extrabold ${servicio.color} bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider`}>
-                      {servicio.items.length} incluidos
-                    </span>
-                  </div>
-                </div>
-                {/* Flechita animada */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-slate-100' : ''}`}>
-                  <ChevronDown className="w-5 h-5 text-slate-500" />
-                </div>
-              </button>
-
-              {/* Contenido desplegable (ANIMACIÓN FLUIDA CON GRID) */}
-              <div
-                className={`grid transition-all duration-300 ease-in-out ${
-                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="p-4 pt-0 border-t border-slate-50/50 mt-1">
+                </AccordionTrigger>
+                
+                <AccordionContent className="px-4 pb-4">
+                  <div className="pt-2 border-t border-slate-50/50">
                     <div className="grid grid-cols-1 gap-2">
                       {servicio.items.map((item, i) => (
                         <div
                           key={i}
-                          className={`flex items-start gap-3 p-3 rounded-xl ${
+                          className={cn(
+                            "flex items-start gap-3 p-3 rounded-xl",
                             item.highlight === "warning"
                               ? "bg-red-50/50 border border-red-50"
                               : "bg-slate-50/50 border border-transparent"
-                          }`}
+                          )}
                         >
                           <div className="mt-0.5 shrink-0">
                             {item.highlight === "warning" ? (
                               <AlertTriangle className="w-4 h-4 text-red-500" />
                             ) : (
-                              <CheckCircle2 className={`w-4 h-4 ${servicio.color}`} />
+                              <CheckCircle2 className={cn("w-4 h-4", servicio.color)} />
                             )}
                           </div>
-                          <span className={`text-[13px] leading-snug font-bold pt-0.5 ${
+                          <span className={cn(
+                            "text-[13px] leading-snug font-bold pt-0.5",
                             item.highlight === "warning" ? "text-red-700" : "text-slate-700"
-                          }`}>
+                          )}>
                             {item.text}
                           </span>
                         </div>
                       ))}
                     </div>
 
-                    {/* Nota */}
                     {servicio.nota && (
-                      <div className={`mt-3 flex items-start gap-2.5 text-xs font-extrabold p-3 rounded-xl border ${servicio.nota.type === "warning" ? "text-red-800 bg-red-50/50 border-red-100" : "text-azul-marino bg-azul-claro/10 border-azul-claro/20"}`}>
+                      <div className={cn(
+                        "mt-3 flex items-start gap-2.5 text-xs font-extrabold p-3 rounded-xl border",
+                        servicio.nota.type === "warning" 
+                          ? "text-red-800 bg-red-50/50 border-red-100" 
+                          : "text-azul-marino bg-azul-claro/10 border-azul-claro/20"
+                      )}>
                         {servicio.nota.type === "warning" ? (
                           <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
                         ) : (
@@ -258,11 +271,11 @@ export function ServiciosIncluidos() {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
       </div>
 
       {/* --- VISTA ESCRITORIO: GRILLA BENTO (Intacta) --- */}
