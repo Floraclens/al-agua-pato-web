@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
-  Info // <-- Agregado para usar un ícono más amigable en las notas
+  Info 
 } from "lucide-react"
 
 interface ServiceItem {
@@ -129,7 +129,6 @@ const serviciosData: ServiceCategory[] = [
       { text: "Personal operador a cargo para los 3 servicios" },
     ],
     nota: {
-      // TEXTO SUAVIZADO Y CAMBIADO A TIPO "INFO" (Azul amigable en vez de rojo alerta)
       text: "Para tener en cuenta: Los insumos corren por cuenta de la familia. Nuestro personal y las máquinas estarán a tu disposición durante las primeras 3 horas de la fiesta.",
       type: "info",
     },
@@ -213,50 +212,52 @@ export function ServiciosIncluidos() {
                 </div>
               </button>
 
-              {/* Contenido desplegable */}
+              {/* Contenido desplegable (ANIMACIÓN FLUIDA CON GRID) */}
               <div
-                className={`transition-all duration-300 ease-in-out ${
-                  isOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+                className={`grid transition-all duration-300 ease-in-out ${
+                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                 }`}
               >
-                <div className="p-4 pt-0 border-t border-slate-50/50 mt-1">
-                  <div className="grid grid-cols-1 gap-2">
-                    {servicio.items.map((item, i) => (
-                      <div
-                        key={i}
-                        className={`flex items-start gap-3 p-3 rounded-xl ${
-                          item.highlight === "warning"
-                            ? "bg-red-50/50 border border-red-50"
-                            : "bg-slate-50/50 border border-transparent"
-                        }`}
-                      >
-                        <div className="mt-0.5 shrink-0">
-                          {item.highlight === "warning" ? (
-                            <AlertTriangle className="w-4 h-4 text-red-500" />
-                          ) : (
-                            <CheckCircle2 className={`w-4 h-4 ${servicio.color}`} />
-                          )}
+                <div className="overflow-hidden">
+                  <div className="p-4 pt-0 border-t border-slate-50/50 mt-1">
+                    <div className="grid grid-cols-1 gap-2">
+                      {servicio.items.map((item, i) => (
+                        <div
+                          key={i}
+                          className={`flex items-start gap-3 p-3 rounded-xl ${
+                            item.highlight === "warning"
+                              ? "bg-red-50/50 border border-red-50"
+                              : "bg-slate-50/50 border border-transparent"
+                          }`}
+                        >
+                          <div className="mt-0.5 shrink-0">
+                            {item.highlight === "warning" ? (
+                              <AlertTriangle className="w-4 h-4 text-red-500" />
+                            ) : (
+                              <CheckCircle2 className={`w-4 h-4 ${servicio.color}`} />
+                            )}
+                          </div>
+                          <span className={`text-[13px] leading-snug font-bold pt-0.5 ${
+                            item.highlight === "warning" ? "text-red-700" : "text-slate-700"
+                          }`}>
+                            {item.text}
+                          </span>
                         </div>
-                        <span className={`text-[13px] leading-snug font-bold pt-0.5 ${
-                          item.highlight === "warning" ? "text-red-700" : "text-slate-700"
-                        }`}>
-                          {item.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Nota */}
-                  {servicio.nota && (
-                    <div className={`mt-3 flex items-start gap-2.5 text-xs font-extrabold p-3 rounded-xl border ${servicio.nota.type === "warning" ? "text-red-800 bg-red-50/50 border-red-100" : "text-azul-marino bg-azul-claro/10 border-azul-claro/20"}`}>
-                      {servicio.nota.type === "warning" ? (
-                        <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
-                      ) : (
-                        <Info className="w-4 h-4 shrink-0 text-azul-claro" />
-                      )}
-                      <p className="pt-0.5">{servicio.nota.text}</p>
+                      ))}
                     </div>
-                  )}
+
+                    {/* Nota */}
+                    {servicio.nota && (
+                      <div className={`mt-3 flex items-start gap-2.5 text-xs font-extrabold p-3 rounded-xl border ${servicio.nota.type === "warning" ? "text-red-800 bg-red-50/50 border-red-100" : "text-azul-marino bg-azul-claro/10 border-azul-claro/20"}`}>
+                        {servicio.nota.type === "warning" ? (
+                          <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+                        ) : (
+                          <Info className="w-4 h-4 shrink-0 text-azul-claro" />
+                        )}
+                        <p className="pt-0.5">{servicio.nota.text}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
