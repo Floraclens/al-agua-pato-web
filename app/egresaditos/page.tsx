@@ -79,7 +79,6 @@ export default function PaginaReservaEgresaditos() {
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(null)
   const [pagoTotalidad, setPagoTotalidad] = useState<boolean>(false)
 
-  // INICIALIZAMOS TODOS LOS DATOS VACÍOS, INCLUYENDO LOS DEL COLEGIO
   const [datosCliente, setDatosCliente] = useState<DatosCliente>({
     nombre: "",
     telefono: "",
@@ -143,7 +142,6 @@ export default function PaginaReservaEgresaditos() {
   const isValidPersonaje = !extras.personaje || hasSeleccionados;
   const errorPersonajeVacio = extras.personaje && !hasSeleccionados;
 
-  // NUEVA VALIDACIÓN: Exige que Institución, Sala y Turno estén completos
   const canSubmit = 
     selectedDate && 
     selectedTurno && 
@@ -183,6 +181,7 @@ export default function PaginaReservaEgresaditos() {
              <span className="text-sm font-bold tracking-wide text-azul-marino uppercase">Exclusivo Colegios</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-black text-lavanda mb-3">Egresaditos</h1>
+          <h2 className="sr-only">Reserva tu evento escolar</h2>
           <p className="text-muted-foreground text-lg">Completá los datos y asegurá la mejor despedida.</p>
         </div>
 
@@ -202,13 +201,13 @@ export default function PaginaReservaEgresaditos() {
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO */}
+                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
-                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
-                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/07!</strong>
+                        Abonando la seña hoy y cancelando hasta el 31/07, mantenemos el precio. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
                       </p>
                     </div>
 
@@ -236,13 +235,13 @@ export default function PaginaReservaEgresaditos() {
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO */}
+                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
-                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
-                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/07!</strong>
+                        Abonando la seña hoy y cancelando hasta el 31/07, mantenemos el precio. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
                       </p>
                     </div>
 
@@ -365,7 +364,7 @@ export default function PaginaReservaEgresaditos() {
       </div>
 
       <a 
-        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20en%20la%20página%20de%20reservas%20de%20Egresaditos%20y%20tengo%20una%20duda..." 
+        href="https://api.whatsapp.com/send?phone=5493854470103&text=Hola!%20Estoy%20en%20la%20pagina%20de%20reservas%20de%20Egresaditos%20y%20tengo%20una%20duda..." 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"

@@ -214,7 +214,7 @@ export default function PaginaReserva() {
               
               <div className="space-y-2 w-full">
                 
-                {/* Temporada Baja (DINÁMICA) */}
+                {/* Temporada Baja */}
                 <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">📅 Temporada Baja <span className="font-medium opacity-70 text-xs ml-1">(1 Abr - 31 Ago)</span></span>
@@ -227,7 +227,7 @@ export default function PaginaReserva() {
                       <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-blue-900 leading-snug">
                         <strong className="block text-blue-700 mb-0.5 uppercase tracking-wide text-[11px] font-extrabold">Aclaración sobre la pileta</strong>
-                        Sin pileta, salvo que el clima acompañe y quieras sumarla como adicional. ¡Seleccionála más abajo y listo!
+                        Sin pileta, salvo que el clima acompañe y quieras sumarlo como adicional, ¡seleccioná más abajo y listo!
                       </p>
                     </div>
 
@@ -243,7 +243,7 @@ export default function PaginaReserva() {
                   </div>
                 </details>
 
-                {/* Temporada Media (DINÁMICA) */}
+                {/* Temporada Media */}
                 <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">⭐ Temporada Media <span className="font-medium opacity-70 text-xs ml-1">(1 Sep - 14 Dic)</span></span>
@@ -251,13 +251,13 @@ export default function PaginaReserva() {
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO */}
+                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
-                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
-                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/07!</strong>
+                        Abonando la seña hoy y cancelando hasta el 31/07, mantenemos el precio. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
                       </p>
                     </div>
 
@@ -278,7 +278,7 @@ export default function PaginaReserva() {
                   </div>
                 </details>
 
-                {/* Temporada Alta (DINÁMICA) */}
+                {/* Temporada Alta */}
                 <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
@@ -286,13 +286,13 @@ export default function PaginaReserva() {
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO */}
+                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios Congelados!</strong>
-                        Abonando la <strong>totalidad</strong> de tu evento antes del <strong>31 de Julio</strong>. <br/> 
-                        <span className="opacity-80 italic">(A partir de Agosto aplicarán las nuevas tarifas definidas)</span>
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/07!</strong>
+                        Abonando la seña hoy y cancelando hasta el 31/07, mantenemos el precio. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
                       </p>
                     </div>
 
