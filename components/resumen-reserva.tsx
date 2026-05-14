@@ -207,11 +207,9 @@ export function ResumenReserva({
       
       let mensajeWhatsApp = ""
 
-      // --- OPCIÓN NUCLEAR: TODOS LOS EMOJIS EN UNICODE ---
-      // \u00A1 = ¡ | \u00BF = ¿ | \uD83E\uDD86 = Pato | \uD83C\uDF93 = Egresado | \uD83D\uDCC5 = Calendario | \u23F0 = Reloj | \uD83C\uDF88 = Globo
-      // \uD83D\uDCB3 = Tarjeta/Método | \uD83D\uDCB0 = Bolsa Dinero | \uD83D\uDCB8 = Billete Volando
-      // \uD83C\uDFEB = Colegio | \u270F\uFE0F = Lápiz | \u2600\uFE0F = Sol | \uD83D\uDC64 = Usuario | \uD83C\uDF82 = Torta | \u2728 = Estrellas
-
+      // --- OPCIÓN NUCLEAR 2.0: EMOJIS + TILDES Y Ñ EN UNICODE ---
+      // \u00F1 = ñ | \u00E9 = é | \u00F3 = ó | \u00E1 = á
+      
       if (isEgresadito) {
         mensajeWhatsApp = 
 `\u00A1Hola Al Agua Pato! \uD83E\uDD86\uD83C\uDF93 Acabo de solicitar una reserva de EGRESADITOS desde la web.
@@ -222,22 +220,22 @@ export function ResumenReserva({
 \uD83C\uDF88 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-\uD83D\uDCB3 Método: ${textoMetodoPago}
+\uD83D\uDCB3 M\u00E9todo: ${textoMetodoPago}
 \uD83D\uDCB0 Total: ${formatPrice(calculos.total)}
-\uD83D\uDCB8 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
+\uD83D\uDCB8 ${pagoTotalidad ? "Abono total ahora:" : "Se\u00F1a requerida:"} ${formatPrice(calculos.sena)}
 
 *Datos del Colegio:*
-\uD83C\uDFEB Institución: ${datosCliente.institucion}
+\uD83C\uDFEB Instituci\u00F3n: ${datosCliente.institucion}
 \u270F\uFE0F Sala/Curso: ${datosCliente.sala}
 \u2600\uFE0F Turno: ${datosCliente.turno_colegio}
 \uD83D\uDC64 A nombre de: ${datosCliente.nombre}
 
 *(ID interno de reserva: ${reservaId})*
 
-\u00BFTe puedo pasar el comprobante por acá para confirmar la fecha?`
+\u00BFTe puedo pasar el comprobante por ac\u00E1 para confirmar la fecha?`
       } else {
         mensajeWhatsApp = 
-`\u00A1Hola Al Agua Pato! \uD83E\uDD86\u2728 Acabo de solicitar una reserva desde la página web.
+`\u00A1Hola Al Agua Pato! \uD83E\uDD86\u2728 Acabo de solicitar una reserva desde la p\u00E1gina web.
 
 *Detalles del evento:*
 \uD83D\uDCC5 Fecha: ${fechaFormateada}
@@ -245,17 +243,17 @@ export function ResumenReserva({
 \uD83C\uDF88 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-\uD83D\uDCB3 Método: ${textoMetodoPago}
+\uD83D\uDCB3 M\u00E9todo: ${textoMetodoPago}
 \uD83D\uDCB0 Total: ${formatPrice(calculos.total)}
-\uD83D\uDCB8 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
+\uD83D\uDCB8 ${pagoTotalidad ? "Abono total ahora:" : "Se\u00F1a requerida:"} ${formatPrice(calculos.sena)}
 
 *Mis datos:*
 \uD83D\uDC64 A nombre de: ${datosCliente.nombre}
-\uD83C\uDF82 Cumpleañero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " añitos" : "-"})
+\uD83C\uDF82 Cumplea\u00F1ero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " a\u00F1itos" : "-"})
 
 *(ID interno de reserva: ${reservaId})*
 
-\u00BFTe puedo pasar el comprobante por acá para confirmar la fecha?`
+\u00BFTe puedo pasar el comprobante por ac\u00E1 para confirmar la fecha?`
       }
 
       // Usamos encodeURIComponent nativo
