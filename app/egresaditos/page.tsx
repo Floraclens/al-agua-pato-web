@@ -201,7 +201,6 @@ export default function PaginaReservaEgresaditos() {
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
@@ -214,12 +213,16 @@ export default function PaginaReservaEgresaditos() {
                     <ul className="list-disc pl-4 space-y-3 text-xs md:text-sm">
                       <li>
                         <strong>Lunes a Viernes:</strong> <span className="font-extrabold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span> <br/>
-                        <span className="inline-block mt-1">Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</span> <br/>
-                        <span className="text-muted-foreground italic">* El último turno puede comenzar a las 18:30 hs.</span>
+                        <ul className="list-[circle] pl-5 mt-2 space-y-1.5 text-azul-marino/80">
+                           <li>✨ <strong>Exclusividad total:</strong> Solo 1 evento por día.</li>
+                           <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
+                        </ul>
+                        <span className="text-muted-foreground italic text-xs ml-5">* El último turno puede comenzar a las 18:30 hs.</span>
                       </li>
                       <li>
-                        <strong>Sábados, Domingos y Feriados (Turnos fijos):</strong>
+                        <strong>Sábados, Domingos y Feriados:</strong>
                         <ul className="list-[circle] pl-5 mt-2 space-y-1.5">
+                          <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
                           <li>Turno 1 (12:00 a 16:00 hs): <strong className="text-lavanda text-sm">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_1_fijo)}</strong></li>
                           <li>Turno 2 (18:30 a 22:30 hs): <strong className="text-lavanda text-sm">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_2_fijo)}</strong></li>
                         </ul>
@@ -235,7 +238,6 @@ export default function PaginaReservaEgresaditos() {
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
@@ -246,9 +248,10 @@ export default function PaginaReservaEgresaditos() {
                     </div>
 
                     <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
-                      Todos los días (Turnos fijos):
+                      Todos los días:
                     </div>
                     <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
+                      <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
                       <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_1_fijo)}</span></li>
                       <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-lavanda text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_2_fijo)}</span></li>
                     </ul>

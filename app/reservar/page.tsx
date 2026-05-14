@@ -215,14 +215,13 @@ export default function PaginaReserva() {
               <div className="space-y-2 w-full">
                 
                 {/* Temporada Baja */}
-                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                <details name="temporadas" className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">📅 Temporada Baja <span className="font-medium opacity-70 text-xs ml-1">(1 Abr - 31 Ago)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL ACLARATORIO PILETA EN TEMPORADA BAJA */}
                     <div className="mb-4 bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
                       <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-blue-900 leading-snug">
@@ -231,62 +230,30 @@ export default function PaginaReserva() {
                       </p>
                     </div>
 
-                    <p className="flex items-center gap-2 mb-2">
-                      <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
-                      <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Costo Fijo</span>
-                    </p>
-                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm">
-                      <li><strong>Turno de 4 horas.</strong></li>
-                      <li>Franja horaria disponible: <strong>12:00 a 19:00 hs</strong>.</li>
-                      <li className="text-muted-foreground italic">* El último turno puede comenzar a las 15:00 hs como máximo.</li>
+                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
+                      Todos los días:
+                    </div>
+
+                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm mb-1">
+                      <li>
+                        <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
+                        <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2 relative -top-0.5">Costo Fijo</span>
+                      </li>
+                      <li>✨ <strong>Exclusividad total:</strong> Solo 1 evento por día.</li>
+                      <li>Turno de 4 horas a elección (Franja de 12:00 a 19:00 hs).</li>
                     </ul>
+                    <span className="inline-block text-muted-foreground italic text-xs ml-4">* El último turno puede comenzar a las 15:00 hs.</span>
                   </div>
                 </details>
 
                 {/* Temporada Media */}
-                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                <details name="temporadas" className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">⭐ Temporada Media <span className="font-medium opacity-70 text-xs ml-1">(1 Sep - 14 Dic)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
                     
-                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
-                    <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-                      <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/07!</strong>
-                        Abonando la seña hoy y cancelando hasta el 31/07, mantenemos el precio. <br/> 
-                        <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
-                      </p>
-                    </div>
-
-                    <ul className="list-disc pl-4 space-y-3 text-xs md:text-sm">
-                      <li>
-                        <strong>Lunes a Viernes:</strong> <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span> <br/>
-                        <span className="inline-block mt-1">Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</span> <br/>
-                        <span className="text-muted-foreground italic">* El último turno puede comenzar a las 18:30 hs.</span>
-                      </li>
-                      <li>
-                        <strong>Sábados, Domingos y Feriados (Turnos fijos):</strong>
-                        <ul className="list-[circle] pl-5 mt-2 space-y-1.5">
-                          <li>Turno 1 (12:00 a 16:00 hs): <strong className="text-azul-marino text-sm">{formatMoneyUI(PRECIOS.temporada_media.turno_1_fijo)}</strong></li>
-                          <li>Turno 2 (18:30 a 22:30 hs): <strong className="text-azul-marino text-sm">{formatMoneyUI(PRECIOS.temporada_media.turno_2_fijo)}</strong></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </div>
-                </details>
-
-                {/* Temporada Alta */}
-                <details className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                    <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
-                    <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
-                  </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
-                    
-                    {/* CARTEL DE CONGELAMIENTO ACTUALIZADO */}
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
@@ -297,9 +264,52 @@ export default function PaginaReserva() {
                     </div>
 
                     <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
-                      Todos los días (Turnos fijos):
+                      Lunes a Viernes:
+                    </div>
+                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm mb-1">
+                      <li>
+                        <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span>
+                      </li>
+                      <li>✨ <strong>Exclusividad total:</strong> Solo 1 evento por día.</li>
+                      <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
+                    </ul>
+                    <span className="inline-block text-muted-foreground italic text-xs ml-4 mb-5">* El último turno puede comenzar a las 18:30 hs.</span>
+
+                    <div className="block">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
+                        Sábados, Domingos y Feriados:
+                      </div>
+                      <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
+                        <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
+                        <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.turno_1_fijo)}</span></li>
+                        <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.turno_2_fijo)}</span></li>
+                      </ul>
+                    </div>
+                  </div>
+                </details>
+
+                {/* Temporada Alta */}
+                <details name="temporadas" className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
+                    <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
+                  </summary>
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
+                    <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                      <p className="text-[13px] text-orange-900 leading-snug">
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/07!</strong>
+                        Abonando la seña hoy y cancelando hasta el 31/07, mantenemos el precio. <br/> 
+                        <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
+                      </p>
+                    </div>
+
+                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
+                      Todos los días:
                     </div>
                     <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
+                      <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
                       <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_alta.turno_1_fijo)}</span></li>
                       <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_alta.turno_2_fijo)}</span></li>
                     </ul>
