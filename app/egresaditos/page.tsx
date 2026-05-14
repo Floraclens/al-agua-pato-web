@@ -181,6 +181,18 @@ export default function PaginaReservaEgresaditos() {
     }, 100)
   }
 
+  const handleAccordionToggle = (e: React.MouseEvent<HTMLDetailsElement>) => {
+    const details = e.currentTarget;
+    if (!details.open) {
+      setTimeout(() => {
+        const headerOffset = 100;
+        const elementPosition = details.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      }, 150);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 font-sans pb-16">
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 shadow-sm">
@@ -211,7 +223,9 @@ export default function PaginaReservaEgresaditos() {
               <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de tu evento</h4>
               
               <div className="space-y-2 w-full">
-                <details name="temporadas" className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                
+                {/* TEMPORADA 1 (NOVIEMBRE - DICIEMBRE 14) */}
+                <details name="temporadas" onClick={handleAccordionToggle} className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">📅 1 de Noviembre al 14 de Diciembre</span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
@@ -227,30 +241,29 @@ export default function PaginaReservaEgresaditos() {
                       </p>
                     </div>
 
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
-                      Lunes a Viernes:
+                    <div className="block mb-5">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Lunes a Viernes:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span></li>
+                        <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
+                        <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
+                      </ul>
+                      <span className="inline-block text-muted-foreground italic text-xs ml-4 mt-2">* El último turno puede comenzar a las 18:30 hs.</span>
                     </div>
-                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm mb-1">
-                      <li><span className="font-extrabold text-black text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span></li>
-                      <li>✨ <strong>Exclusividad total:</strong> Solo 1 evento por día.</li>
-                      <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
-                    </ul>
-                    <span className="inline-block text-muted-foreground italic text-xs ml-4 mb-5">* El último turno puede comenzar a las 18:30 hs.</span>
 
                     <div className="block">
-                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
-                        Sábados, Domingos y Feriados:
-                      </div>
-                      <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
-                        <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
-                        <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-black text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_1_fijo)}</span></li>
-                        <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-black text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_2_fijo)}</span></li>
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Sábados, Domingos y Feriados:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_1_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_2_fijo)}</span></li>
                       </ul>
                     </div>
                   </div>
                 </details>
 
-                <details name="temporadas" className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                {/* TEMPORADA 2 (DICIEMBRE 15 - FIN DE MES) */}
+                <details name="temporadas" onClick={handleAccordionToggle} className="group bg-white rounded-xl border border-lavanda/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">🔥 15 de Diciembre a Fin de Mes</span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
@@ -266,14 +279,15 @@ export default function PaginaReservaEgresaditos() {
                       </p>
                     </div>
 
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">
-                      Todos los días:
+                    <div className="block">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_1_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_2_fijo)}</span></li>
+                      </ul>
                     </div>
-                    <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
-                      <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
-                      <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-black text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_1_fijo)}</span></li>
-                      <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-black text-base">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_2_fijo)}</span></li>
-                    </ul>
+
                   </div>
                 </details>
 
@@ -363,6 +377,7 @@ export default function PaginaReservaEgresaditos() {
               </div>
             </section>
 
+            {/* 4. Pago */}
             <section className={`bg-white rounded-3xl p-6 shadow-sm border ${showErrors && !metodoPago ? "border-red-400 error-field ring-4 ring-red-500/10" : "border-border/50"} transition-all`}>
               <h3 className="text-xl font-bold text-azul-marino mb-6 flex items-center gap-3 pb-4 border-b border-border/50">
                 <span className="w-8 h-8 rounded-full bg-amarillo/20 flex items-center justify-center text-azul-marino text-sm font-extrabold">4</span>

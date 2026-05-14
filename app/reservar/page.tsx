@@ -193,7 +193,6 @@ export default function PaginaReserva() {
   const handleFailedSubmit = () => {
     setShowErrors(true)
     setTimeout(() => {
-      // Busca el primer elemento que tenga CUALQUIERA de los dos errores (de arriba hacia abajo en la pantalla)
       const firstError = document.querySelector('.error-field, .error-specific')
 
       if (firstError) {
@@ -204,6 +203,18 @@ export default function PaginaReserva() {
       }
     }, 100)
   }
+
+  const handleAccordionToggle = (e: React.MouseEvent<HTMLDetailsElement>) => {
+    const details = e.currentTarget;
+    if (!details.open) {
+      setTimeout(() => {
+        const headerOffset = 100;
+        const elementPosition = details.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      }, 150);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-slate-50 font-sans pb-16">
@@ -231,12 +242,14 @@ export default function PaginaReserva() {
               <h4 className="text-lg font-extrabold text-azul-marino mb-3">Costos de tu evento</h4>
               <div className="space-y-2 w-full">
                 
-                <details name="temporadas" className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                {/* TEMPORADA BAJA */}
+                <details name="temporadas" onClick={handleAccordionToggle} className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">📅 Temporada Baja <span className="font-medium opacity-70 text-xs ml-1">(1 Abr - 31 Ago)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
                     <div className="mb-4 bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
                       <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-blue-900 leading-snug">
@@ -244,25 +257,31 @@ export default function PaginaReserva() {
                         Sin pileta, salvo que el clima acompañe y quieras sumarlo como adicional, ¡seleccioná más abajo y listo!
                       </p>
                     </div>
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
-                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm mb-1">
-                      <li>
-                        <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
-                        <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2 relative -top-0.5">Costo Fijo</span>
-                      </li>
-                      <li>✨ <strong>Exclusividad total:</strong> Solo 1 evento por día.</li>
-                      <li>Turno de 4 horas a elección (Franja de 12:00 a 19:00 hs).</li>
-                    </ul>
-                    <span className="inline-block text-muted-foreground italic text-xs ml-4">* El último turno puede comenzar a las 15:00 hs.</span>
+
+                    <div className="block">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li>
+                          <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
+                          <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2 relative -top-0.5">Costo Fijo</span>
+                        </li>
+                        <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
+                        <li>Turno de 4 horas a elección (Franja de 12:00 a 19:00 hs).</li>
+                      </ul>
+                      <span className="inline-block text-muted-foreground italic text-xs ml-4 mt-2">* El último turno puede comenzar a las 15:00 hs.</span>
+                    </div>
+
                   </div>
                 </details>
 
-                <details name="temporadas" className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                {/* TEMPORADA MEDIA */}
+                <details name="temporadas" onClick={handleAccordionToggle} className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">⭐ Temporada Media <span className="font-medium opacity-70 text-xs ml-1">(1 Sep - 14 Dic)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
@@ -271,28 +290,37 @@ export default function PaginaReserva() {
                         <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
                       </p>
                     </div>
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Lunes a Viernes:</div>
-                    <ul className="list-disc pl-4 space-y-1.5 text-xs md:text-sm mb-1">
-                      <li><span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span></li>
-                      <li>✨ <strong>Exclusividad total:</strong> Solo 1 evento por día.</li>
-                      <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
-                    </ul>
-                    <span className="inline-block text-muted-foreground italic text-xs ml-4 mb-5">* El último turno puede comenzar a las 18:30 hs.</span>
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Sábados, Domingos y Feriados:</div>
-                    <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
-                      <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
-                      <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.turno_1_fijo)}</span></li>
-                      <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_media.turno_2_fijo)}</span></li>
-                    </ul>
+
+                    <div className="block mb-5">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Lunes a Viernes:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span></li>
+                        <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
+                        <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
+                      </ul>
+                      <span className="inline-block text-muted-foreground italic text-xs ml-4 mt-2">* El último turno puede comenzar a las 18:30 hs.</span>
+                    </div>
+
+                    <div className="block">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Sábados, Domingos y Feriados:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_media.turno_1_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_media.turno_2_fijo)}</span></li>
+                      </ul>
+                    </div>
+
                   </div>
                 </details>
 
-                <details name="temporadas" className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+                {/* TEMPORADA ALTA */}
+                <details name="temporadas" onClick={handleAccordionToggle} className="group bg-white rounded-xl border border-azul-claro/20 shadow-sm overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer items-center justify-between p-3.5 select-none bg-slate-50/50 hover:bg-slate-50 transition-colors">
                     <span className="font-bold text-azul-marino text-sm md:text-base">🔥 Temporada Alta <span className="font-medium opacity-70 text-xs ml-1">(15 Dic - 31 Mar)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
                   <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
@@ -301,12 +329,16 @@ export default function PaginaReserva() {
                         <span className="opacity-80 italic">(A partir de Agosto se aplicarán las nuevas tarifas definidas hasta Diciembre)</span>
                       </p>
                     </div>
-                    <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
-                    <ul className="list-disc pl-4 space-y-2 text-xs md:text-sm">
-                      <li>🗓️ <strong>2 turnos disponibles por día.</strong></li>
-                      <li><strong>Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_alta.turno_1_fijo)}</span></li>
-                      <li><strong>Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-bold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_alta.turno_2_fijo)}</span></li>
-                    </ul>
+
+                    <div className="block">
+                      <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
+                      <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
+                        <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_alta.turno_1_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_alta.turno_2_fijo)}</span></li>
+                      </ul>
+                    </div>
+
                   </div>
                 </details>
 
