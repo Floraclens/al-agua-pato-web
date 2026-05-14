@@ -55,6 +55,9 @@ export default function AdminPage() {
   const [isFetching, setIsFetching] = useState(true)
   const [filtroActivo, setFiltroActivo] = useState<FiltroEstado>("todas")
 
+  // --- NUEVO ESTADO PARA EL BOTÓN DE COPIAR ---
+  const [isCopied, setIsCopied] = useState(false)
+
   const [modalReprogramar, setModalReprogramar] = useState<any>(null)
   const [reprogramDate, setReprogramDate] = useState<Date | undefined>(undefined)
   const [reprogramTurno, setReprogramTurno] = useState<Turno>(null)
@@ -190,7 +193,7 @@ export default function AdminPage() {
       return
     }
 
-    let textoCopiar = `🦆 *RESERVAS CONFIRMADAS - AL AGUA PATO* 🦆\n(Generado automáticamente)\n\n`
+    let textoCopiar = `\uD83E\uDD86 *RESERVAS CONFIRMADAS - AL AGUA PATO* \uD83E\uDD86\n(Generado automáticamente)\n\n`
     
     activas.forEach(r => {
       let fechaFmt = r.fecha
@@ -198,23 +201,31 @@ export default function AdminPage() {
         fechaFmt = format(parseISO(r.fecha), "EEEE d 'de' MMMM", { locale: es }).toUpperCase() 
       } catch (e) {}
       
-      textoCopiar += `📅 *${fechaFmt}*\n`
-      textoCopiar += `⏰ Horario: ${r.turno}\n`
-      textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
+      textoCopiar += `\uD83D\uDCC5 *${fechaFmt}*\n`
+      textoCopiar += `\u23F0 Horario: ${r.turno}\n`
+      textoCopiar += `\uD83D\uDC64 Cliente: ${r.nombre} (${r.telefono})\n`
       if (r.nombre_cumpleanero) {
-        if (r.nombre_cumpleanero.includes("🎓")) {
-          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").trim()
-          textoCopiar += `🎓 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
+        if (r.nombre_cumpleanero.includes("\uD83C\uDF93") || r.nombre_cumpleanero.includes("🎓")) {
+          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").replace("\uD83C\uDF93", "").trim()
+          textoCopiar += `\uD83C\uDF93 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
         } else {
-          textoCopiar += `🎂 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
+          textoCopiar += `\uD83C\uDF82 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
         }
       }
-      textoCopiar += `🎈 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
+      textoCopiar += `\uD83C\uDF88 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
       textoCopiar += `-----------------------------------\n\n`
     })
 
     navigator.clipboard.writeText(textoCopiar).then(() => {
+      // --- MAGIA VISUAL PARA EL BOTÓN ---
+      setIsCopied(true)
       toast.success("¡Resumen copiado al portapapeles! Ya podés pegarlo en tu WhatsApp.")
+      
+      // Volver a la normalidad en 3 segundos
+      setTimeout(() => {
+        setIsCopied(false)
+      }, 3000)
+
     }).catch(err => {
       toast.error("Error al copiar. Tu navegador no lo permite automáticamente.")
     })
@@ -270,13 +281,12 @@ export default function AdminPage() {
     
     let mensaje = ""
     if (isActiva) {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆✨. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n👉 ${urlInvitacion}`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86\u2728. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n\uD83D\uDC49 ${urlInvitacion}`
     } else {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! ✨`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! \u2728`
     }
     
-    // LA SOLUCIÓN DEFINITIVA: api.whatsapp.com/send
-    return `https://api.whatsapp.com/send?phone=549${phone}&text=${encodeURIComponent(mensaje)}`
+    return `https://wa.me/549${phone}?text=${encodeURIComponent(mensaje)}`
   }
 
   if (!session) {
@@ -396,12 +406,21 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto pr-2">
+            
+            {/* BOTÓN CON ESTADO DINÁMICO */}
             <Button 
               onClick={handleCompartirMes}
-              className="w-full md:w-auto bg-azul-claro hover:bg-azul-claro/90 text-white font-bold rounded-lg shadow-sm"
+              disabled={isCopied}
+              className={`w-full md:w-auto font-bold rounded-lg shadow-sm transition-all duration-300 ${
+                isCopied 
+                  ? "bg-green-500 hover:bg-green-600 text-white" 
+                  : "bg-azul-claro hover:bg-azul-claro/90 text-white"
+              }`}
             >
-              <Share2 className="w-4 h-4 mr-2" /> Copiar Resumen
+              {isCopied ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+              {isCopied ? "¡Copiado!" : "Copiar Resumen"}
             </Button>
+            
             <div className="hidden md:flex items-center gap-2 text-sm font-bold text-muted-foreground whitespace-nowrap">
               <Filter className="w-4 h-4" /> {reservasFiltradas.length} res.
             </div>
@@ -432,7 +451,7 @@ export default function AdminPage() {
 
               const isPagoTotalidadDesdeInicio = reserva.sena >= reserva.total || (reserva.metodo_pago && reserva.metodo_pago.includes("Totalidad"))
               
-              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓")
+              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓") || reserva.nombre_cumpleanero?.includes("\uD83C\uDF93")
 
               return (
                 <div key={reserva.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between transition-all hover:shadow-md ${isActiva ? "border-transparent" : "border-orange-200"}`}>
@@ -479,7 +498,7 @@ export default function AdminPage() {
                       
                       {isEgresadito ? (
                         <p className="text-sm text-slate-700">
-                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").trim()} ({reserva.edad_cumple || "-"})
+                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").replace("\uD83C\uDF93", "").trim()} ({reserva.edad_cumple || "-"})
                         </p>
                       ) : (
                         <p className="text-sm text-slate-700">
