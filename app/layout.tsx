@@ -58,7 +58,7 @@ export default function RootLayout({
     "name": "Al Agua Pato | Salón de Fiestas Infantiles",
     "image": "https://al-agua-pato-web.vercel.app/logo-circular.png",
     "url": "https://al-agua-pato-web.vercel.app",
-    "telephone": "+5493854470103",
+    "telephone": "+5493854043737",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Los Flores",

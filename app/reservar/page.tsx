@@ -421,7 +421,7 @@ export default function PaginaReserva() {
         </div>
       </div>
 
-      <a href="https://api.whatsapp.com/send?phone=5493854470103&text=Hola!%20Estoy%20en%20la%20pagina%20de%20reservas%20y%20tengo%20una%20duda..." target="_blank" rel="noopener noreferrer" className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center">
+      <a href="https://api.whatsapp.com/send?phone=5493854043737&text=Hola!%20Estoy%20en%20la%20pagina%20de%20reservas%20y%20tengo%20una%20duda..." target="_blank" rel="noopener noreferrer" className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center">
         <MessageCircle className="w-6 h-6 lg:w-7 lg:h-7" />
         <span className="absolute right-full mr-4 bg-white text-slate-800 text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">¿Dudas con tu reserva?</span>
       </a>

@@ -494,7 +494,7 @@ export default function LandingPage() {
                   <MapPin className="w-4 h-4" />
                   <span className="hidden sm:inline">Santiago del Estero</span>
                </a>
-               <a href="tel:5493854470103" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
+               <a href="tel:5493854043737" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
                   <Phone className="w-4 h-4" />
                   <span className="hidden sm:inline">Contacto</span>
                </a>
@@ -534,7 +534,7 @@ export default function LandingPage() {
 
       {/* BOTÓN WHATSAPP CORREGIDO CON URL ENCODED */}
       <a 
-        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20viendo%20la%20p%C3%A1gina%20web%20y%20tengo%20una%20consulta%20sobre%20el%20sal%C3%B3n..." 
+        href="https://wa.me/5493854043737?text=Hola!%20Estoy%20viendo%20la%20p%C3%A1gina%20web%20y%20tengo%20una%20consulta%20sobre%20el%20sal%C3%B3n..." 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"

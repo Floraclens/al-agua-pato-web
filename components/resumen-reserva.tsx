@@ -201,7 +201,7 @@ export function ResumenReserva({
       }
 
       const reservaId = data?.id || "N/A"
-      const NUMERO_WHATSAPP_SALON = "5493854470103" 
+      const NUMERO_WHATSAPP_SALON = "5493854043737" 
       
       const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM", { locale: es })
       const turnoLabel = getTurnoLabel(selectedTurno)
