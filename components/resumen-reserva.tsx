@@ -44,6 +44,7 @@ interface ResumenReservaProps {
   canSubmit: boolean
   pagoTotalidad: boolean
   isEgresadito?: boolean 
+  onSubmitAttempt?: () => void 
 }
 
 function formatPrice(price: number): string {
@@ -77,7 +78,8 @@ export function ResumenReserva({
   calculos,
   canSubmit,
   pagoTotalidad,
-  isEgresadito = false 
+  isEgresadito = false,
+  onSubmitAttempt 
 }: ResumenReservaProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -148,16 +150,15 @@ export function ResumenReserva({
   const selectedExtras = getSelectedExtrasLabels()
 
   const handleReserva = useCallback(async () => {
-    if (!selectedDate || !selectedTurno || !metodoPago) return
-
-    const validacion = validarReservaCompleta(selectedDate, selectedTurno, datosCliente, metodoPago, isEgresadito)
-    
-    if (!validacion.isValid) {
-      toast.error("Faltan datos obligatorios", {
-        description: formatearErroresValidacion(validacion.errors)
+    if (!canSubmit) {
+      if (onSubmitAttempt) onSubmitAttempt()
+      toast.error("Faltan completar datos", {
+        description: "Revisá los campos marcados en rojo para continuar."
       })
       return
     }
+
+    if (!selectedDate || !selectedTurno || !metodoPago) return
 
     setIsSubmitting(true)
     try {
@@ -253,7 +254,6 @@ export function ResumenReserva({
 ¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
       }
 
-      // LA SOLUCIÓN DEFINITIVA: api.whatsapp.com/send
       const urlWhatsapp = `https://api.whatsapp.com/send?phone=${NUMERO_WHATSAPP_SALON}&text=${encodeURIComponent(mensajeWhatsApp)}`
       
       setWaUrl(urlWhatsapp)
@@ -268,9 +268,7 @@ export function ResumenReserva({
       toast.error(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }
-  }, [selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad, isEgresadito])
-
-  const faltaElegirPersonaje = extras.personaje && extras.personajesSeleccionados.length === 0;
+  }, [canSubmit, onSubmitAttempt, selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad, isEgresadito])
 
   if (isSuccess && selectedDate && selectedTurno) {
     return (
@@ -506,16 +504,10 @@ export function ResumenReserva({
           </p>
         </div>
 
-        {faltaElegirPersonaje && (
-          <p className="text-red-500 text-xs font-bold text-center mb-4">
-            * Marcaste la opción de Personajes pero no elegiste ninguno. Seleccionalo o destildá la opción.
-          </p>
-        )}
-
         <Button
           type="button"
           size="lg"
-          disabled={!canSubmit || isSubmitting}
+          disabled={isSubmitting} 
           onClick={handleReserva}
           className="w-full h-14 text-base sm:text-lg font-bold bg-amarillo hover:bg-amarillo/90 text-azul-marino shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full mb-3"
         >

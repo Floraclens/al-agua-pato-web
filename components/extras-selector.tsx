@@ -4,13 +4,14 @@ import { useState } from "react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
-import { PartyPopper, Clock, UserPlus, Users, Minus, Plus, Eye, EyeOff } from "lucide-react"
+import { PartyPopper, Clock, UserPlus, Users, Minus, Plus, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { PRECIOS } from "@/lib/config-reservas"
 
 interface ExtrasSelectorProps {
   extras: any
   onChangeExtras: (extras: any) => void
-  showPileta?: boolean 
+  showPileta?: boolean
+  showErrors?: boolean // NUEVO: Propiedad para recibir el aviso de error desde el padre
 }
 
 function formatPrice(price: number): string {
@@ -26,9 +27,9 @@ export function ExtrasSelector({
   extras,
   onChangeExtras,
   showPileta = false,
+  showErrors = false // Recibe si debe mostrar errores
 }: ExtrasSelectorProps) {
   
-  // Estado para guardar qué precios decidió revelar el usuario
   const [preciosRevelados, setPreciosRevelados] = useState<string[]>([])
 
   const updateAdults = (e: React.MouseEvent, delta: number) => {
@@ -177,10 +178,11 @@ export function ExtrasSelector({
           isZancos ? extras.zancosLed > 0 :
           extras[extra.id] === true
 
-        // Está revelado si el usuario lo pidió o si la tarjeta ya está seleccionada
         const isRevealed = preciosRevelados.includes(extra.id) || isChecked;
-
         const Icon = extra.icon
+
+        // NUEVO: Detectar si esta tarjeta específica tiene un error (personaje sin elegir)
+        const hasPersonajeError = showErrors && extra.id === "personaje" && isChecked && (!extras.personajesSeleccionados || extras.personajesSeleccionados.length === 0);
 
         return (
           <div
@@ -208,9 +210,10 @@ export function ExtrasSelector({
             }}
             className={cn(
               "relative overflow-hidden rounded-2xl border-2 transition-all duration-300 cursor-pointer group flex flex-col",
-              isChecked 
-                ? "border-azul-claro bg-azul-claro/5 shadow-md ring-4 ring-azul-claro/20" 
-                : "border-border/60 hover:border-azul-marino/30 hover:shadow-sm"
+              // Inyectamos la clase 'error-specific' y estilos rojos SOLO en la tarjeta que falla
+              hasPersonajeError ? "error-specific border-red-500 ring-4 ring-red-500/20 bg-red-50/10 shadow-lg" : 
+              isChecked ? "border-azul-claro bg-azul-claro/5 shadow-md ring-4 ring-azul-claro/20" : 
+              "border-border/60 hover:border-azul-marino/30 hover:shadow-sm"
             )}
           >
             <div className={cn(
@@ -249,22 +252,23 @@ export function ExtrasSelector({
                   id={extra.id}
                   checked={isChecked}
                   onCheckedChange={() => {}} 
-                  className="h-5 w-5 border-2 border-slate-300 data-[state=checked]:bg-azul-claro data-[state=checked]:border-azul-claro text-white pointer-events-none transition-colors"
+                  className={cn(
+                    "h-5 w-5 border-2 text-white pointer-events-none transition-colors",
+                    hasPersonajeError ? "border-red-500 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500" : "border-slate-300 data-[state=checked]:bg-azul-claro data-[state=checked]:border-azul-claro"
+                  )}
                   aria-readonly
                 />
               </div>
 
               <div className={cn(
                 "absolute bottom-3 right-3 z-20 px-3 py-1.5 rounded-full text-sm font-extrabold shadow-md border transition-all duration-300",
-                isChecked 
-                  ? "bg-azul-marino text-white border-white/10" 
-                  : "bg-white/95 text-slate-700 border-white/20 backdrop-blur-sm hover:bg-slate-100"
+                hasPersonajeError ? "bg-red-500 text-white border-red-400" :
+                isChecked ? "bg-azul-marino text-white border-white/10" : 
+                "bg-white/95 text-slate-700 border-white/20 backdrop-blur-sm hover:bg-slate-100"
               )}>
                 {isChecked ? (
-                  // Si está seleccionado, mostramos solo el precio fijo
                   extra.precioTexto
                 ) : isRevealed ? (
-                  // Si está revelado pero no seleccionado, damos la opción de ocultarlo
                   <button
                     type="button"
                     onClick={(e) => {
@@ -278,7 +282,6 @@ export function ExtrasSelector({
                     <EyeOff className="w-3.5 h-3.5 text-slate-400 group-hover/btn:text-slate-700 transition-colors" />
                   </button>
                 ) : (
-                  // Si no está revelado, botón para ver precio
                   <button
                     type="button"
                     onClick={(e) => {
@@ -295,7 +298,7 @@ export function ExtrasSelector({
 
             <div className="p-4 flex-1 flex flex-col bg-transparent justify-between gap-3">
               <div>
-                <h4 className="font-bold text-azul-marino text-lg mb-1 flex items-center justify-between">
+                <h4 className={cn("font-bold text-lg mb-1 flex items-center justify-between", hasPersonajeError ? "text-red-600" : "text-azul-marino")}>
                   {extra.titulo}
                 </h4>
                 <p className="text-sm text-muted-foreground leading-snug">
@@ -360,7 +363,7 @@ export function ExtrasSelector({
               )}
 
               {extra.needsMultiSelect && extras.personaje && (
-                <div className="animate-in slide-in-from-top-2 duration-300 w-full space-y-4 pt-3 border-t border-slate-200" onClick={(e) => e.stopPropagation()}>
+                <div className={cn("animate-in slide-in-from-top-2 duration-300 w-full pt-3 border-t", hasPersonajeError ? "border-red-200" : "border-slate-200")} onClick={(e) => e.stopPropagation()}>
                   <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto pr-2 pb-2">
                     {personajesDisponibles.map((personaje) => (
                       <button
@@ -370,6 +373,7 @@ export function ExtrasSelector({
                           "px-3 py-1.5 rounded-full text-xs font-bold border transition-colors w-auto text-left whitespace-normal h-auto break-words",
                           (extras.personajesSeleccionados || []).includes(personaje)
                             ? "bg-amarillo text-azul-marino border-amarillo shadow-sm"
+                            : hasPersonajeError ? "bg-white text-red-500 border-red-300 hover:bg-red-50" 
                             : "bg-white text-muted-foreground border-slate-200 hover:border-amarillo hover:bg-slate-50"
                         )}
                       >
@@ -377,6 +381,16 @@ export function ExtrasSelector({
                       </button>
                     ))}
                   </div>
+                  
+                  {/* NUEVO: Mensaje de error inyectado directamente abajo de la lista de botones */}
+                  {hasPersonajeError && (
+                    <div className="mt-2 flex items-start gap-1.5 text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span className="text-[11px] font-bold leading-tight">
+                        ¡Atención! No seleccionaste ningún personaje. Elegí al menos uno para continuar o destildá la opción.
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
