@@ -246,7 +246,7 @@ export default function PaginaReservaEgresaditos() {
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span></li>
                         <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
-                        <li>Turno de 4 horas a elección (Franja de 12:00 a 22:30 hs).</li>
+                        <li>🕒 <strong className="text-slate-800">4 horas a elección</strong> (12:00 a 22:30 hs).</li>
                       </ul>
                       <span className="inline-block text-muted-foreground italic text-xs ml-4 mt-2">* El último turno puede comenzar a las 18:30 hs.</span>
                     </div>
