@@ -1,9 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
-import { PartyPopper, Clock, UserPlus, Users, Minus, Plus } from "lucide-react"
+import { PartyPopper, Clock, UserPlus, Users, Minus, Plus, Eye, EyeOff } from "lucide-react"
 import { PRECIOS } from "@/lib/config-reservas"
 
 interface ExtrasSelectorProps {
@@ -27,6 +28,9 @@ export function ExtrasSelector({
   showPileta = false,
 }: ExtrasSelectorProps) {
   
+  // Estado para guardar qué precios decidió revelar el usuario
+  const [preciosRevelados, setPreciosRevelados] = useState<string[]>([])
+
   const updateAdults = (e: React.MouseEvent, delta: number) => {
     e.stopPropagation() 
     const newVal = Math.max(1, Math.min(10, extras.adultosAdicionales + delta))
@@ -78,7 +82,7 @@ export function ExtrasSelector({
     {
       id: "adultosAdicionales", 
       titulo: "Adultos Extra",
-      descripcion: "Agregá invitados adultos extra (Límite máximo: 10 adultos).", // TEXTO ACTUALIZADO AQUÍ
+      descripcion: "Agregá invitados adultos extra (Límite máximo: 10 adultos).",
       precio: PRECIOS.opcionales.adultosAdicionales,
       icon: Users,
       bgColor: "bg-emerald-500/10",
@@ -173,6 +177,9 @@ export function ExtrasSelector({
           isZancos ? extras.zancosLed > 0 :
           extras[extra.id] === true
 
+        // Está revelado si el usuario lo pidió o si la tarjeta ya está seleccionada
+        const isRevealed = preciosRevelados.includes(extra.id) || isChecked;
+
         const Icon = extra.icon
 
         return (
@@ -247,8 +254,42 @@ export function ExtrasSelector({
                 />
               </div>
 
-              <div className="absolute bottom-3 right-3 z-20 bg-azul-marino text-white px-3 py-1.5 rounded-full text-sm font-extrabold shadow-md border border-white/10">
-                {extra.precioTexto}
+              <div className={cn(
+                "absolute bottom-3 right-3 z-20 px-3 py-1.5 rounded-full text-sm font-extrabold shadow-md border transition-all duration-300",
+                isChecked 
+                  ? "bg-azul-marino text-white border-white/10" 
+                  : "bg-white/95 text-slate-700 border-white/20 backdrop-blur-sm hover:bg-slate-100"
+              )}>
+                {isChecked ? (
+                  // Si está seleccionado, mostramos solo el precio fijo
+                  extra.precioTexto
+                ) : isRevealed ? (
+                  // Si está revelado pero no seleccionado, damos la opción de ocultarlo
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPreciosRevelados(prev => prev.filter(item => item !== extra.id));
+                    }}
+                    className="flex items-center gap-2 group/btn"
+                    title="Ocultar precio"
+                  >
+                    {extra.precioTexto} 
+                    <EyeOff className="w-3.5 h-3.5 text-slate-400 group-hover/btn:text-slate-700 transition-colors" />
+                  </button>
+                ) : (
+                  // Si no está revelado, botón para ver precio
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPreciosRevelados(prev => [...prev, extra.id]);
+                    }}
+                    className="flex items-center gap-1.5 text-xs uppercase tracking-wider hover:scale-105 transition-transform"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> Ver precio
+                  </button>
+                )}
               </div>
             </div>
 
