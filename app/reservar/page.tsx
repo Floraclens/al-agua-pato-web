@@ -5,7 +5,7 @@ import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
-import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react" // Añadimos AlertCircle
+import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react" 
 import { type Turno } from "@/lib/turno"
 import { obtenerReglasParaFecha, PRECIOS } from "@/lib/config-reservas"
 import Link from "next/link"
@@ -220,8 +220,18 @@ export default function PaginaReserva() {
                     <span className="font-bold text-azul-marino text-sm md:text-base">📅 Temporada Baja <span className="font-medium opacity-70 text-xs ml-1">(1 Abr - 31 Ago)</span></span>
                     <ChevronDown className="w-5 h-5 text-azul-marino/50 transition-transform duration-300 group-open:-rotate-180" />
                   </summary>
-                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 space-y-2 mt-1">
-                    <p className="flex items-center gap-2">
+                  <div className="px-4 pb-4 pt-3 text-sm text-azul-marino/80 border-t border-border/50 mt-1">
+                    
+                    {/* CARTEL ACLARATORIO PILETA EN TEMPORADA BAJA */}
+                    <div className="mb-4 bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-start gap-3 shadow-sm">
+                      <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                      <p className="text-[13px] text-blue-900 leading-snug">
+                        <strong className="block text-blue-700 mb-0.5 uppercase tracking-wide text-[11px] font-extrabold">Aclaración sobre la pileta</strong>
+                        Sin pileta, salvo que el clima acompañe y quieras sumarla como adicional. ¡Seleccionála más abajo y listo!
+                      </p>
+                    </div>
+
+                    <p className="flex items-center gap-2 mb-2">
                       <span className="font-extrabold text-azul-marino text-base">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
                       <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Costo Fijo</span>
                     </p>
@@ -417,7 +427,7 @@ export default function PaginaReserva() {
       </div>
 
       <a 
-        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20en%20la%20página%20de%20reservas%20y%20tengo%20una%20duda..." 
+        href="https://api.whatsapp.com/send?phone=5493854470103&text=Hola!%20Estoy%20en%20la%20pagina%20de%20reservas%20y%20tengo%20una%20duda..." 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"
