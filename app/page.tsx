@@ -9,7 +9,7 @@ import {
   Sparkles, MapPin, CheckCircle2, Star, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
   HelpCircle, Phone, Mail, GraduationCap, School, ChevronDown,
-  Instagram, Facebook // <-- NUEVOS ICONOS IMPORTADOS
+  Instagram, Facebook 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -135,7 +135,7 @@ export default function LandingPage() {
                   <PartyPopper className="w-8 h-8 text-white" />
                 </div>
                 <div className="relative z-10">
-                  <h4 className="font-black text-white mb-1.5 text-lg md:text-xl drop-shadow-md">¡Se viene algo <span className="text-rosa">increíble!</span> 🚀</h4>
+                  <h4 className="font-black text-white mb-1.5 text-lg md:text-xl drop-shadow-md">¡Se viene algo <span className="text-rosa">increíble!</span> {"\uD83D\uDE80"}</h4>
                   <p className="text-sm md:text-base text-white/80 leading-relaxed font-medium">
                     Muy pronto estrenamos un nuevo espacio que te hará <strong className="text-amarillo font-bold">saltar de diversión</strong>... ¿Estás preparado para lo que se viene?
                   </p>
@@ -164,7 +164,7 @@ export default function LandingPage() {
                   <Sparkles className="w-5 h-5 text-rosa animate-pulse" />
                 </div>
                 <p className="text-sm md:text-base font-bold text-white leading-tight drop-shadow-md">
-                  ¡Con tu reserva te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-amarillo font-black">Invitación Digital Personalizada</strong>! 🎁
+                  ¡Con tu reserva te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-amarillo font-black">Invitación Digital Personalizada</strong>! {"\uD83C\uDF81"}
                 </p>
               </div>
             </div>
@@ -385,10 +385,10 @@ export default function LandingPage() {
                 <p className="text-2xl md:text-4xl font-bold leading-tight drop-shadow-md text-center max-w-3xl mx-auto flex flex-col items-center justify-center">
                   Nuestro espacio te ofrece una oferta única que te hará sentir que
                   <span className="relative inline-flex justify-center whitespace-nowrap mt-5 md:mt-8">
-                     <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
-                     <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text">
-                      "la magia se vive aquí"
-                     </strong>
+                      <span className="absolute -inset-2 bg-gradient-to-r from-amarillo to-naranja blur-xl md:blur-2xl opacity-30 md:opacity-50 animate-pulse rounded-full"></span>
+                      <strong className="relative text-transparent bg-clip-text bg-gradient-to-r from-amarillo to-naranja font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter shimmer-text">
+                       "la magia se vive aquí"
+                      </strong>
                   </span>
                 </p>
                 
@@ -412,7 +412,7 @@ export default function LandingPage() {
             <div className="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 md:mt-12 min-h-[140px]">
                
                <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-azul-marino text-xs md:text-sm font-extrabold px-5 py-2.5 rounded-full shadow-2xl animate-bounce z-20 border-2 border-rosa/30 flex items-center justify-center">
-                 🎁 ¡Incluye Invitación Digital Personalizada!
+                 {"\uD83C\uDF81"} ¡Incluye Invitación Digital Personalizada!
                </div>
 
                <div className="absolute -inset-x-6 -top-2 -bottom-6 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-3xl opacity-80 animate-pulse pointer-events-none" />
@@ -499,7 +499,6 @@ export default function LandingPage() {
                   <span className="hidden sm:inline">Contacto</span>
                </a>
                
-               {/* NUEVOS ICONOS SOCIALES */}
                <div className="flex items-center gap-4 border-l border-white/20 pl-6 ml-2">
                  <a href="https://www.instagram.com/alaguapato.sgo/" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-rosa transition-colors" aria-label="Instagram">
                    <Instagram className="w-5 h-5" />
@@ -517,7 +516,7 @@ export default function LandingPage() {
                © {new Date().getFullYear()} Al Agua Pato. Todos los derechos reservados.
              </p>
              <p className="text-xs text-white/30 font-medium text-center sm:text-right flex items-center gap-1">
-               Diseñado con <span className="text-rosa">❤</span> por Ignacio
+               Diseñado con <span className="text-rosa">{"\u2764\uFE0F"}</span> por Ignacio
              </p>
           </div>
         </div>
@@ -533,8 +532,9 @@ export default function LandingPage() {
          </Button>
       </div>
 
+      {/* BOTÓN WHATSAPP CORREGIDO CON URL ENCODED */}
       <a 
-        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20viendo%20la%20página%20web%20y%20tengo%20una%20consulta%20sobre%20el%20salón..." 
+        href="https://wa.me/5493854470103?text=Hola!%20Estoy%20viendo%20la%20p%C3%A1gina%20web%20y%20tengo%20una%20consulta%20sobre%20el%20sal%C3%B3n..." 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 lg:p-4 rounded-full shadow-[0_4px_14px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.6)] transition-all hover:-translate-y-1 active:scale-95 group flex items-center justify-center"

@@ -277,7 +277,7 @@ export default function AdminPage() {
     if (isActiva) {
       mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86\u2728. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n\uD83D\uDC49 ${urlInvitacion}`
     } else {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! \u2728`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para reservarte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! \u2728`
     }
     
     // Usamos encodeURIComponent nativo que es el método 100% a prueba de fallos para WhatsApp
