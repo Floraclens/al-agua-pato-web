@@ -23,7 +23,7 @@ export const PRECIOS = {
   opcionales: {
     adultosAdicionales: 7000,
     animacion: 70000,
-    horaExtra: 200000,
+    horaExtra: 300000,
     robot_led: { uno: 200000, dos: 350000, detalle: "1 hora de servicio" },
     zancos_led: { precio_unidad: 200000, max: 2, detalle: "1 hora de servicio" },
     personaje: { precio_unidad: 125000, detalle: "1 hora de servicio" },
