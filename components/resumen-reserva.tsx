@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { toast } from "sonner" // <-- IMPORTAMOS SONNER
+import { toast } from "sonner" 
 import {
   CalendarDays,
   Clock,
@@ -153,7 +153,6 @@ export function ResumenReserva({
     const validacion = validarReservaCompleta(selectedDate, selectedTurno, datosCliente, metodoPago, isEgresadito)
     
     if (!validacion.isValid) {
-      // REEMPLAZO DE WINDOW.ALERT POR TOAST DE SONNER
       toast.error("Faltan datos obligatorios", {
         description: formatearErroresValidacion(validacion.errors)
       })
@@ -195,7 +194,6 @@ export function ResumenReserva({
 
       if (error) {
         console.error("[reservas] Error al guardar:", error.message, error)
-        // REEMPLAZO DE WINDOW.ALERT
         toast.error(`No se pudo completar la reserva: ${error.message}`)
         setIsSubmitting(false)
         return
@@ -219,9 +217,9 @@ export function ResumenReserva({
 🎈 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-💵 Método: ${textoMetodoPago}
-💰 Total: ${formatPrice(calculos.total)}
-💸 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
+💳 Método: ${textoMetodoPago}
+💲 Total: ${formatPrice(calculos.total)}
+📌 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
 
 *Datos del Colegio:*
 🏫 Institución: ${datosCliente.institucion}
@@ -242,9 +240,9 @@ export function ResumenReserva({
 🎈 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-💵 Método: ${textoMetodoPago}
-💰 Total: ${formatPrice(calculos.total)}
-💸 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
+💳 Método: ${textoMetodoPago}
+💲 Total: ${formatPrice(calculos.total)}
+📌 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
 
 *Mis datos:*
 👤 A nombre de: ${datosCliente.nombre}
@@ -255,7 +253,10 @@ export function ResumenReserva({
 ¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
       }
 
-      const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP_SALON}?text=${encodeURIComponent(mensajeWhatsApp)}`
+      // OPTIMIZACIÓN: Usamos URLSearchParams que es el estándar moderno para codificar URLs sin errores.
+      const params = new URLSearchParams()
+      params.append("text", mensajeWhatsApp)
+      const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP_SALON}?${params.toString()}`
       
       setWaUrl(urlWhatsapp)
       window.open(urlWhatsapp, "_blank")
@@ -266,7 +267,6 @@ export function ResumenReserva({
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
       console.error("[reservas] Error inesperado:", e)
-      // REEMPLAZO DE WINDOW.ALERT
       toast.error(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }

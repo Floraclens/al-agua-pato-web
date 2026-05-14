@@ -7,7 +7,7 @@ import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { toast } from "sonner" // <-- IMPORTAMOS SONNER PARA LAS NOTIFICACIONES
+import { toast } from "sonner" 
 import { 
   Calendar, 
   Trash2, 
@@ -263,6 +263,7 @@ export default function AdminPage() {
     return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
   }
 
+  // --- SOLUCIÓN A EMOJIS ROTOS EN WHATSAPP ---
   const getWhatsAppLink = (reserva: any, isActiva: boolean, fechaFormat: string) => {
     if (!reserva.telefono) return "#"
     const phone = reserva.telefono.replace(/\D/g, "")
@@ -274,8 +275,12 @@ export default function AdminPage() {
     } else {
       mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! ✨`
     }
-    return `https://wa.me/549${phone}?text=${encodeURIComponent(mensaje)}`
+    
+    const params = new URLSearchParams()
+    params.append("text", mensaje)
+    return `https://wa.me/549${phone}?${params.toString()}`
   }
+  // ---------------------------------------------
 
   if (!session) {
     return (
