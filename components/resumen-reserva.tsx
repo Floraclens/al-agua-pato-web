@@ -207,57 +207,54 @@ export function ResumenReserva({
       
       let mensajeWhatsApp = ""
 
-      // --- OPCIÓN NUCLEAR 2.0: EMOJIS + TILDES Y Ñ EN UNICODE ---
-      // \u00F1 = ñ | \u00E9 = é | \u00F3 = ó | \u00E1 = á
-      
       if (isEgresadito) {
         mensajeWhatsApp = 
-`\u00A1Hola Al Agua Pato! \uD83E\uDD86\uD83C\uDF93 Acabo de solicitar una reserva de EGRESADITOS desde la web.
+`¡Hola Al Agua Pato! 🦆🎓 Acabo de solicitar una reserva de EGRESADITOS desde la web.
 
 *Detalles del evento:*
-\uD83D\uDCC5 Fecha: ${fechaFormateada}
-\u23F0 Turno: ${turnoLabel}
-\uD83C\uDF88 Extras: ${extras_elegidos}
+📅 Fecha: ${fechaFormateada}
+⏰ Turno: ${turnoLabel}
+🎈 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-\uD83D\uDCB3 M\u00E9todo: ${textoMetodoPago}
-\uD83D\uDCB0 Total: ${formatPrice(calculos.total)}
-\uD83D\uDCB8 ${pagoTotalidad ? "Abono total ahora:" : "Se\u00F1a requerida:"} ${formatPrice(calculos.sena)}
+💳 Método: ${textoMetodoPago}
+💲 Total: ${formatPrice(calculos.total)}
+📌 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
 
 *Datos del Colegio:*
-\uD83C\uDFEB Instituci\u00F3n: ${datosCliente.institucion}
-\u270F\uFE0F Sala/Curso: ${datosCliente.sala}
-\u2600\uFE0F Turno: ${datosCliente.turno_colegio}
-\uD83D\uDC64 A nombre de: ${datosCliente.nombre}
+🏫 Institución: ${datosCliente.institucion}
+✏️ Sala/Curso: ${datosCliente.sala}
+☀️ Turno: ${datosCliente.turno_colegio}
+👤 A nombre de: ${datosCliente.nombre}
 
 *(ID interno de reserva: ${reservaId})*
 
-\u00BFTe puedo pasar el comprobante por ac\u00E1 para confirmar la fecha?`
+¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
       } else {
         mensajeWhatsApp = 
-`\u00A1Hola Al Agua Pato! \uD83E\uDD86\u2728 Acabo de solicitar una reserva desde la p\u00E1gina web.
+`¡Hola Al Agua Pato! 🦆✨ Acabo de solicitar una reserva desde la página web.
 
 *Detalles del evento:*
-\uD83D\uDCC5 Fecha: ${fechaFormateada}
-\u23F0 Turno: ${turnoLabel}
-\uD83C\uDF88 Extras: ${extras_elegidos}
+📅 Fecha: ${fechaFormateada}
+⏰ Turno: ${turnoLabel}
+🎈 Extras: ${extras_elegidos}
 
 *Resumen de pago:*
-\uD83D\uDCB3 M\u00E9todo: ${textoMetodoPago}
-\uD83D\uDCB0 Total: ${formatPrice(calculos.total)}
-\uD83D\uDCB8 ${pagoTotalidad ? "Abono total ahora:" : "Se\u00F1a requerida:"} ${formatPrice(calculos.sena)}
+💳 Método: ${textoMetodoPago}
+💲 Total: ${formatPrice(calculos.total)}
+📌 ${pagoTotalidad ? "Abono total ahora:" : "Seña requerida:"} ${formatPrice(calculos.sena)}
 
 *Mis datos:*
-\uD83D\uDC64 A nombre de: ${datosCliente.nombre}
-\uD83C\uDF82 Cumplea\u00F1ero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " a\u00F1itos" : "-"})
+👤 A nombre de: ${datosCliente.nombre}
+🎂 Cumpleañero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " añitos" : "-"})
 
 *(ID interno de reserva: ${reservaId})*
 
-\u00BFTe puedo pasar el comprobante por ac\u00E1 para confirmar la fecha?`
+¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
       }
 
-      // Usamos encodeURIComponent nativo
-      const urlWhatsapp = `https://wa.me/${NUMERO_WHATSAPP_SALON}?text=${encodeURIComponent(mensajeWhatsApp)}`
+      // LA SOLUCIÓN DEFINITIVA: api.whatsapp.com/send
+      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${NUMERO_WHATSAPP_SALON}&text=${encodeURIComponent(mensajeWhatsApp)}`
       
       setWaUrl(urlWhatsapp)
       window.open(urlWhatsapp, "_blank")

@@ -179,7 +179,6 @@ export default function AdminPage() {
     }
   }
 
-  // --- OPCIÓN NUCLEAR: EMOJIS EN CÓDIGO UNICODE ---
   const handleCompartirMes = () => {
     const activas = reservas.filter(r => {
       const est = (r.estado || "").toLowerCase()
@@ -191,9 +190,7 @@ export default function AdminPage() {
       return
     }
 
-    // \uD83E\uDD86 = Pato | \uD83D\uDCC5 = Calendario | \u23F0 = Reloj | \uD83D\uDC64 = Usuario 
-    // \uD83C\uDF93 = Egresado | \uD83C\uDF82 = Torta | \uD83C\uDF88 = Globo
-    let textoCopiar = `\uD83E\uDD86 *RESERVAS CONFIRMADAS - AL AGUA PATO* \uD83E\uDD86\n(Generado automáticamente)\n\n`
+    let textoCopiar = `🦆 *RESERVAS CONFIRMADAS - AL AGUA PATO* 🦆\n(Generado automáticamente)\n\n`
     
     activas.forEach(r => {
       let fechaFmt = r.fecha
@@ -201,18 +198,18 @@ export default function AdminPage() {
         fechaFmt = format(parseISO(r.fecha), "EEEE d 'de' MMMM", { locale: es }).toUpperCase() 
       } catch (e) {}
       
-      textoCopiar += `\uD83D\uDCC5 *${fechaFmt}*\n`
-      textoCopiar += `\u23F0 Horario: ${r.turno}\n`
-      textoCopiar += `\uD83D\uDC64 Cliente: ${r.nombre} (${r.telefono})\n`
+      textoCopiar += `📅 *${fechaFmt}*\n`
+      textoCopiar += `⏰ Horario: ${r.turno}\n`
+      textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
       if (r.nombre_cumpleanero) {
-        if (r.nombre_cumpleanero.includes("\uD83C\uDF93") || r.nombre_cumpleanero.includes("🎓")) {
-          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").replace("\uD83C\uDF93", "").trim()
-          textoCopiar += `\uD83C\uDF93 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
+        if (r.nombre_cumpleanero.includes("🎓")) {
+          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").trim()
+          textoCopiar += `🎓 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
         } else {
-          textoCopiar += `\uD83C\uDF82 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
+          textoCopiar += `🎂 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
         }
       }
-      textoCopiar += `\uD83C\uDF88 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
+      textoCopiar += `🎈 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
       textoCopiar += `-----------------------------------\n\n`
     })
 
@@ -266,24 +263,21 @@ export default function AdminPage() {
     return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
   }
 
-  // --- SOLUCIÓN NUCLEAR A EMOJIS ROTOS EN WHATSAPP ---
   const getWhatsAppLink = (reserva: any, isActiva: boolean, fechaFormat: string) => {
     if (!reserva.telefono) return "#"
     const phone = reserva.telefono.replace(/\D/g, "")
     const urlInvitacion = `https://al-agua-pato-web.vercel.app/invitacion/${reserva.id}`
     
     let mensaje = ""
-    // \uD83E\uDD86 = Pato | \u2728 = Estrellitas | \uD83D\uDC49 = Dedo índice
     if (isActiva) {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86\u2728. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n\uD83D\uDC49 ${urlInvitacion}`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆✨. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n👉 ${urlInvitacion}`
     } else {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para reservarte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! \u2728`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! ✨`
     }
     
-    // Usamos encodeURIComponent nativo que es el método 100% a prueba de fallos para WhatsApp
-    return `https://wa.me/549${phone}?text=${encodeURIComponent(mensaje)}`
+    // LA SOLUCIÓN DEFINITIVA: api.whatsapp.com/send
+    return `https://api.whatsapp.com/send?phone=549${phone}&text=${encodeURIComponent(mensaje)}`
   }
-  // ---------------------------------------------
 
   if (!session) {
     return (
@@ -438,7 +432,7 @@ export default function AdminPage() {
 
               const isPagoTotalidadDesdeInicio = reserva.sena >= reserva.total || (reserva.metodo_pago && reserva.metodo_pago.includes("Totalidad"))
               
-              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓") || reserva.nombre_cumpleanero?.includes("\uD83C\uDF93")
+              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓")
 
               return (
                 <div key={reserva.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between transition-all hover:shadow-md ${isActiva ? "border-transparent" : "border-orange-200"}`}>
@@ -485,7 +479,7 @@ export default function AdminPage() {
                       
                       {isEgresadito ? (
                         <p className="text-sm text-slate-700">
-                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").replace("\uD83C\uDF93", "").trim()} ({reserva.edad_cumple || "-"})
+                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").trim()} ({reserva.edad_cumple || "-"})
                         </p>
                       ) : (
                         <p className="text-sm text-slate-700">
