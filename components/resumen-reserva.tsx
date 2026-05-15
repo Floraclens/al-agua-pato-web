@@ -280,12 +280,25 @@ export function ResumenReserva({
         <div className="relative z-10 flex min-h-full p-4 py-12 sm:py-16">
           <div className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-emerald-100 text-center animate-in zoom-in-95 duration-500 overflow-hidden m-auto">
             <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-rosa via-amarillo to-azul-claro" />
-            <div className="relative w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-500/20 border-4 border-white mt-2 overflow-hidden">
-              <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill className="object-cover" />
-              <div className="absolute -right-2 -top-2 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white z-10">
+            
+            {/* CORRECCIÓN: Separamos el círculo de la imagen del tilde verde */}
+            <div className="relative w-24 h-24 mx-auto mb-6 mt-2">
+              {/* Contenedor de la imagen (recorta solo el logo) */}
+              <div className="absolute inset-0 bg-white rounded-full border-4 border-white shadow-xl shadow-green-500/20 overflow-hidden flex items-center justify-center">
+                <Image 
+                  src="/logo-circular.png" 
+                  alt="Logo Al Agua Pato" 
+                  fill 
+                  className="object-cover scale-110" 
+                />
+              </div>
+              {/* Contenedor del tilde (está por fuera del overflow-hidden, no se recorta) */}
+              <div className="absolute -right-1 -top-1 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white z-10">
                 <CheckCircle2 className="w-5 h-5 text-azul-marino" />
               </div>
             </div>
+            {/* FIN CORRECCIÓN */}
+
             <h3 className="text-2xl md:text-3xl font-extrabold text-azul-marino mb-3 flex items-center justify-center gap-2">
               <Sparkles className="w-6 h-6 text-amarillo animate-pulse" />
               ¡Reserva Solicitada!

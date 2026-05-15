@@ -55,7 +55,6 @@ export default function AdminPage() {
   const [isFetching, setIsFetching] = useState(true)
   const [filtroActivo, setFiltroActivo] = useState<FiltroEstado>("todas")
 
-  // --- NUEVO ESTADO PARA EL BOTÓN DE COPIAR ---
   const [isCopied, setIsCopied] = useState(false)
 
   const [modalReprogramar, setModalReprogramar] = useState<any>(null)
@@ -193,7 +192,7 @@ export default function AdminPage() {
       return
     }
 
-    let textoCopiar = `\uD83E\uDD86 *RESERVAS CONFIRMADAS - AL AGUA PATO* \uD83E\uDD86\n(Generado automáticamente)\n\n`
+    let textoCopiar = `🦆 *RESERVAS CONFIRMADAS - AL AGUA PATO* 🦆\n(Generado automáticamente)\n\n`
     
     activas.forEach(r => {
       let fechaFmt = r.fecha
@@ -201,27 +200,25 @@ export default function AdminPage() {
         fechaFmt = format(parseISO(r.fecha), "EEEE d 'de' MMMM", { locale: es }).toUpperCase() 
       } catch (e) {}
       
-      textoCopiar += `\uD83D\uDCC5 *${fechaFmt}*\n`
-      textoCopiar += `\u23F0 Horario: ${r.turno}\n`
-      textoCopiar += `\uD83D\uDC64 Cliente: ${r.nombre} (${r.telefono})\n`
+      textoCopiar += `📅 *${fechaFmt}*\n`
+      textoCopiar += `⏰ Horario: ${r.turno}\n`
+      textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
       if (r.nombre_cumpleanero) {
-        if (r.nombre_cumpleanero.includes("\uD83C\uDF93") || r.nombre_cumpleanero.includes("🎓")) {
-          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").replace("\uD83C\uDF93", "").trim()
-          textoCopiar += `\uD83C\uDF93 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
+        if (r.nombre_cumpleanero.includes("🎓")) {
+          const colegioLimpio = r.nombre_cumpleanero.replace("🎓", "").trim()
+          textoCopiar += `🎓 Colegio: ${colegioLimpio} (${r.edad_cumple || ""})\n`
         } else {
-          textoCopiar += `\uD83C\uDF82 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
+          textoCopiar += `🎂 Cumpleañero: ${r.nombre_cumpleanero} (${r.edad_cumple ? r.edad_cumple + ' años' : ''})\n`
         }
       }
-      textoCopiar += `\uD83C\uDF88 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
+      textoCopiar += `🎈 Extras solicitados: ${r.extras_elegidos || "Ninguno"}\n`
       textoCopiar += `-----------------------------------\n\n`
     })
 
     navigator.clipboard.writeText(textoCopiar).then(() => {
-      // --- MAGIA VISUAL PARA EL BOTÓN ---
       setIsCopied(true)
       toast.success("¡Resumen copiado al portapapeles! Ya podés pegarlo en tu WhatsApp.")
       
-      // Volver a la normalidad en 3 segundos
       setTimeout(() => {
         setIsCopied(false)
       }, 3000)
@@ -274,19 +271,24 @@ export default function AdminPage() {
     return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
   }
 
-  const getWhatsAppLink = (reserva: any, isActiva: boolean, fechaFormat: string) => {
-    if (!reserva.telefono) return "#"
+  // NUEVO: Función que se ejecuta al hacer clic, forzando la codificación perfecta
+  const handleOpenWhatsApp = (e: React.MouseEvent, reserva: any, isActiva: boolean, fechaFormat: string) => {
+    e.preventDefault()
+    if (!reserva.telefono) return
+    
     const phone = reserva.telefono.replace(/\D/g, "")
     const urlInvitacion = `https://al-agua-pato-web.vercel.app/invitacion/${reserva.id}`
     
     let mensaje = ""
     if (isActiva) {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86\u2728. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n\uD83D\uDC49 ${urlInvitacion}`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆✨. ¡Tu fecha para el ${fechaFormat} ya está súper confirmada! Te compartimos el acceso a tu Panel VIP para que puedas armar la invitación digital interactiva de tu evento:\n\n👉 ${urlInvitacion}`
     } else {
-      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato \uD83E\uDD86. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! \u2728`
+      mensaje = `¡Hola ${reserva.nombre}! Te escribimos de Al Agua Pato 🦆. Vimos que iniciaste tu reserva para el ${fechaFormat}, pero nos quedó pendiente recibir el comprobante de pago para bloquearte el lugar. ¿Tuviste algún inconveniente? ¡Avisanos así te aseguramos la fecha! ✨`
     }
     
-    return `https://wa.me/549${phone}?text=${encodeURIComponent(mensaje)}`
+    // Usamos la API completa de WhatsApp y abrimos la pestaña por JavaScript
+    const whatsappUrl = `https://api.whatsapp.com/send/?phone=549${phone}&text=${encodeURIComponent(mensaje)}`
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
   }
 
   if (!session) {
@@ -407,7 +409,6 @@ export default function AdminPage() {
 
           <div className="flex items-center gap-3 w-full md:w-auto pr-2">
             
-            {/* BOTÓN CON ESTADO DINÁMICO */}
             <Button 
               onClick={handleCompartirMes}
               disabled={isCopied}
@@ -451,7 +452,7 @@ export default function AdminPage() {
 
               const isPagoTotalidadDesdeInicio = reserva.sena >= reserva.total || (reserva.metodo_pago && reserva.metodo_pago.includes("Totalidad"))
               
-              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓") || reserva.nombre_cumpleanero?.includes("\uD83C\uDF93")
+              const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓")
 
               return (
                 <div key={reserva.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between transition-all hover:shadow-md ${isActiva ? "border-transparent" : "border-orange-200"}`}>
@@ -498,7 +499,7 @@ export default function AdminPage() {
                       
                       {isEgresadito ? (
                         <p className="text-sm text-slate-700">
-                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").replace("\uD83C\uDF93", "").trim()} ({reserva.edad_cumple || "-"})
+                          <span className="font-bold text-azul-marino">Colegio:</span> {reserva.nombre_cumpleanero.replace("🎓", "").trim()} ({reserva.edad_cumple || "-"})
                         </p>
                       ) : (
                         <p className="text-sm text-slate-700">
@@ -566,20 +567,19 @@ export default function AdminPage() {
                       </Button>
                     )}
 
+                    {/* CORRECCIÓN: Botón actualizado con evento onClick en lugar de href */}
                     {reserva.telefono && !(isActiva && isEgresadito) && (
-                      <a 
-                        href={getWhatsAppLink(reserva, isActiva, fechaFormateada)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                      <button 
+                        onClick={(e) => handleOpenWhatsApp(e, reserva, isActiva, fechaFormateada)} 
                         className={`w-full flex justify-center items-center gap-2 font-bold py-2.5 px-4 rounded-lg transition-colors text-sm border ${
                           isActiva 
-                            ? "bg-gradient-to-r from-amarillo/20 to-naranja/20 text-naranja border-naranja/30 hover:bg-naranja/20" 
-                            : "bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#1da851] border-[#25D366]/30"
+                            ? "bg-gradient-to-r from-amarillo/20 to-naranja/20 text-naranja border-naranja/30 hover:bg-naranja/20 cursor-pointer" 
+                            : "bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#1da851] border-[#25D366]/30 cursor-pointer"
                         }`}
                       >
                         {isActiva ? <PartyPopper className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />} 
                         {isActiva ? "Enviar Invitación VIP" : "Reclamar Seña"}
-                      </a>
+                      </button>
                     )}
                     
                     <div className="flex items-center gap-2 mt-1">
