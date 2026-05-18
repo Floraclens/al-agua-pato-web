@@ -169,7 +169,7 @@ export default function InvitacionVIP() {
     <main className={`min-h-[100dvh] ${temaActual === 'blanca' ? 'bg-slate-200' : 'bg-neutral-950'} flex flex-col items-center justify-center py-6 px-4 transition-colors duration-500`}>
       <div className="w-full max-w-[400px] mx-auto">
         
-        {/* ENCABEZADO ULTRA INTUITIVO */}
+        {/* ENCABEZADO */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-1">
             <Sparkles className={`w-4 h-4 ${t.colorInstruccion} animate-pulse`} />
@@ -201,18 +201,23 @@ export default function InvitacionVIP() {
           </div>
         </div>
 
-        {/* TARJETA - REPARACIÓN: Eliminado aspect-[4/5] y agregado contenedor dinámico con Next Image */}
-        <div ref={tarjetaRef} className="relative mx-auto w-full min-h-[520px] flex flex-col justify-center overflow-hidden rounded-none shadow-2xl">
+        {/* TARJETA - CAMBIADO: Añadido bg-black base para anclar el contraste de color al exportar */}
+        <div ref={tarjetaRef} className="relative mx-auto w-full min-h-[520px] flex flex-col justify-center overflow-hidden rounded-none shadow-2xl bg-black">
           
-          {/* IMAGEN OPTIMIZADA POR NEXT.JS PARA CARGA RÁPIDA EN MÓVILES */}
-          <Image 
-            src={t.archivo} 
-            alt="Fondo Invitación" 
-            fill 
-            priority 
-            quality={90}
-            className="object-cover z-0" 
-          />
+          {/* CONTROL DE CAPAS DE FONDO SIMULTÁNEAS - Carga los 3 fondos en paralelo eliminando el lag */}
+          {(Object.keys(temas) as TemaFondo[]).map((key) => (
+            <Image 
+              key={key}
+              src={temas[key].archivo} 
+              alt={`Fondo ${key}`} 
+              fill 
+              priority 
+              quality={100}
+              className={`object-cover z-0 transition-opacity duration-300 ${
+                temaActual === key ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`} 
+            />
+          ))}
 
           <div className="relative z-10 flex flex-col h-full w-full items-center justify-center p-6 mx-auto">
             
@@ -220,11 +225,9 @@ export default function InvitacionVIP() {
             <div className="flex flex-col items-center justify-center w-full mx-auto">
               
               <div className="relative w-24 h-24 bg-white rounded-full p-1.5 border-4 border-white/10 shadow-[0_8px_20px_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-auto">
-                {/* Logo con priority para que no titile ni cargue lento */}
                 <Image src="/logo-circular.png" alt="Logo" fill priority className="object-cover rounded-full scale-125" />
               </div>
 
-              {/* Ajuste de tamaño responsive: text-[50px] en celulares muy chicos, text-[64px] desde tablets */}
               <h1 className={`font-[family-name:var(--font-anton)] italic text-[50px] sm:text-[64px] ${t.colorNombre} uppercase tracking-normal mt-3 text-center drop-shadow-[0_6px_20px_rgba(0,0,0,0.9)] leading-none mx-auto w-full`}>
                 {nombreLimpio}
               </h1>
@@ -284,12 +287,14 @@ export default function InvitacionVIP() {
               </div>
             </div>
 
+            {/* LÍNEA DECORATIVA */}
             <div className="flex items-center justify-center w-full max-w-[200px] mx-auto mt-6 mb-2">
               <div className={`flex-1 h-px bg-gradient-to-r from-transparent ${t.colorLine}`} />
               <div className={`w-1.5 h-1.5 rounded-full mx-3 ${t.colorDot} ${t.colorDotShadow}`} />
               <div className={`flex-1 h-px bg-gradient-to-l from-transparent ${t.colorLine}`} />
             </div>
 
+            {/* SELLO INFERIOR */}
             <div className="w-full text-center mx-auto mt-2">
               <p className={`text-[8.5px] ${t.colorFooter} uppercase tracking-[0.4em] font-extrabold`}>
                 Al Agua Pato • Fiestas Infantiles
