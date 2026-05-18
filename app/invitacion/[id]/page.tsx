@@ -165,6 +165,10 @@ export default function InvitacionVIP() {
   const nombreLimpio = isEgresadito ? reserva.nombre_cumpleanero.replace("🎓", "").trim() : reserva.nombre_cumpleanero
   const edadFormat = reserva.edad_cumple ? (reserva.edad_cumple === "1" ? "1 AÑITO" : `${reserva.edad_cumple} AÑITOS`) : ""
 
+  // EXTRAER SOLO LA HORA (ej: si es "1er Turno(12 a 16)" saca "12 a 16")
+  const matchHora = reserva.turno?.match(/\((.*?)\)/);
+  const horarioLimpio = matchHora ? matchHora[1].trim() : reserva.turno;
+
   return (
     <main className={`min-h-[100dvh] ${temaActual === 'blanca' ? 'bg-slate-200' : 'bg-neutral-950'} flex flex-col items-center justify-center py-6 px-4 transition-colors duration-500`}>
       <div className="w-full max-w-[400px] mx-auto">
@@ -201,10 +205,9 @@ export default function InvitacionVIP() {
           </div>
         </div>
 
-        {/* TARJETA - CAMBIADO: Añadido bg-black base para anclar el contraste de color al exportar */}
+        {/* TARJETA */}
         <div ref={tarjetaRef} className="relative mx-auto w-full min-h-[520px] flex flex-col justify-center overflow-hidden rounded-none shadow-2xl bg-black">
           
-          {/* CONTROL DE CAPAS DE FONDO SIMULTÁNEAS - Carga los 3 fondos en paralelo eliminando el lag */}
           {(Object.keys(temas) as TemaFondo[]).map((key) => (
             <Image 
               key={key}
@@ -269,7 +272,8 @@ export default function InvitacionVIP() {
                   </div>
                   <div className="flex flex-col justify-center text-left">
                     <p className={`text-[10px] font-black ${t.colorLabel} uppercase tracking-widest leading-none mb-1`}>Horario</p>
-                    <p className={`${t.colorValor} font-bold text-[16px] sm:text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>{reserva.turno}</p>
+                    {/* ACA USAMOS EL HORARIO LIMPIO */}
+                    <p className={`${t.colorValor} font-bold text-[16px] sm:text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>{horarioLimpio}</p>
                   </div>
                 </div>
 
@@ -287,14 +291,12 @@ export default function InvitacionVIP() {
               </div>
             </div>
 
-            {/* LÍNEA DECORATIVA */}
             <div className="flex items-center justify-center w-full max-w-[200px] mx-auto mt-6 mb-2">
               <div className={`flex-1 h-px bg-gradient-to-r from-transparent ${t.colorLine}`} />
               <div className={`w-1.5 h-1.5 rounded-full mx-3 ${t.colorDot} ${t.colorDotShadow}`} />
               <div className={`flex-1 h-px bg-gradient-to-l from-transparent ${t.colorLine}`} />
             </div>
 
-            {/* SELLO INFERIOR */}
             <div className="w-full text-center mx-auto mt-2">
               <p className={`text-[8.5px] ${t.colorFooter} uppercase tracking-[0.4em] font-extrabold`}>
                 Al Agua Pato • Fiestas Infantiles
