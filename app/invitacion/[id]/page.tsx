@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { CalendarDays, Clock, MapPin, Loader2, Download, Share2, AlertTriangle, Sparkles, Palette, MousePointer2 } from "lucide-react"
+import { CalendarDays, Clock, MapPin, Loader2, Download, Share2, AlertTriangle, Sparkles, Palette } from "lucide-react"
 import Image from "next/image"
 import { toPng } from "html-to-image"
 import { Button } from "@/components/ui/button"
@@ -201,18 +201,31 @@ export default function InvitacionVIP() {
           </div>
         </div>
 
-        {/* TARJETA */}
-        <div ref={tarjetaRef} className="relative mx-auto w-full aspect-[4/5] overflow-hidden bg-cover bg-center rounded-none shadow-2xl" style={{ backgroundImage: `url(${t.archivo})` }}>
+        {/* TARJETA - REPARACIÓN: Eliminado aspect-[4/5] y agregado contenedor dinámico con Next Image */}
+        <div ref={tarjetaRef} className="relative mx-auto w-full min-h-[520px] flex flex-col justify-center overflow-hidden rounded-none shadow-2xl">
           
-          <div className="relative z-10 flex flex-col h-full w-full items-center justify-center p-5 mx-auto">
+          {/* IMAGEN OPTIMIZADA POR NEXT.JS PARA CARGA RÁPIDA EN MÓVILES */}
+          <Image 
+            src={t.archivo} 
+            alt="Fondo Invitación" 
+            fill 
+            priority 
+            quality={90}
+            className="object-cover z-0" 
+          />
+
+          <div className="relative z-10 flex flex-col h-full w-full items-center justify-center p-6 mx-auto">
             
             {/* GRUPO SUPERIOR */}
             <div className="flex flex-col items-center justify-center w-full mx-auto">
+              
               <div className="relative w-24 h-24 bg-white rounded-full p-1.5 border-4 border-white/10 shadow-[0_8px_20px_rgba(0,0,0,0.5)] overflow-hidden shrink-0 mx-auto">
-                <Image src="/logo-circular.png" alt="Logo" fill className="object-cover rounded-full scale-125" />
+                {/* Logo con priority para que no titile ni cargue lento */}
+                <Image src="/logo-circular.png" alt="Logo" fill priority className="object-cover rounded-full scale-125" />
               </div>
 
-              <h1 className={`font-[family-name:var(--font-anton)] italic text-[56px] md:text-[64px] ${t.colorNombre} uppercase tracking-normal mt-3 text-center drop-shadow-[0_6px_20px_rgba(0,0,0,0.9)] leading-none mx-auto w-full`}>
+              {/* Ajuste de tamaño responsive: text-[50px] en celulares muy chicos, text-[64px] desde tablets */}
+              <h1 className={`font-[family-name:var(--font-anton)] italic text-[50px] sm:text-[64px] ${t.colorNombre} uppercase tracking-normal mt-3 text-center drop-shadow-[0_6px_20px_rgba(0,0,0,0.9)] leading-none mx-auto w-full`}>
                 {nombreLimpio}
               </h1>
 
@@ -222,7 +235,7 @@ export default function InvitacionVIP() {
                   <div className={`w-2 h-7 ${t.colorBadgeBg} transform -skew-x-[24deg] mr-1.5 opacity-80`} />
                   
                   <div className={`transform -skew-x-[24deg] ${t.colorBadgeBg} ring-1 ${t.colorBadgeRing} shadow-[0_10px_30px_rgba(0,0,0,0.6)] px-8 py-1 flex items-center justify-center`}>
-                    <p className={`transform skew-x-[24deg] font-[family-name:var(--font-anton)] ${t.colorBadgeText} text-2xl md:text-3xl italic tracking-wider uppercase leading-none pt-0.5`}>
+                    <p className={`transform skew-x-[24deg] font-[family-name:var(--font-anton)] ${t.colorBadgeText} text-xl sm:text-2xl md:text-3xl italic tracking-wider uppercase leading-none pt-0.5`}>
                       {isEgresadito ? `TURNO ${reserva.edad_cumple}` : edadFormat}
                     </p>
                   </div>
@@ -235,7 +248,7 @@ export default function InvitacionVIP() {
 
             {/* GRUPO INFERIOR */}
             <div className="w-full flex justify-center mt-8">
-              <div className="w-fit flex flex-col gap-3.5">
+              <div className="w-fit flex flex-col gap-4">
                 
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full ${t.colorIconoBg} ring-2 ${t.colorIconoRing} shadow-lg flex items-center justify-center shrink-0`}>
@@ -243,7 +256,7 @@ export default function InvitacionVIP() {
                   </div>
                   <div className="flex flex-col justify-center text-left">
                     <p className={`text-[10px] font-black ${t.colorLabel} uppercase tracking-widest leading-none mb-1`}>Día del evento</p>
-                    <p className={`${t.colorValor} font-bold text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>{fechaLegible}</p>
+                    <p className={`${t.colorValor} font-bold text-[16px] sm:text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>{fechaLegible}</p>
                   </div>
                 </div>
 
@@ -253,7 +266,7 @@ export default function InvitacionVIP() {
                   </div>
                   <div className="flex flex-col justify-center text-left">
                     <p className={`text-[10px] font-black ${t.colorLabel} uppercase tracking-widest leading-none mb-1`}>Horario</p>
-                    <p className={`${t.colorValor} font-bold text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>{reserva.turno}</p>
+                    <p className={`${t.colorValor} font-bold text-[16px] sm:text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>{reserva.turno}</p>
                   </div>
                 </div>
 
@@ -263,7 +276,7 @@ export default function InvitacionVIP() {
                   </div>
                   <div className="flex flex-col justify-center text-left">
                     <p className={`text-[10px] font-black ${t.colorLabel} uppercase tracking-widest leading-none mb-1`}>Ubicación</p>
-                    <p className={`${t.colorValor} font-bold text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>Al Agua Pato</p>
+                    <p className={`${t.colorValor} font-bold text-[16px] sm:text-[17px] leading-none uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]`}>Al Agua Pato</p>
                     <p className={`${t.colorValor} opacity-90 text-[10px] font-medium uppercase mt-0.5 leading-none`}>Los Flores, Sgo. del Estero</p>
                   </div>
                 </div>
@@ -277,7 +290,7 @@ export default function InvitacionVIP() {
               <div className={`flex-1 h-px bg-gradient-to-l from-transparent ${t.colorLine}`} />
             </div>
 
-            <div className="w-full text-center mx-auto">
+            <div className="w-full text-center mx-auto mt-2">
               <p className={`text-[8.5px] ${t.colorFooter} uppercase tracking-[0.4em] font-extrabold`}>
                 Al Agua Pato • Fiestas Infantiles
               </p>
