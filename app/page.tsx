@@ -143,7 +143,32 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="mt-10 flex flex-col items-center gap-8">
+            <div className="mt-12 flex flex-col items-center gap-10">
+              
+              {/* CARTEL PROMOCIONAL - EQUILIBRADO Y ELEGANTE */}
+              <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mx-auto max-w-2xl">
+                {/* Resplandor sutil pero notorio */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-2xl md:rounded-full blur-md opacity-60 animate-pulse"></div>
+                
+                {/* Contenedor principal equilibrado */}
+                <div className="relative flex flex-col sm:flex-row items-center justify-center gap-4 px-6 py-4 md:px-8 md:py-5 rounded-2xl md:rounded-full bg-[#081524]/80 backdrop-blur-xl border border-white/20 shadow-2xl hover:-translate-y-1 transition-transform duration-300 text-center sm:text-left">
+                  
+                  <div className="bg-gradient-to-br from-rosa to-naranja p-3 rounded-full shrink-0 shadow-inner">
+                    <Sparkles className="w-6 h-6 text-white animate-pulse" />
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <p className="text-base md:text-[1.15rem] font-bold text-white leading-snug drop-shadow-md">
+                      Reservando hasta el <strong className="text-transparent bg-clip-text bg-gradient-to-r from-rosa to-lavanda font-black tracking-tight text-xl">31/7</strong>, <strong className="text-amarillo font-black uppercase tracking-wide">congelás el valor 2026</strong>
+                    </p>
+                    <p className="text-xs md:text-sm text-white/80 font-medium mt-1 flex items-center justify-center sm:justify-start gap-1.5">
+                      Asegurá tu fecha y tu tarjeta digital de invitación 🎁
+                    </p>
+                  </div>
+                  
+                </div>
+              </div>
+
               <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0">
                 <div className="relative inline-block w-full sm:w-fit">
                   <div className="absolute -inset-x-2 -top-1 -bottom-4 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-full blur-xl opacity-70 animate-pulse"></div>
@@ -159,14 +184,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="max-w-md mx-auto flex items-center justify-center gap-3.5 px-6 py-3.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-500 w-full sm:w-auto text-left sm:text-center">
-                <div className="bg-rosa/20 p-2.5 rounded-full shrink-0 shadow-inner">
-                  <Sparkles className="w-5 h-5 text-rosa animate-pulse" />
-                </div>
-                <p className="text-sm md:text-base font-bold text-white leading-tight drop-shadow-md">
-                  ¡Con tu reserva te <strong className="text-rosa font-black tracking-tight">regalamos</strong> la <strong className="text-amarillo font-black">Invitación Digital Personalizada</strong>! {"\uD83C\uDF81"}
-                </p>
-              </div>
             </div>
           </div>
         </section>
@@ -532,7 +549,6 @@ export default function LandingPage() {
          </Button>
       </div>
 
-      {/* BOTÓN WHATSAPP CORREGIDO CON URL ENCODED */}
       <a 
         href="https://wa.me/5493854043737?text=Hola!%20Estoy%20viendo%20la%20p%C3%A1gina%20web%20y%20tengo%20una%20consulta%20sobre%20el%20sal%C3%B3n..." 
         target="_blank" 

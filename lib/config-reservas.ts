@@ -2,6 +2,9 @@
  * Configuración centralizada de precios y reglas de reservas
  */
 
+// NUEVO: VALOR DE LA SEÑA CENTRALIZADO
+export const VALOR_SENA = 350000;
+
 // Feriados estáticos de Argentina (Año 2026)
 export const FERIADOS: string[] = [
   "2026-01-01", "2026-02-16", "2026-02-17", "2026-03-23", "2026-03-24",
@@ -123,7 +126,6 @@ export function obtenerReglasParaFecha(fecha: Date) {
   return { ...baseReglas, modalidad: HORARIOS.temporada_alta.modalidad, franja_horaria: { inicio: "12:00", fin: "22:30" }, turnos: HORARIOS.temporada_alta.turnos, precios: { turno_1: PRECIOS.temporada_alta.turno_1_fijo, turno_2: PRECIOS.temporada_alta.turno_2_fijo } }
 }
 
-// NUEVA FUNCIÓN MÁGICA PARA EGRESADITOS
 export function obtenerReglasEgresaditos(fecha: Date) {
   const mes = fecha.getMonth() + 1
   const dia = fecha.getDate()
@@ -132,10 +134,8 @@ export function obtenerReglasEgresaditos(fecha: Date) {
 
   let baseReglas: any = { pileta_disponible, es_egresadito: true }
 
-  // Si no es Noviembre (11) ni Diciembre (12), bloqueamos el calendario
   if (mes < 11) return { ...baseReglas, disponible: false }
 
-  // Del 15 de Dic al 31 de Dic (Todo Fijo)
   if (mes === 12 && dia >= 15) {
     return { 
       ...baseReglas, 
@@ -146,7 +146,6 @@ export function obtenerReglasEgresaditos(fecha: Date) {
     }
   }
 
-  // Del 1 de Nov al 14 de Dic
   if (esFinde) {
     return { 
       ...baseReglas, 
