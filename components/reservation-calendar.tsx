@@ -1,20 +1,28 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import type { Turno, LunVieTurno } from "@/lib/turno"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { obtenerReglasParaFecha, obtenerReglasEgresaditos, determinarTemporada } from "@/lib/config-reservas"
-import { FERIADOS } from "@/lib/config-reservas"
+import { obtenerReglasParaFecha, obtenerReglasEgresaditos } from "@/lib/config-reservas"
+import { Calendar as CalendarIcon, CheckCircle, ChevronDown, Search, AlertCircle, Clock, Loader2 } from "lucide-react"
 
 const LABEL_MANANA = "12:00 a 16:00 hs"
 const LABEL_NOCHE = "18:30 a 22:30 hs"
 
-function pad2(n: number) {
-  return String(n).padStart(2, "0")
+// --- HELPERS ---
+function pad2(n: number) { return String(n).padStart(2, "0") }
+
+// Label ultracorto para que no se rompa el diseño en pantallas de celulares chicos
+function obtenerLabelTurnoCorto(turno: Turno): string {
+  if (!turno) return ""
+  if (typeof turno === "string") {
+    return turno === "primero" ? "Mañana" : "Tarde/Noche"
+  }
+  return turno.label.split(" a ")[0] + " hs"
 }
 
 function formatClock(totalMinutes: number): string {
@@ -32,7 +40,6 @@ function isLunVieTurn(t: NonNullable<Turno>): t is LunVieTurno {
   return typeof t === "object" && t !== null && "id" in t && t.id === "lun_vie"
 }
 
-// MODIFICADO: Ahora puede leer las reglas de egresaditos si se lo piden
 function showDualFixedSlots(date: Date, isEgresadito: boolean = false): boolean {
   const reglas = isEgresadito ? obtenerReglasEgresaditos(date) : obtenerReglasParaFecha(date)
   return reglas?.modalidad === 'doble_turno_fijo'
@@ -49,7 +56,6 @@ function checkOverlap(slotStartMin: number, slotEndMin: number, bookedLabels: st
     if (matches && matches.length >= 2) {
       const bookedStart = parseTimeStringToMinutes(matches[0])
       const bookedEnd = parseTimeStringToMinutes(matches[1])
-      
       if (Math.max(slotStartMin, bookedStart) < Math.min(slotEndMin, bookedEnd)) {
         return true
       }
@@ -58,363 +64,352 @@ function checkOverlap(slotStartMin: number, slotEndMin: number, bookedLabels: st
   return false
 }
 
+// --- COMPONENTE PRINCIPAL ---
 interface ReservationCalendarProps {
   selectedDate: Date | undefined
   onSelectDate: (date: Date | undefined) => void
   onTurnoBooked: (turno: Turno) => void
   ignoreReservaId?: number
-  isEgresadito?: boolean // NUEVO PROP AÑADIDO
+  isEgresadito?: boolean 
 }
+
+type VerificationState = 'idle' | 'checking' | 'success' | 'error'
 
 export function ReservationCalendar({
   selectedDate,
   onSelectDate,
   onTurnoBooked,
   ignoreReservaId,
-  isEgresadito = false // Por defecto es falso (reserva normal)
+  isEgresadito = false 
 }: ReservationCalendarProps) {
-  const [isMounted, setIsMounted] = useState(false)
-  const [activeBubble, setActiveBubble] = useState<string | number | null>(null)
   
-  const [bookedSlots, setBookedSlots] = useState<string[]>([])
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
-
-  const [globalBookings, setGlobalBookings] = useState<Record<string, string[]>>({})
-
-  useEffect(() => {
-    setIsMounted(true)
-    
-    async function fetchAllReservations() {
-      const supabase = createBrowserClient()
-      
-      // OPTIMIZACIÓN: Solo traemos las columnas estrictamente necesarias
-      let query = supabase.from("reservas").select("id, fecha, turno")
-      if (ignoreReservaId) {
-        query = query.neq("id", ignoreReservaId)
-      }
-
-      const { data, error } = await query
-      
-      if (!error && data) {
-        const mapping: Record<string, string[]> = {}
-        data.forEach((r) => {
-          const dateOnly = r.fecha.split("T")[0]
-          if (!mapping[dateOnly]) mapping[dateOnly] = []
-          mapping[dateOnly].push(r.turno)
-        })
-        setGlobalBookings(mapping)
-      }
-    }
-    fetchAllReservations()
-  }, [ignoreReservaId])
-
-  useEffect(() => {
-    if (!selectedDate) {
-      setBookedSlots([])
-      return
-    }
-
-    async function fetchReservations() {
-      setIsLoadingSlots(true)
-      const supabase = createBrowserClient()
-      
-      const y = selectedDate!.getFullYear()
-      const m = String(selectedDate!.getMonth() + 1).padStart(2, "0")
-      const d = String(selectedDate!.getDate()).padStart(2, "0")
-      const dateStr = `${y}-${m}-${d}`
-
-      // OPTIMIZACIÓN: Solo traemos la columna 'turno'
-      let query = supabase.from("reservas").select("turno").eq("fecha", dateStr)
-      
-      if (ignoreReservaId) {
-        query = query.neq("id", ignoreReservaId)
-      }
-
-      const { data, error } = await query
-
-      if (!error && data) {
-        setBookedSlots(data.map((r: { turno: string }) => r.turno))
-      } else if (error) {
-        console.error("Error al obtener turnos:", error)
-      }
-      setIsLoadingSlots(false)
-    }
-
-    fetchReservations()
-  }, [selectedDate, ignoreReservaId])
+  const [fechaBuscada, setFechaBuscada] = useState<Date | undefined>(selectedDate)
+  const [turnoBuscado, setTurnoBuscado] = useState<Turno | null>(null)
+  
+  // UI States
+  const [showCalendar, setShowCalendar] = useState(false)
+  const [showHours, setShowHours] = useState(false) 
+  const [verificacion, setVerificacion] = useState<VerificationState>('idle')
+  const [dateWarning, setDateWarning] = useState(false)
 
   const disabledDays = useCallback((date: Date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
-    // Regla universal: No se puede reservar en el pasado
     if (date <= today) return true
 
-    // REGLA EXCLUSIVA PARA EGRESADITOS
     if (isEgresadito) {
-      const month = date.getMonth() + 1 // getMonth es 0-indexado
-      // Si el mes NO ES Noviembre (11) ni Diciembre (12), bloqueamos el día
-      if (month !== 11 && month !== 12) {
-        return true
-      }
+      const month = date.getMonth() + 1 
+      if (month !== 11 && month !== 12) return true
     }
-
     return false
   }, [isEgresadito])
 
-  const isDayFullyBooked = useCallback((date: Date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    if (date <= today) return false
-
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, "0")
-    const d = String(date.getDate()).padStart(2, "0")
-    const dateStr = `${y}-${m}-${d}`
-
-    const bookings = globalBookings[dateStr] || []
-    if (bookings.length === 0) return false
-
-    // Ahora le pasamos isEgresadito para que sepa qué regla de turnos usar
-    const isDual = showDualFixedSlots(date, isEgresadito)
-    if (isDual) {
-      return bookings.length >= 2 
-    } else {
-      return bookings.length >= 1 
+  const handleDateSelect = (date: Date | undefined) => {
+    setFechaBuscada(date)
+    setTurnoBuscado(null)
+    setVerificacion('idle')
+    setDateWarning(false)
+    setShowCalendar(false) 
+    
+    if (date) {
+      setShowHours(true) 
     }
-  }, [globalBookings, isEgresadito])
-
-  const handleSelectDate = useCallback(
-    (date: Date | undefined) => {
-      onSelectDate(date)
-      setActiveBubble(null)
-    },
-    [onSelectDate]
-  )
-
-  const handleTurnSelect = useCallback(
-    (turno: NonNullable<Turno>, bubbleId: string | number) => {
-      if (!selectedDate) return
-
-      const dual = showDualFixedSlots(selectedDate, isEgresadito)
-      if (dual && isLunVieTurn(turno)) return
-      if (!dual && (turno === "primero" || turno === "segundo")) return
-
-      setActiveBubble(bubbleId)
-      onTurnoBooked(turno)
-    },
-    [selectedDate, onTurnoBooked, isEgresadito]
-  )
-
-  // LOGICA PARA QUE ARRANQUE EN NOVIEMBRE SI ES EGRESADITOS
-  const defaultMonth = useMemo(() => {
-    if (!isEgresadito) return undefined; // Para cumples normales, arranca en el mes actual
-
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentYear = today.getFullYear();
-
-    // Si estamos en enero a octubre, mostramos noviembre de este año
-    if (currentMonth < 11) {
-      return new Date(currentYear, 10, 1); // 10 = Noviembre (0-indexado)
-    } 
-    // Si estamos en noviembre o diciembre, mostramos el mes actual
-    else {
-      return today;
-    }
-  }, [isEgresadito]);
-
-
-  if (!isMounted) {
-    return <div className="flex justify-center min-h-[350px]" />
+    
+    onSelectDate(undefined) 
   }
 
-  const isDual = selectedDate ? showDualFixedSlots(selectedDate, isEgresadito) : false
+  const handleTurnSelect = (turno: Turno) => {
+    setTurnoBuscado(turno)
+    setVerificacion('idle')
+    setShowHours(false) 
+  }
 
-  const isPrimeroBooked = isDual ? checkOverlap(12 * 60, 16 * 60, bookedSlots) : false
-  const isSegundoBooked = isDual ? checkOverlap(18 * 60 + 30, 22 * 60 + 30, bookedSlots) : false
-  const isLunVieFullyBooked = !isDual && bookedSlots.length > 0
+  const handleFakeTurnClick = () => {
+    setDateWarning(true)
+    setShowCalendar(true) 
+    setShowHours(false)
+    setTimeout(() => setDateWarning(false), 4000)
+  }
+
+  const handleVerify = async () => {
+    if (!fechaBuscada || !turnoBuscado) return
+
+    setVerificacion('checking')
+    
+    const y = fechaBuscada.getFullYear()
+    const m = String(fechaBuscada.getMonth() + 1).padStart(2, "0")
+    const d = String(fechaBuscada.getDate()).padStart(2, "0")
+    const dateStr = `${y}-${m}-${d}`
+
+    const supabase = createBrowserClient()
+    let query = supabase.from("reservas").select("turno").eq("fecha", dateStr)
+    if (ignoreReservaId) query = query.neq("id", ignoreReservaId)
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error("Error consultando disponibilidad:", error)
+      setVerificacion('error')
+      return
+    }
+
+    const bookedSlots = data ? data.map(r => r.turno) : []
+    const isDual = showDualFixedSlots(fechaBuscada, isEgresadito)
+
+    let isOverlap = false
+    if (isDual) {
+      if (turnoBuscado === "primero") isOverlap = checkOverlap(12 * 60, 16 * 60, bookedSlots)
+      if (turnoBuscado === "segundo") isOverlap = checkOverlap(18 * 60 + 30, 22 * 60 + 30, bookedSlots)
+    } else {
+      if (isLunVieTurn(turnoBuscado)) {
+        isOverlap = bookedSlots.length > 0 
+      }
+    }
+
+    setTimeout(() => {
+      if (isOverlap) {
+        setVerificacion('error')
+      } else {
+        setVerificacion('success')
+        onSelectDate(fechaBuscada)
+        onTurnoBooked(turnoBuscado)
+      }
+    }, 600)
+  }
+
+  const defaultMonth = useMemo(() => {
+    if (!isEgresadito) return undefined;
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    if (currentMonth < 11) return new Date(today.getFullYear(), 10, 1); 
+    return today;
+  }, [isEgresadito]);
 
   const lunVieStartOptions: number[] = []
-  if (selectedDate) {
-    // Si estamos en egresaditos, leemos sus propias reglas
-    const reglas = isEgresadito ? obtenerReglasEgresaditos(selectedDate) : obtenerReglasParaFecha(selectedDate)
-    
+  if (fechaBuscada) {
+    const reglas = isEgresadito ? obtenerReglasEgresaditos(fechaBuscada) : obtenerReglasParaFecha(fechaBuscada)
     if (reglas && reglas.modalidad === 'turno_flexible' && reglas.ultimo_inicio_permitido) {
       const [horaInicio] = reglas.franja_horaria.inicio.split(':').map(Number)
       const [horaUltimoInicio, minutoUltimoInicio] = reglas.ultimo_inicio_permitido.split(':').map(Number)
       const ultimoInicioMinutos = horaUltimoInicio * 60 + minutoUltimoInicio
-      
       for (let min = horaInicio * 60; min <= ultimoInicioMinutos; min += 30) {
         lunVieStartOptions.push(min)
       }
     }
   }
 
+  const isDual = fechaBuscada ? showDualFixedSlots(fechaBuscada, isEgresadito) : false
+
   return (
-    <div className="w-full space-y-6">
-      <div className="flex items-center justify-center gap-6 text-xs font-bold text-slate-500 uppercase mb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-white border border-slate-300 shadow-sm" /> Disponible
-        </div>
-        <div className="flex items-center gap-2 text-red-600">
-          <div className="w-3 h-3 rounded-full bg-red-100 border border-red-400 shadow-sm" /> Ocupado
-        </div>
+    <div className="w-full space-y-4">
+      
+      {/* 1. BARRA DE CONTROL (Botones 50/50 en todas las pantallas) */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        
+        {/* BOTÓN FECHA */}
+        <button
+          type="button"
+          onClick={() => { setShowCalendar(!showCalendar); setShowHours(false); }}
+          className={cn(
+            "w-full h-[68px] sm:h-[72px] px-3 sm:px-4 rounded-2xl border-2 flex items-center justify-between transition-all bg-white text-left",
+            fechaBuscada ? "border-azul-marino shadow-sm" : "border-slate-200 hover:border-azul-claro",
+            dateWarning && !fechaBuscada && "border-red-300 ring-2 ring-red-100",
+            showCalendar && "border-azul-marino ring-2 ring-azul-marino/10"
+          )}
+        >
+          <div className="flex flex-col items-start overflow-hidden w-full">
+            <span className={cn("text-[10px] font-black uppercase tracking-widest mb-0.5", dateWarning && !fechaBuscada ? "text-red-500" : "text-slate-400")}>
+              1. Fecha
+            </span>
+            <span className={cn("text-xs sm:text-sm font-bold truncate w-full", fechaBuscada ? "text-azul-marino" : "text-slate-400")}>
+              {fechaBuscada ? format(fechaBuscada, "d MMM yyyy", { locale: es }) : "Elegir día..."}
+            </span>
+          </div>
+          <ChevronDown className={cn("w-4 h-4 shrink-0 transition-transform text-slate-400", showCalendar && "rotate-180 text-azul-marino")} />
+        </button>
+
+        {/* BOTÓN HORARIO */}
+        <button
+          type="button"
+          onClick={fechaBuscada ? () => { setShowHours(!showHours); setShowCalendar(false); } : handleFakeTurnClick}
+          className={cn(
+            "w-full h-[68px] sm:h-[72px] px-3 sm:px-4 rounded-2xl border-2 flex items-center justify-between transition-all bg-white text-left",
+            turnoBuscado ? "border-azul-marino shadow-sm" : "border-slate-200 hover:border-azul-claro",
+            showHours && "border-azul-marino ring-2 ring-azul-marino/10"
+          )}
+        >
+          <div className="flex flex-col items-start overflow-hidden w-full">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+              2. Horario
+            </span>
+            <span className={cn("text-xs sm:text-sm font-bold truncate w-full", turnoBuscado ? "text-azul-marino" : "text-slate-400")}>
+              {turnoBuscado ? obtenerLabelTurnoCorto(turnoBuscado) : "Elegir hora..."}
+            </span>
+          </div>
+          <ChevronDown className={cn("w-4 h-4 shrink-0 transition-transform text-slate-400", showHours && "rotate-180 text-azul-marino")} />
+        </button>
+
       </div>
 
-      <div className="flex justify-center">
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={handleSelectDate}
-          disabled={(date) => disabledDays(date) || isDayFullyBooked(date)}
-          defaultMonth={defaultMonth} // <--- ACÁ LE PASAMOS EL MES POR DEFECTO CALCULADO
-          locale={es}
-          className="rounded-xl border border-border/50 bg-background p-3"
-          modifiers={{
-            ocupado: (date) => isDayFullyBooked(date),
-          }}
-          modifiersClassNames={{
-            ocupado: "!bg-red-100 !text-red-600 !line-through !opacity-100 !font-bold border border-red-300"
-          }}
-          classNames={{
-            months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-            month: "space-y-4",
-            caption: "flex justify-center pt-1 relative items-center",
-            caption_label: "text-lg font-bold text-azul-marino capitalize",
-            nav: "space-x-1 flex items-center",
-            nav_button: "h-9 w-9 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-azul-claro/20 rounded-lg transition-colors",
-            nav_button_previous: "absolute left-1",
-            nav_button_next: "absolute right-1",
-            table: "w-full border-collapse space-y-1",
-            head_row: "flex",
-            head_cell: "text-muted-foreground rounded-md w-10 font-medium text-[0.8rem] capitalize",
-            row: "flex w-full mt-2",
-            cell: "h-10 w-10 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-            day: "h-10 w-10 p-0 font-medium aria-selected:opacity-100 hover:bg-rosa/20 rounded-lg transition-colors",
-            day_range_end: "day-range-end",
-            day_selected: "bg-azul-marino text-white hover:bg-azul-marino hover:text-white focus:bg-azul-marino focus:text-white font-bold",
-            day_today: "bg-amarillo/30 text-azul-marino font-bold",
-            day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-            day_disabled: "text-muted-foreground opacity-30",
-            day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-            day_hidden: "invisible",
-          }}
-        />
-      </div>
-
-      {!selectedDate && (
-        <p className="text-sm text-muted-foreground text-center">
-          Seleccioná un día en el calendario para ver los horarios disponibles.
-        </p>
+      {/* ALERTA: Si intenta elegir horario sin elegir fecha */}
+      {dateWarning && !fechaBuscada && (
+        <div className="flex items-center justify-center gap-2 text-red-500 bg-red-50 py-2.5 px-3 rounded-xl border border-red-100 animate-in fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span className="text-[11px] font-bold leading-tight text-center">Por favor, seleccioná la fecha primero.</span>
+        </div>
       )}
 
-      {selectedDate && (
-        <div className="rounded-xl border border-border/50 bg-card/50 p-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div>
-            <p className="text-sm font-bold text-azul-marino text-center mb-1">
-              Horarios disponibles para el{" "}
-              {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
-            </p>
+      {/* 2. PANEL DESPLEGABLE: CALENDARIO (Ocupa el 100% del ancho abajo de los botones) */}
+      {showCalendar && (
+        <div className="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-300">
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={fechaBuscada}
+              onSelect={handleDateSelect}
+              disabled={disabledDays}
+              defaultMonth={fechaBuscada || defaultMonth} 
+              locale={es}
+              className="rounded-xl border-none bg-transparent p-0 w-full max-w-[340px]"
+              classNames={{
+                months: "flex flex-col space-y-4",
+                month: "space-y-4 w-full",
+                caption: "flex justify-center pt-1 relative items-center mb-2",
+                caption_label: "text-[16px] font-black text-azul-marino capitalize",
+                nav: "space-x-1 flex items-center",
+                nav_button: "h-8 w-8 bg-white border border-slate-200 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100",
+                nav_button_previous: "absolute left-0",
+                nav_button_next: "absolute right-0",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex justify-between w-full mb-2",
+                head_cell: "text-slate-400 font-extrabold text-[10px] uppercase w-8 sm:w-10 text-center",
+                row: "flex justify-between w-full mt-1.5",
+                cell: "h-9 w-8 sm:w-10 text-center p-0",
+                day: "h-9 w-8 sm:w-10 p-0 font-bold text-slate-600 bg-white border border-transparent hover:border-slate-300 rounded-lg shadow-sm transition-all",
+                day_selected: "!bg-azul-marino !text-white !font-black scale-105 shadow-md",
+                day_today: "border-2 !border-amarillo",
+                day_outside: "text-slate-300 opacity-40 font-medium bg-transparent shadow-none border-none",
+                day_disabled: "text-slate-200 opacity-30 cursor-not-allowed bg-transparent shadow-none border-none",
+              }}
+            />
           </div>
+        </div>
+      )}
 
-          {isLoadingSlots ? (
-            <p className="text-sm text-center text-muted-foreground">Verificando disponibilidad...</p>
-          ) : isDual ? (
-            isPrimeroBooked && isSegundoBooked ? (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-center shadow-sm">
-                <p className="text-red-600 font-semibold text-sm">
-                  ❌ Este día ya se encuentra completamente reservado.
-                </p>
-                <p className="text-red-500/80 text-xs mt-1">
-                  (Ambos turnos están ocupados)
-                </p>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  disabled={isPrimeroBooked}
-                  onClick={() => handleTurnSelect("primero", "primero")}
-                  className={cn(
-                    "flex flex-col items-center justify-center rounded-xl border-2 px-4 py-3 transition-all min-h-[76px]",
-                    isPrimeroBooked
-                      ? "border-red-200 bg-red-50/80 text-red-500/80 cursor-not-allowed"
-                      : activeBubble === "primero"
-                      ? "border-naranja bg-naranja text-white shadow-md scale-[1.02]"
-                      : "border-azul-marino/20 bg-naranja/10 text-azul-marino hover:border-azul-marino"
-                  )}
-                >
-                  <span className="text-sm font-semibold">{LABEL_MANANA}</span>
-                  {isPrimeroBooked && (
-                    <span className="text-xs font-bold text-red-600 mt-1">❌ Turno Reservado</span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  disabled={isSegundoBooked}
-                  onClick={() => handleTurnSelect("segundo", "segundo")}
-                  className={cn(
-                    "flex flex-col items-center justify-center rounded-xl border-2 px-4 py-3 transition-all min-h-[76px]",
-                    isSegundoBooked
-                      ? "border-red-200 bg-red-50/80 text-red-500/80 cursor-not-allowed"
-                      : activeBubble === "segundo"
-                      ? "border-lavanda bg-lavanda text-white shadow-md scale-[1.02]"
-                      : "border-azul-marino/20 bg-lavanda/10 text-azul-marino hover:border-azul-marino"
-                  )}
-                >
-                  <span className="text-sm font-semibold">{LABEL_NOCHE}</span>
-                  {isSegundoBooked && (
-                    <span className="text-xs font-bold text-red-600 mt-1">❌ Turno Reservado</span>
-                  )}
-                </button>
-              </div>
-            )
+      {/* 3. PANEL DESPLEGABLE: HORARIOS (Ocupa el 100% del ancho) */}
+      {showHours && fechaBuscada && (
+        <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl animate-in slide-in-from-top-2 fade-in duration-300">
+          {isDual ? (
+            /* FIN DE SEMANA / TEMPORADA ALTA */
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => handleTurnSelect("primero")}
+                className={cn(
+                  "w-full text-left px-5 py-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4",
+                  turnoBuscado === "primero" ? "bg-naranja text-white border-naranja font-bold shadow-md" : "bg-white text-azul-marino hover:border-naranja/40 border-slate-200"
+                )}
+              >
+                <span className="text-[11px] font-black uppercase tracking-widest opacity-80">Turno Mañana</span>
+                <span className="text-base font-extrabold">{LABEL_MANANA}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTurnSelect("segundo")}
+                className={cn(
+                  "w-full text-left px-5 py-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4",
+                  turnoBuscado === "segundo" ? "bg-lavanda text-white border-lavanda font-bold shadow-md" : "bg-white text-azul-marino hover:border-lavanda/40 border-slate-200"
+                )}
+              >
+                <span className="text-[11px] font-black uppercase tracking-widest opacity-80">Turno Tarde/Noche</span>
+                <span className="text-base font-extrabold">{LABEL_NOCHE}</span>
+              </button>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {isLunVieFullyBooked ? (
-                 <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-center shadow-sm">
-                   <p className="text-red-600 font-semibold text-sm">
-                     ❌ Este día ya se encuentra reservado. 
-                   </p>
-                   <p className="text-red-500/80 text-xs mt-1">
-                     (Solo se realiza un evento por día de lunes a viernes)
-                   </p>
-                 </div>
+            /* DÍAS DE SEMANA FLEXIBLES */
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {lunVieStartOptions.map((min) => {
+                const labelFormateado = formatFourHourRange(min)
+                const isSelected = isLunVieTurn(turnoBuscado!) && turnoBuscado?.label === labelFormateado
+                return (
+                  <button
+                    key={min}
+                    type="button"
+                    onClick={() => handleTurnSelect({ id: "lun_vie", label: labelFormateado })}
+                    className={cn(
+                      "py-3 px-2 text-xs sm:text-sm font-bold rounded-xl border-2 text-center transition-all",
+                      isSelected
+                        ? "bg-azul-marino text-white border-azul-marino shadow-md scale-[1.03]"
+                        : "bg-white text-azul-marino border-slate-200 hover:border-azul-marino hover:bg-slate-50"
+                    )}
+                  >
+                    {formatClock(min)} hs
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 4. BOTÓN VERIFICAR Y RESPUESTA (Solo cuando todo está cerrado y elegido) */}
+      {fechaBuscada && turnoBuscado && !showCalendar && !showHours && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 mt-2">
+          {verificacion === 'idle' || verificacion === 'loading' ? (
+            <button
+              type="button"
+              onClick={handleVerify}
+              disabled={verificacion === 'loading'}
+              className="w-full h-14 bg-verde hover:bg-green-600 text-white font-black rounded-xl shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+            >
+              {verificacion === 'loading' ? (
+                <><Loader2 className="w-5 h-5 animate-spin" /> Verificando...</>
+              ) : (
+                <><Search className="w-5 h-5" /> Verificar Disponibilidad</>
+              )}
+            </button>
+          ) : null}
+
+          {/* MENSAJES DE ERROR PERSONALIZADOS (Lógica inteligente condicional) */}
+          {verificacion === 'error' && (
+            <div className="bg-red-50 border-2 border-red-200 p-5 rounded-2xl text-center shadow-inner animate-in zoom-in-95">
+              <div className="mx-auto bg-red-100 text-red-500 w-12 h-12 rounded-full flex items-center justify-center mb-3">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              
+              {isDual ? (
+                <>
+                  {/* Mensaje para días con múltiples turnos (Fin de semana) */}
+                  <p className="text-red-700 font-black text-sm mb-1 uppercase tracking-wide">Turno Ocupado</p>
+                  <p className="text-red-500 text-xs font-medium mb-4">Por favor, verificá disponibilidad en el otro horario o elegí un día diferente.</p>
+                </>
               ) : (
                 <>
-                  <p className="text-sm text-center text-foreground/90 leading-relaxed mb-3">
-                    Elegí la hora de inicio de tu evento (duración de 4 horas):
-                  </p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {lunVieStartOptions.map((min) => {
-                      const labelFormateado = formatFourHourRange(min)
-                      const isSelected = activeBubble === min
-
-                      return (
-                        <button
-                          key={min}
-                          type="button"
-                          onClick={() =>
-                            handleTurnSelect(
-                              { id: "lun_vie", label: labelFormateado },
-                              min
-                            )
-                          }
-                          className={cn(
-                            "rounded-full border px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200",
-                            isSelected
-                              ? "bg-azul-marino text-white border-azul-marino shadow-md scale-105"
-                              : "bg-background text-azul-marino border-azul-marino/30 hover:bg-azul-marino hover:text-white"
-                          )}
-                        >
-                          {formatClock(min)}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  {/* Mensaje para días con evento único (Días de semana flexibles) */}
+                  <p className="text-red-700 font-black text-sm mb-1 uppercase tracking-wide">Fecha Ocupada</p>
+                  <p className="text-red-500 text-xs font-medium mb-4">Realizamos un único evento por día bajo esta modalidad. Por favor, elegí otra fecha.</p>
                 </>
               )}
+              
+              <button 
+                onClick={() => { setVerificacion('idle'); setShowCalendar(!isDual); setShowHours(isDual); }} 
+                className="text-xs font-black bg-white border-2 border-red-200 text-red-600 px-5 py-2.5 rounded-xl hover:bg-red-50 transition-colors w-full sm:w-auto"
+              >
+                Modificar Búsqueda
+              </button>
+            </div>
+          )}
+
+          {/* RESULTADO LIBRE */}
+          {verificacion === 'success' && (
+            <div className="bg-green-50 border-2 border-verde/40 p-4 rounded-xl flex items-start gap-3 shadow-sm animate-in zoom-in-95">
+              <div className="bg-verde text-white p-1.5 rounded-full shrink-0 mt-0.5">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-green-800 font-black text-sm uppercase tracking-wide mb-0.5">¡Turno Confirmado Libre!</p>
+                <p className="text-green-700 text-xs font-medium">Hemos reservado este espacio temporalmente para vos. Completá tus datos abajo para asegurar la fecha.</p>
+              </div>
             </div>
           )}
         </div>
