@@ -159,7 +159,7 @@ export default function LandingPage() {
                   
                   <div className="flex flex-col">
                     <p className="text-base md:text-[1.15rem] font-bold text-white leading-snug drop-shadow-md">
-                      Reservando hasta el <strong className="text-transparent bg-clip-text bg-gradient-to-r from-rosa to-lavanda font-black tracking-tight text-xl">31/7</strong>, <strong className="text-amarillo font-black uppercase tracking-wide">congelás el valor 2026</strong>
+                      Precios congelados hasta el <strong className="text-transparent bg-clip-text bg-gradient-to-r from-rosa to-lavanda font-black tracking-tight text-xl">31/12</strong>
                     </p>
                     <p className="text-xs md:text-sm text-white/80 font-medium mt-1 flex items-center justify-center sm:justify-start gap-1.5">
                       Asegurá tu fecha y tu tarjeta digital de invitación 🎁
