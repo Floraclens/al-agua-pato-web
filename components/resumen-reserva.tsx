@@ -25,7 +25,6 @@ import { getTurnoLabel } from "@/lib/turno"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { validarReservaCompleta, formatearErroresValidacion } from "@/lib/validacion-reservas"
 
 interface ResumenReservaProps {
   selectedDate: Date | undefined
@@ -38,6 +37,7 @@ interface ResumenReservaProps {
     precioExtras: number
     subtotal: number
     descuento: number
+    recargo?: number
     total: number
     sena: number
   }
@@ -281,9 +281,7 @@ export function ResumenReserva({
           <div className="relative w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-emerald-100 text-center animate-in zoom-in-95 duration-500 overflow-hidden m-auto">
             <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-rosa via-amarillo to-azul-claro" />
             
-            {/* CORRECCIÓN: Separamos el círculo de la imagen del tilde verde */}
             <div className="relative w-24 h-24 mx-auto mb-6 mt-2">
-              {/* Contenedor de la imagen (recorta solo el logo) */}
               <div className="absolute inset-0 bg-white rounded-full border-4 border-white shadow-xl shadow-green-500/20 overflow-hidden flex items-center justify-center">
                 <Image 
                   src="/logo-circular.png" 
@@ -292,12 +290,10 @@ export function ResumenReserva({
                   className="object-cover scale-110" 
                 />
               </div>
-              {/* Contenedor del tilde (está por fuera del overflow-hidden, no se recorta) */}
               <div className="absolute -right-1 -top-1 bg-amarillo rounded-full p-1.5 shadow-sm border-2 border-white z-10">
                 <CheckCircle2 className="w-5 h-5 text-azul-marino" />
               </div>
             </div>
-            {/* FIN CORRECCIÓN */}
 
             <h3 className="text-2xl md:text-3xl font-extrabold text-azul-marino mb-3 flex items-center justify-center gap-2">
               <Sparkles className="w-6 h-6 text-amarillo animate-pulse" />
@@ -451,6 +447,9 @@ export function ResumenReserva({
                   {metodoPago === "efectivo" && pagoTotalidad && (
                     <Badge className="bg-verde text-white text-xs">10% OFF</Badge>
                   )}
+                  {metodoPago === "tarjeta" && (
+                    <Badge variant="destructive" className="bg-red-500 text-white text-[10px] uppercase tracking-wider">Recargo</Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -484,6 +483,8 @@ export function ResumenReserva({
               </span>
             </div>
           )}
+          
+          {/* LÓGICA VISUAL: DESCUENTO */}
           {calculos.descuento > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-verde font-medium flex flex-col">
@@ -492,6 +493,19 @@ export function ResumenReserva({
               </span>
               <span className="text-verde font-medium">
                 -{formatPrice(calculos.descuento)}
+              </span>
+            </div>
+          )}
+
+          {/* LÓGICA VISUAL RECARGO */}
+          {(calculos.recargo ?? 0) > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-red-500 font-medium flex flex-col">
+                Recargo Tarjeta (20%)
+                <span className="text-[10px] opacity-80 leading-tight">(Gastos administrativos)</span>
+              </span>
+              <span className="text-red-500 font-medium">
+                +{formatPrice(calculos.recargo!)}
               </span>
             </div>
           )}
@@ -506,7 +520,7 @@ export function ResumenReserva({
           </span>
         </div>
 
-        <div className="bg-amarillo/20 rounded-xl p-4 mb-4 text-center">
+        <div className="bg-amarillo/20 rounded-xl p-4 mb-4 text-center border border-amarillo/40">
           <p className="text-sm text-azul-marino">
             <span className="font-bold">
               {pagoTotalidad ? "Total a abonar para reservar:" : "Seña requerida para reservar:"}
@@ -515,6 +529,7 @@ export function ResumenReserva({
           <p className="text-2xl font-extrabold text-azul-marino">
             {formatPrice(calculos.sena)}
           </p>
+          {/* SE ELIMINÓ EL MENSAJE DE RECARGO DE LA SEÑA ACÁ */}
         </div>
 
         <Button

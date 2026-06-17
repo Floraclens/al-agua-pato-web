@@ -7,8 +7,7 @@ import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react" 
 import { type Turno } from "@/lib/turno"
-// IMPORTAMOS VALOR_SENA DESDE LA CONFIGURACIÓN
-import { obtenerReglasParaFecha, PRECIOS, VALOR_SENA } from "@/lib/config-reservas"
+import { obtenerReglasParaFecha, PRECIOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS } from "@/lib/config-reservas"
 import Link from "next/link"
 
 export type { Turno } from "@/lib/turno"
@@ -37,8 +36,6 @@ export interface DatosCliente {
   sala?: string
   turno_colegio?: string
 }
-
-const DESCUENTO_EFECTIVO = 0.1
 
 const formatMoneyUI = (amount: number) => {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
@@ -92,11 +89,13 @@ export default function PaginaReserva() {
     turno_colegio: ""
   })
 
+  // === CALCULADORA CENTRAL DE PRECIOS ===
   const calculos = useMemo(() => {
     let subtotal = 0
     let precioTurno = 0
     let precioExtras = 0
     let descuento = 0
+    let recargo = 0
 
     if (selectedTurno && selectedDate && reglasFecha) {
       if (reglasFecha.modalidad === 'doble_turno_fijo') {
@@ -141,19 +140,31 @@ export default function PaginaReserva() {
 
     subtotal += precioExtras
 
+    // LÓGICA DE DESCUENTO (Efectivo)
     if (metodoPago === "efectivo" && pagoTotalidad && subtotal > 0) {
-      descuento = subtotal * DESCUENTO_EFECTIVO
+      descuento = subtotal * (RECARGOS_Y_DESCUENTOS.efectivo_totalidad_descuento_porcentaje / 100)
     }
 
-    const total = subtotal - descuento
-    // UTILIZAMOS LA VARIABLE IMPORTADA
-    const senaFinal = pagoTotalidad ? total : VALOR_SENA
+    // LÓGICA DE RECARGO (Tarjeta)
+    if (metodoPago === "tarjeta" && subtotal > 0) {
+      recargo = subtotal * (RECARGOS_Y_DESCUENTOS.tarjeta_recargo_porcentaje / 100)
+    }
+
+    const total = subtotal - descuento + recargo
+    
+    // CORRECCIÓN LÓGICA DE SEÑA: La seña no recibe recargos. Se mantiene estática salvo que abonen la totalidad.
+    let senaFinal = VALOR_SENA
+    
+    if (pagoTotalidad) {
+      senaFinal = total
+    }
 
     return {
       precioTurno,
       precioExtras,
       subtotal,
       descuento,
+      recargo,
       total,
       sena: senaFinal,
     }

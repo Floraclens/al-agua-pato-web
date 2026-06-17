@@ -2,8 +2,14 @@
  * Configuración centralizada de precios y reglas de reservas
  */
 
-// NUEVO: VALOR DE LA SEÑA CENTRALIZADO
+// VALOR DE LA SEÑA CENTRALIZADO
 export const VALOR_SENA = 350000;
+
+// REGLAS FINANCIERAS (NUEVO)
+export const RECARGOS_Y_DESCUENTOS = {
+  efectivo_totalidad_descuento_porcentaje: 10,
+  tarjeta_recargo_porcentaje: 20
+};
 
 // Feriados estáticos de Argentina (Año 2026)
 export const FERIADOS: string[] = [
@@ -25,7 +31,7 @@ export const PRECIOS = {
 
   opcionales: {
     adultosAdicionales: 7000,
-    animacion: 70000,
+    animacion: 90000,
     horaExtra: 300000,
     robot_led: { uno: 200000, dos: 350000, detalle: "1 hora de servicio" },
     zancos_led: { precio_unidad: 200000, max: 2, detalle: "1 hora de servicio" },
@@ -39,7 +45,7 @@ export const PRECIOS = {
   }
 }
 
-// NUEVO: PRECIOS EXCLUSIVOS EGRESADITOS
+// PRECIOS EXCLUSIVOS EGRESADITOS
 export const PRECIOS_EGRESADITOS = {
   nov_a_dic14: {
     lunes_a_viernes: 1050000,

@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { Banknote, Building2, CreditCard } from "lucide-react"
+import { Banknote, Building2, CreditCard, AlertTriangle } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { MetodoPago } from "@/app/page"
 import { cn } from "@/lib/utils"
@@ -93,6 +93,7 @@ export function MetodoPagoSelector({
               </div>
             </button>
 
+            {/* DESPLEGABLE EFECTIVO: 10% OFF */}
             {isSelected && metodo.id === "efectivo" && (
               <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-300 pl-[4.5rem]">
                 <label className="flex items-start gap-3 cursor-pointer p-3 bg-white border border-verde/20 rounded-lg shadow-sm">
@@ -113,6 +114,23 @@ export function MetodoPagoSelector({
                     </span>
                   </div>
                 </label>
+              </div>
+            )}
+
+            {/* DESPLEGABLE TARJETA: 20% RECARGO */}
+            {isSelected && metodo.id === "tarjeta" && (
+              <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-300 pl-[4.5rem]">
+                <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg shadow-sm">
+                  <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span className="text-sm font-bold text-red-700">Recargo del 20%</span>
+                    </div>
+                    <span className="text-xs text-red-600/90 leading-snug">
+                      Los pagos procesados con tarjeta de débito o crédito tienen un recargo financiero sobre el valor a abonar.
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
