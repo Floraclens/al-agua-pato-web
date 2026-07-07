@@ -48,13 +48,13 @@ export const PRECIOS = {
 // PRECIOS EXCLUSIVOS EGRESADITOS
 export const PRECIOS_EGRESADITOS = {
   nov_a_dic14: {
-    lunes_a_viernes: 1050000,
-    turno_1_fijo: 1050000,
-    turno_2_fijo: 1050000
+    lunes_a_viernes: 1100000,
+    turno_1_fijo: 1100000,
+    turno_2_fijo: 1100000
   },
   dic15_a_fin: {
-    turno_1_fijo: 1050000,
-    turno_2_fijo: 1050000
+    turno_1_fijo: 1100000,
+    turno_2_fijo: 1100000
   }
 }
 
