@@ -24,10 +24,10 @@ export const PRECIOS = {
   temporada_baja: { lunes_a_viernes: 700000, fines_de_semana: 700000 },
   temporada_media: { 
     lunes_a_viernes: 1000000, 
-    turno_1_fijo: 930000, 
-    turno_2_fijo: 1000000 
+    turno_1_fijo: 970000, 
+    turno_2_fijo: 1050000 
   },
-  temporada_alta: { turno_1_fijo: 930000, turno_2_fijo: 1000000 },
+  temporada_alta: { turno_1_fijo: 970000, turno_2_fijo: 1050000 },
 
   opcionales: {
     adultosAdicionales: 7000,
