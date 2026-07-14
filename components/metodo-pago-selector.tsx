@@ -33,7 +33,7 @@ const metodos = [
   {
     id: "tarjeta" as const,
     titulo: "Tarjeta",
-    descripcion: "VISA, MASTERCARD bancarizadas y NARANJA",
+    descripcion: "Solo tarjetas bancarizadas hasta en 3 cuotas sin interés (Hasta el 31/08)",
     icon: CreditCard,
     color: "text-lavanda",
     bgColor: "bg-lavanda/10",
