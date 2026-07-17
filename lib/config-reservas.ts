@@ -8,7 +8,7 @@ export const VALOR_SENA = 350000;
 // REGLAS FINANCIERAS (NUEVO)
 export const RECARGOS_Y_DESCUENTOS = {
   efectivo_totalidad_descuento_porcentaje: 10,
-  tarjeta_recargo_porcentaje: 20
+  tarjeta_recargo_porcentaje: 0
 };
 
 // Feriados estáticos de Argentina (Año 2026)

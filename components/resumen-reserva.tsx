@@ -447,9 +447,6 @@ export function ResumenReserva({
                   {metodoPago === "efectivo" && pagoTotalidad && (
                     <Badge className="bg-verde text-white text-xs">10% OFF</Badge>
                   )}
-                  {metodoPago === "tarjeta" && (
-                    <Badge variant="destructive" className="bg-red-500 text-white text-[10px] uppercase tracking-wider">Recargo</Badge>
-                  )}
                 </div>
               </div>
             </div>
@@ -493,19 +490,6 @@ export function ResumenReserva({
               </span>
               <span className="text-verde font-medium">
                 -{formatPrice(calculos.descuento)}
-              </span>
-            </div>
-          )}
-
-          {/* LÓGICA VISUAL RECARGO */}
-          {(calculos.recargo ?? 0) > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-red-500 font-medium flex flex-col">
-                Recargo Tarjeta (20%)
-                <span className="text-[10px] opacity-80 leading-tight">(Gastos administrativos)</span>
-              </span>
-              <span className="text-red-500 font-medium">
-                +{formatPrice(calculos.recargo!)}
               </span>
             </div>
           )}
