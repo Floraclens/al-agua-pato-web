@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ServiciosIncluidos } from "@/components/servicios-incluidos"
 import { PhotoGallery } from "@/components/photo-gallery"
+import { LogoWatermark } from "@/components/logo-watermark"
 import { 
   Sparkles, MapPin, CheckCircle2, Star, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
@@ -63,8 +64,9 @@ export default function LandingPage() {
 
   return (
     <main id="top" className="min-h-screen bg-[#081524] font-sans">
-      <div className="bg-background">
-        
+      <div className="relative isolate">
+        <LogoWatermark />
+
         <header className="bg-white/90 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 shadow-sm">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
@@ -346,7 +348,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="faq" className="py-20 bg-slate-50 border-t border-border/50">
+        <section id="faq" className="py-20 border-t border-border/50">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-azul-claro/10 text-azul-claro font-bold text-xs uppercase tracking-widest mb-4">

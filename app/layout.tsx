@@ -63,8 +63,8 @@ export const metadata: Metadata = {
     images: ['https://al-agua-pato-web.vercel.app/og-image.jpg'],
   },
   icons: {
-    icon: '/logo-circular.png',
-    apple: '/logo-circular.png',
+    icon: '/favicon-circular.png',
+    apple: '/favicon-circular.png',
   },
 }
 

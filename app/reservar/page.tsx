@@ -5,6 +5,7 @@ import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
+import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react" 
 import { type Turno } from "@/lib/turno"
 import { obtenerReglasParaFecha, PRECIOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS } from "@/lib/config-reservas"
@@ -229,7 +230,8 @@ export default function PaginaReserva() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 font-sans pb-16">
+    <main className="relative isolate min-h-screen bg-slate-50/30 font-sans pb-16">
+      <LogoWatermark />
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="inline-flex items-center gap-2 text-azul-marino font-bold hover:text-azul-marino/80 transition-colors">

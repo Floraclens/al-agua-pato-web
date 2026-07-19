@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
+import Image from "next/image"
 import { createBrowserClient } from "@/lib/supabase/client"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -9,18 +10,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner" 
 import { 
-  Calendar, 
-  Trash2, 
-  LogOut, 
-  Waves, 
-  Phone, 
-  User, 
+  Calendar,
+  Trash2,
+  LogOut,
+  Phone,
+  User,
   Banknote,
   Loader2,
   Mail,
   CheckCircle2,
   Clock,
-  Lock,
   Filter,
   DollarSign,
   AlertCircle,
@@ -296,8 +295,8 @@ export default function AdminPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-card border border-border/50 rounded-2xl shadow-xl p-8">
           <div className="flex flex-col items-center justify-center mb-8">
-            <div className="w-16 h-16 bg-azul-claro/10 rounded-full flex items-center justify-center mb-4">
-              <Lock className="h-8 w-8 text-azul-claro" />
+            <div className="relative w-16 h-16 rounded-full overflow-hidden mb-4 shadow-md">
+              <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill sizes="64px" className="object-cover scale-110" />
             </div>
             <h1 className="text-2xl font-bold text-azul-marino">Acceso Privado</h1>
           </div>
@@ -334,7 +333,9 @@ export default function AdminPage() {
       <nav className="bg-azul-marino text-white p-4 shadow-md sticky top-0 z-40">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Waves className="h-6 w-6 text-amarillo" />
+            <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0">
+              <Image src="/logo-circular.png" alt="Logo Al Agua Pato" fill sizes="32px" className="object-cover scale-110" />
+            </div>
             <span className="font-bold text-lg">Panel de Lorena</span>
           </div>
           <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 rounded-full" onClick={handleLogout}>
