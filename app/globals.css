@@ -5,6 +5,8 @@
 
 /* Al Agua Pato Theme - Colores del Logo */
 :root {
+  color-scheme: light;
+
   /* Base colors */
   --background: oklch(0.99 0.005 90); /* Crema muy suave */
   --foreground: oklch(0.23 0.065 260); /* Azul marino oscuro #1A237E */

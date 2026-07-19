@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Nunito, Great_Vibes, Roboto_Condensed, Anton } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
@@ -32,6 +32,11 @@ const anton = Anton({
   variable: '--font-anton',
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  colorScheme: 'light',
+  themeColor: '#F5F5F0',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://al-agua-pato-web.vercel.app'),
