@@ -15,7 +15,9 @@
 
 -- =====================================================================
 --  PARTE 2  (aplicar PRIMERO — no rompe nada, blinda la escritura)
---  Validación de precio + estado + sanidad en el INSERT anónimo.
+--  Validación de precio + estado + sanidad en el INSERT, para anon Y
+--  authenticated (ver nota del Paso 4 sobre por qué authenticated también
+--  necesita esta validación, no un WITH CHECK (true) "de confianza").
 -- =====================================================================
 
 -- (idempotente; RLS ya debería estar activo porque hay policies)
@@ -39,54 +41,114 @@ RETURNS numeric LANGUAGE sql IMMUTABLE AS $$
   END;
 $$;
 
--- --- Paso 2: policy de INSERT con validación ---------------------------
+-- --- Paso 2: función compartida de validación de un insert -------------
+-- Única fuente de verdad para "¿esta fila de reserva es válida?". La usan
+-- AMBAS policies de INSERT (anon y authenticated) para no duplicar el mismo
+-- WITH CHECK gigante en dos lugares que puedan divergir con el tiempo (el
+-- mismo problema de duplicación que ya existe entre app/reservar/page.tsx y
+-- app/egresaditos/page.tsx en el código de la app).
+CREATE OR REPLACE FUNCTION public.reserva_insert_valida(
+  p_estado text,
+  p_fecha date,
+  p_total numeric,
+  p_sena numeric,
+  p_nombre text,
+  p_telefono text,
+  p_email text,
+  p_nombre_cumpleanero text,
+  p_edad_cumple text,
+  p_extras_elegidos text,
+  p_metodo_pago text
+) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$
+  SELECT
+    -- solo se puede crear una reserva PENDIENTE (no auto-confirmarse)
+    p_estado = 'pendiente'
+
+    -- Piso de precio según el tipo de reserva.
+    -- El 🎓 al inicio de nombre_cumpleanero marca "egresadito" (lo escribe
+    -- la app, components/resumen-reserva.tsx). Emoji exacto: U+1F393
+    -- (F0 9F 8E 93), sin selector de variación. OJO: es señal
+    -- client-controlled -> defensa en profundidad, no garantía (ver nota
+    -- al pie del archivo).
+    -- Factor 0.85 = margen por debajo del 10% de descuento real, para no
+    -- rechazar por redondeos/promos. Subilo a 0.90 si querés más estricto.
+    AND p_total > 0
+    AND p_total >= public.precio_base_minimo(
+          p_fecha,
+          coalesce(p_nombre_cumpleanero, '') LIKE '🎓%'
+        ) * 0.85
+
+    -- Invariante robusto: un egresadito solo puede ser en Nov o Dic
+    AND NOT (
+          coalesce(p_nombre_cumpleanero, '') LIKE '🎓%'
+          AND EXTRACT(MONTH FROM p_fecha) NOT IN (11, 12)
+        )
+
+    -- Seña coherente: seña normal (350000) o abonando totalidad (= total)
+    AND p_sena >= 350000
+    AND p_sena <= p_total
+
+    -- Sanidad / anti-abuso (estos textos van a WhatsApp e invitación sin
+    -- sanitizar)
+    AND char_length(p_nombre) BETWEEN 2 AND 80
+    AND p_telefono ~ '^[0-9+()\-\s]{8,20}$'
+    AND (p_email IS NULL OR p_email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')
+    AND char_length(coalesce(p_nombre_cumpleanero, '')) <= 120
+    AND char_length(coalesce(p_edad_cumple, '')) <= 40
+    AND char_length(coalesce(p_extras_elegidos, '')) <= 500
+    AND char_length(coalesce(p_metodo_pago, '')) <= 80
+$$;
+
+-- --- Paso 3: policy de INSERT para anon ---------------------------------
 DROP POLICY IF EXISTS "Permitir inserts para todos" ON public.reservas;
+DROP POLICY IF EXISTS "anon insert reserva pendiente valida" ON public.reservas;
 
 CREATE POLICY "anon insert reserva pendiente valida"
 ON public.reservas
 FOR INSERT
 TO anon
 WITH CHECK (
-  -- anon solo puede crear reservas PENDIENTES (no auto-confirmarse)
-  estado = 'pendiente'
-
-  -- Piso de precio según el tipo de reserva.
-  -- El 🎓 al inicio de nombre_cumpleanero marca "egresadito" (lo escribe la app,
-  -- components/resumen-reserva.tsx). Emoji exacto: U+1F393 (F0 9F 8E 93), sin
-  -- selector de variación. OJO: es señal client-controlled -> defensa en
-  -- profundidad, no garantía (ver comentario al pie).
-  -- Factor 0.85 = margen por debajo del 10% de descuento real, para no
-  -- rechazar por redondeos/promos. Subilo a 0.90 si querés más estricto.
-  AND total > 0
-  AND total >= public.precio_base_minimo(
-        fecha,
-        coalesce(nombre_cumpleanero, '') LIKE '🎓%'
-      ) * 0.85
-
-  -- Invariante robusto: un egresadito solo puede ser en Nov o Dic
-  AND NOT (
-        coalesce(nombre_cumpleanero, '') LIKE '🎓%'
-        AND EXTRACT(MONTH FROM fecha) NOT IN (11, 12)
-      )
-
-  -- Seña coherente: seña normal (350000) o abonando totalidad (= total)
-  AND sena >= 350000
-  AND sena <= total
-
-  -- Sanidad / anti-abuso (estos textos van a WhatsApp e invitación sin sanitizar)
-  AND char_length(nombre) BETWEEN 2 AND 80
-  AND telefono ~ '^[0-9+()\-\s]{8,20}$'
-  AND (email IS NULL OR email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')
-  AND char_length(coalesce(nombre_cumpleanero, '')) <= 120
-  AND char_length(coalesce(edad_cumple, '')) <= 40
-  AND char_length(coalesce(extras_elegidos, '')) <= 500
-  AND char_length(coalesce(metodo_pago, '')) <= 80
+  public.reserva_insert_valida(
+    estado, fecha, total, sena, nombre, telefono, email,
+    nombre_cumpleanero, edad_cumple, extras_elegidos, metodo_pago
+  )
 );
 
--- (Opcional) Si la admin alguna vez inserta reservas a mano desde el panel,
--- descomentá esto para que el rol autenticado no quede atado al piso estricto:
--- CREATE POLICY "authenticated insert libre"
--- ON public.reservas FOR INSERT TO authenticated WITH CHECK (true);
+-- --- Paso 4: policy de INSERT para authenticated ------------------------
+-- APLICADA EN PRODUCCIÓN (2026-07-20), reemplazando una versión anterior
+-- SIN validación ("authenticated insert libre", WITH CHECK (true)).
+--
+-- Por qué existe: NO porque el panel /admin cree reservas -- confirmado por
+-- grep en todo el repo que app/admin/page.tsx solo hace SELECT/UPDATE/DELETE
+-- sobre `reservas`, nunca INSERT. El único INSERT del repo es
+-- components/resumen-reserva.tsx, compartido por /reservar y /egresaditos.
+-- Ese código público corre bajo rol "authenticated" (en vez de "anon")
+-- cuando el navegador tiene una sesión de Supabase Auth activa -- por
+-- ejemplo, la admin logueada en /admin en OTRA pestaña del mismo navegador.
+-- Síntoma para reconocerlo: warning "Multiple GoTrueClient instances
+-- detected" en la consola del navegador, y el error "new row violates
+-- row-level security policy for table reservas" con datos 100% válidos
+-- (porque no existía NINGUNA policy de INSERT para authenticated).
+--
+-- Por eso esta policy NO es "confío en quien esté logueado, sin control" --
+-- es el mismo formulario público, ejecutándose accidentalmente con otro
+-- rol, y debe cumplir las mismas reglas anti-fraude que anon. Si en el
+-- futuro el panel necesita un insert manual real (p. ej. "cargar reserva a
+-- mano"), se decide en ese momento si esa reserva debe seguir estas mismas
+-- reglas de negocio o si hace falta una policy nueva y explícita para ese
+-- caso puntual -- no antes.
+DROP POLICY IF EXISTS "authenticated insert libre" ON public.reservas;
+
+CREATE POLICY "authenticated insert reserva pendiente valida"
+ON public.reservas
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  public.reserva_insert_valida(
+    estado, fecha, total, sena, nombre, telefono, email,
+    nombre_cumpleanero, edad_cumple, extras_elegidos, metodo_pago
+  )
+);
 
 
 -- =====================================================================
@@ -149,8 +211,12 @@ GRANT SELECT (id, fecha, turno, nombre_cumpleanero, edad_cumple)
 --   GRANT SELECT ON public.reservas TO anon;
 -- Parte 2:
 --   DROP POLICY IF EXISTS "anon insert reserva pendiente valida" ON public.reservas;
+--   DROP POLICY IF EXISTS "authenticated insert reserva pendiente valida" ON public.reservas;
+--   DROP FUNCTION IF EXISTS public.reserva_insert_valida(text, date, numeric, numeric, text, text, text, text, text, text, text);
 --   CREATE POLICY "Permitir inserts para todos"
 --     ON public.reservas FOR INSERT TO anon WITH CHECK (true);
+--   CREATE POLICY "authenticated insert libre"
+--     ON public.reservas FOR INSERT TO authenticated WITH CHECK (true);
 
 
 -- =====================================================================
