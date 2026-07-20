@@ -157,18 +157,23 @@ WITH CHECK (
 -- =====================================================================
 
 -- --- OPCIÓN A (interina, SQL puro, NO rompe nada) ---------------------
+-- APLICADA EN PRODUCCIÓN (2026-07-20). Verificado funcionando después del
+-- cambio: calendario de disponibilidad, invitación digital
+-- (/invitacion/[id]) y una reserva nueva de prueba — los tres OK.
 -- Corta la exposición de teléfono, email, total, sena, metodo_pago,
 -- nombre y estado. Calendario, returning del insert e invitación siguen
 -- funcionando sin tocar código.
--- (Dejá la policy "Lectura publica de calendario" USING(true) como está:
---  ahora es inofensiva porque las columnas quedan limitadas por el GRANT.)
+-- (Se dejó la policy "Lectura publica de calendario" USING(true) como
+--  estaba: ahora es inofensiva porque las columnas quedan limitadas por
+--  el GRANT.)
 REVOKE SELECT ON public.reservas FROM anon;
 GRANT SELECT (id, fecha, turno, nombre_cumpleanero, edad_cumple)
   ON public.reservas TO anon;
 
--- Límite de A: todavía deja nombre_cumpleanero/edad_cumple (nombre y edad de
--- los chicos) leíbles en masa por anon, porque la invitación los necesita.
--- Es una mejora fuerte, pero NO es "solo fecha/turno". Para eso -> Opción B.
+-- Límite de A (sigue vigente): todavía deja nombre_cumpleanero/edad_cumple
+-- (nombre y edad de los chicos) leíbles en masa por anon, porque la
+-- invitación los necesita. Es una mejora fuerte, pero NO es "solo
+-- fecha/turno". Para eso -> Opción B (pendiente de aplicar, cierra C3).
 
 
 -- --- OPCIÓN B (objetivo real "solo fecha/turno" + cierra C3) ----------
