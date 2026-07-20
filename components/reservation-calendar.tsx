@@ -7,7 +7,7 @@ import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import type { Turno, LunVieTurno } from "@/lib/turno"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { obtenerReglasParaFecha, obtenerReglasEgresaditos } from "@/lib/config-reservas"
+import { obtenerReglasParaFecha, obtenerReglasEgresaditos, feriadosCargadosParaAnio } from "@/lib/config-reservas"
 import { Calendar as CalendarIcon, CheckCircle, ChevronDown, Search, AlertCircle, Clock, Loader2 } from "lucide-react"
 
 const LABEL_MANANA = "12:00 a 16:00 hs"
@@ -91,6 +91,7 @@ export function ReservationCalendar({
   const [showHours, setShowHours] = useState(false) 
   const [verificacion, setVerificacion] = useState<VerificationState>('idle')
   const [dateWarning, setDateWarning] = useState(false)
+  const [feriadosNoCargadosAnio, setFeriadosNoCargadosAnio] = useState<number | null>(null)
 
   const disabledDays = useCallback((date: Date) => {
     const today = new Date()
@@ -105,17 +106,32 @@ export function ReservationCalendar({
   }, [isEgresadito])
 
   const handleDateSelect = (date: Date | undefined) => {
+    // FALLO VISIBLE: si no hay feriados cargados para el año de la fecha, no dejar
+    // avanzar — cotizaría mal en silencio (ver lib/config-reservas.ts). Se muestra
+    // un aviso claro y se deja el calendario abierto para reelegir.
+    if (date && !feriadosCargadosParaAnio(date)) {
+      setFeriadosNoCargadosAnio(date.getFullYear())
+      setFechaBuscada(undefined)
+      setTurnoBuscado(null)
+      setVerificacion('idle')
+      setDateWarning(false)
+      setShowHours(false)
+      onSelectDate(undefined)
+      return
+    }
+    setFeriadosNoCargadosAnio(null)
+
     setFechaBuscada(date)
     setTurnoBuscado(null)
     setVerificacion('idle')
     setDateWarning(false)
-    setShowCalendar(false) 
-    
+    setShowCalendar(false)
+
     if (date) {
-      setShowHours(true) 
+      setShowHours(true)
     }
-    
-    onSelectDate(undefined) 
+
+    onSelectDate(undefined)
   }
 
   const handleTurnSelect = (turno: Turno) => {
@@ -256,6 +272,16 @@ export function ReservationCalendar({
         <div className="flex items-center justify-center gap-2 text-red-500 bg-red-50 py-2.5 px-3 rounded-xl border border-red-100 animate-in fade-in">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span className="text-[11px] font-bold leading-tight text-center">Por favor, seleccioná la fecha primero.</span>
+        </div>
+      )}
+
+      {/* ALERTA: Fecha de un año sin feriados cargados -> no cotizamos (fallo visible) */}
+      {feriadosNoCargadosAnio !== null && (
+        <div className="flex items-center justify-center gap-2 text-red-500 bg-red-50 py-2.5 px-3 rounded-xl border border-red-100 animate-in fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span className="text-[11px] font-bold leading-tight text-center">
+            Todavía no podemos calcular el precio para fechas de {feriadosNoCargadosAnio}. Escribinos por WhatsApp para reservar esa fecha.
+          </span>
         </div>
       )}
 

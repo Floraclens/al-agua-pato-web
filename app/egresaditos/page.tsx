@@ -9,7 +9,7 @@ import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, GraduationCap, School, AlertCircle } from "lucide-react"
 import { type Turno } from "@/lib/turno"
 // IMPORTAMOS LOS RECARGOS Y LA SEÑA DESDE LA CONFIGURACIÓN
-import { obtenerReglasEgresaditos, PRECIOS, PRECIOS_EGRESADITOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS } from "@/lib/config-reservas"
+import { obtenerReglasEgresaditos, PRECIOS, PRECIOS_EGRESADITOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS, FeriadosNoCargadosError } from "@/lib/config-reservas"
 import Link from "next/link"
 
 export type { Turno } from "@/lib/turno"
@@ -68,7 +68,15 @@ export default function PaginaReservaEgresaditos() {
   })
   
   const reglasFecha = useMemo(() => {
-    return selectedDate ? obtenerReglasEgresaditos(selectedDate) : null
+    if (!selectedDate) return null
+    try {
+      return obtenerReglasEgresaditos(selectedDate)
+    } catch (e) {
+      // Defensa en profundidad: si una fecha de un año sin feriados cargados
+      // llegara hasta acá (el calendario ya la bloquea), no crashear el render.
+      if (e instanceof FeriadosNoCargadosError) return null
+      throw e
+    }
   }, [selectedDate])
 
   useEffect(() => {

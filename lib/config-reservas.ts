@@ -11,13 +11,55 @@ export const RECARGOS_Y_DESCUENTOS = {
   tarjeta_recargo_porcentaje: 0
 };
 
-// Feriados estáticos de Argentina (Año 2026)
+// Feriados estáticos de Argentina, por año.
+// IMPORTANTE: un año solo cuenta como "cargado" si figura en ANIOS_FERIADOS_CARGADOS
+// (abajo). Para una fecha de un año NO cargado, esFinDeSemanaOFeriado() LANZA un
+// error en vez de asumir "no es feriado" -> nunca se cotiza mal en silencio.
+// Mantenimiento anual: agregar la lista oficial del año nuevo acá Y sumar el año
+// a ANIOS_FERIADOS_CARGADOS.
 export const FERIADOS: string[] = [
+  // --- 2026 (lista curada, incluye trasladables + puentes) ---
   "2026-01-01", "2026-02-16", "2026-02-17", "2026-03-23", "2026-03-24",
   "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-25", "2026-06-15",
   "2026-06-20", "2026-07-09", "2026-07-10", "2026-08-17", "2026-10-12",
-  "2026-11-23", "2026-12-07", "2026-12-08", "2026-12-25"
+  "2026-11-23", "2026-12-07", "2026-12-08", "2026-12-25",
+
+  // --- 2027 (feriados nacionales de FECHA FIJA, ciertos) ---
+  // PENDIENTE completar con la lista oficial: trasladables (Güemes 17-jun,
+  // San Martín 3er lun ago, Diversidad 12-oct, Soberanía 20-nov), Carnaval y
+  // Viernes Santo (móviles según Pascua), y puentes/días no laborables turísticos.
+  "2027-01-01", // Año Nuevo
+  "2027-03-24", // Día de la Memoria
+  "2027-04-02", // Malvinas
+  "2027-05-01", // Día del Trabajador
+  "2027-05-25", // Revolución de Mayo
+  "2027-06-20", // Paso a la Inmortalidad de Belgrano
+  "2027-07-09", // Día de la Independencia
+  "2027-12-08", // Inmaculada Concepción
+  "2027-12-25", // Navidad
 ]
+
+// Años cuya lista de feriados está cargada y vetada. Una fecha de un año que NO
+// esté acá hace que el cálculo de precio FALLE de forma visible (ver
+// FeriadosNoCargadosError + esFinDeSemanaOFeriado). Bumpear al agregar un año.
+export const ANIOS_FERIADOS_CARGADOS: number[] = [2026, 2027]
+
+// Error explícito para cuando se pide info de feriados de un año no cargado.
+// Se atrapa en la UI (calendario + páginas de reserva) para mostrar un aviso
+// claro y bloquear la reserva, en vez de cotizar con datos incompletos.
+export class FeriadosNoCargadosError extends Error {
+  anio: number
+  constructor(anio: number) {
+    super(`No hay feriados cargados para el año ${anio}. Cargá la lista oficial en lib/config-reservas.ts.`)
+    this.name = "FeriadosNoCargadosError"
+    this.anio = anio
+  }
+}
+
+// Chequeo sin lanzar: ¿tenemos feriados cargados para el año de esta fecha?
+export function feriadosCargadosParaAnio(fecha: Date): boolean {
+  return ANIOS_FERIADOS_CARGADOS.includes(fecha.getFullYear())
+}
 
 // PRECIOS CENTRALIZADOS (CUMPLES NORMALES)
 export const PRECIOS = {
@@ -99,6 +141,11 @@ export function determinarTemporada(fecha: Date): 'temporada_baja' | 'temporada_
 }
 
 export function esFinDeSemanaOFeriado(fecha: Date): boolean {
+  // Backstop irrompible: si no tenemos feriados cargados para este año, NO asumir
+  // "no es feriado" (eso cotizaría mal en silencio) -> fallar visible.
+  if (!feriadosCargadosParaAnio(fecha)) {
+    throw new FeriadosNoCargadosError(fecha.getFullYear())
+  }
   const diaSemana = fecha.getDay()
   const esFinDeSemana = diaSemana === 0 || diaSemana === 6
   const fechaStr = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`

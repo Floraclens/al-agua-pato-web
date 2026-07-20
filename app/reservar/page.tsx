@@ -8,7 +8,7 @@ import { ResumenReserva } from "@/components/resumen-reserva"
 import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react" 
 import { type Turno } from "@/lib/turno"
-import { obtenerReglasParaFecha, PRECIOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS } from "@/lib/config-reservas"
+import { obtenerReglasParaFecha, PRECIOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS, FeriadosNoCargadosError } from "@/lib/config-reservas"
 import Link from "next/link"
 
 export type { Turno } from "@/lib/turno"
@@ -67,7 +67,15 @@ export default function PaginaReserva() {
   })
   
   const reglasFecha = useMemo(() => {
-    return selectedDate ? obtenerReglasParaFecha(selectedDate) : null
+    if (!selectedDate) return null
+    try {
+      return obtenerReglasParaFecha(selectedDate)
+    } catch (e) {
+      // Defensa en profundidad: si una fecha de un año sin feriados cargados
+      // llegara hasta acá (el calendario ya la bloquea), no crashear el render.
+      if (e instanceof FeriadosNoCargadosError) return null
+      throw e
+    }
   }, [selectedDate])
 
   useEffect(() => {
