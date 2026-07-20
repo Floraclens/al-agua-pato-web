@@ -355,16 +355,19 @@ export default function InvitacionVIP() {
     async function fetchReserva() {
       if (!id) return
       const supabase = createBrowserClient()
-      const { data, error } = await supabase
-        .from("reservas")
-        .select("fecha, turno, nombre_cumpleanero, edad_cumple")
-        .eq("id", id)
-        .single()
+
+      // COEXISTENCIA TEMPORAL (hasta 2026-12-13, última fiesta con link viejo):
+      // id numérico = link viejo (por id); uuid = token nuevo (no adivinable).
+      // A partir del 2026-12-14: quitar la rama numérica y dropear get_invitacion_by_id.
+      const esIdNumerico = /^\d+$/.test(id)
+      const { data, error } = esIdNumerico
+        ? await supabase.rpc("get_invitacion_by_id", { p_id: Number(id) }).maybeSingle()
+        : await supabase.rpc("get_invitacion", { p_token: id }).maybeSingle()
 
       if (error || !data) {
         setError(true)
       } else {
-        setReserva(data)
+        setReserva(data as ReservaInfo)
       }
       setLoading(false)
     }

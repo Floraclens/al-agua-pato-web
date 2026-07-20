@@ -170,43 +170,63 @@ REVOKE SELECT ON public.reservas FROM anon;
 GRANT SELECT (id, fecha, turno, nombre_cumpleanero, edad_cumple)
   ON public.reservas TO anon;
 
--- Límite de A (sigue vigente): todavía deja nombre_cumpleanero/edad_cumple
--- (nombre y edad de los chicos) leíbles en masa por anon, porque la
--- invitación los necesita. Es una mejora fuerte, pero NO es "solo
--- fecha/turno". Para eso -> Opción B (pendiente de aplicar, cierra C3).
+-- Límite de A: dejaba nombre_cumpleanero/edad_cumple leíbles en masa por anon.
+-- SUPERADO por la Opción B (abajo): la invitación pasa a un RPC por token y el
+-- GRANT de anon se aprieta a (id, fecha, turno). La línea GRANT de arriba queda
+-- como registro histórico del paso interino.
 
 
 -- --- OPCIÓN B (objetivo real "solo fecha/turno" + cierra C3) ----------
---  REQUIERE CAMBIO DE CÓDIGO. Se hace en dos sub-pasos.
+--  APLICADA EN PRODUCCIÓN (2026-07-20). Reemplaza el id secuencial de la URL de
+--  invitación por un token uuid no adivinable, servido por funciones SECURITY
+--  DEFINER. Va con cambio de código (app/admin/page.tsx + app/invitacion/[id]/
+--  page.tsx). Migración de links viejos: coexistencia temporal por id hasta el
+--  2026-12-13 (max(fecha) de las reservas al momento del corte).
 
---  B.1 — SEGURO de correr ya (no rompe nada): token + función de invitación.
---        Agrega un token no adivinable y una función que devuelve SOLO los
---        campos de la invitación, por token (reemplaza al id secuencial).
+--  B.1 — Bloque aditivo (no rompe nada): token + índice + RPCs.
 -- ---------------------------------------------------------------------
--- ALTER TABLE public.reservas
---   ADD COLUMN IF NOT EXISTS invitacion_token uuid NOT NULL DEFAULT gen_random_uuid();
--- CREATE UNIQUE INDEX IF NOT EXISTS reservas_invitacion_token_idx
---   ON public.reservas (invitacion_token);
---
--- CREATE OR REPLACE FUNCTION public.get_invitacion(p_token uuid)
--- RETURNS TABLE (fecha date, turno text, nombre_cumpleanero text, edad_cumple text)
--- LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
--- AS $$
---   SELECT fecha, turno, nombre_cumpleanero, edad_cumple
---   FROM public.reservas
---   WHERE invitacion_token = p_token
--- $$;
--- REVOKE ALL ON FUNCTION public.get_invitacion(uuid) FROM public;
--- GRANT EXECUTE ON FUNCTION public.get_invitacion(uuid) TO anon, authenticated;
+ALTER TABLE public.reservas
+  ADD COLUMN IF NOT EXISTS invitacion_token uuid NOT NULL DEFAULT gen_random_uuid();
+CREATE UNIQUE INDEX IF NOT EXISTS reservas_invitacion_token_idx
+  ON public.reservas (invitacion_token);
 
---  B.2 — Correr SOLO DESPUÉS de actualizar el código:
---        * /admin arma la URL con invitacion_token en vez de reserva.id
---        * /invitacion/[id] usa supabase.rpc('get_invitacion', { p_token })
---        Recién ahí se aprieta anon a solo fecha/turno (+id para el returning).
---        Si corrés esto antes del cambio de código, /invitacion se ROMPE.
+-- RPC por token (PERMANENTE) — sirve la invitación por token no adivinable
+CREATE OR REPLACE FUNCTION public.get_invitacion(p_token uuid)
+RETURNS TABLE (fecha date, turno text, nombre_cumpleanero text, edad_cumple text)
+LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
+AS $$
+  SELECT fecha, turno, nombre_cumpleanero, edad_cumple
+  FROM public.reservas
+  WHERE invitacion_token = p_token
+$$;
+REVOKE ALL ON FUNCTION public.get_invitacion(uuid) FROM public;
+GRANT EXECUTE ON FUNCTION public.get_invitacion(uuid) TO anon, authenticated;
+
+-- RPC por id (TEMPORAL, coexistencia) — mantiene vivos los links numéricos ya
+-- compartidos por WhatsApp. BORRAR a partir del 2026-12-14 (pasada la última
+-- fiesta con link viejo: max(fecha) = 2026-12-13). Ver CLEANUP más abajo.
+CREATE OR REPLACE FUNCTION public.get_invitacion_by_id(p_id bigint)
+RETURNS TABLE (fecha date, turno text, nombre_cumpleanero text, edad_cumple text)
+LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
+AS $$
+  SELECT fecha, turno, nombre_cumpleanero, edad_cumple
+  FROM public.reservas
+  WHERE id = p_id
+$$;
+REVOKE ALL ON FUNCTION public.get_invitacion_by_id(bigint) FROM public;
+GRANT EXECUTE ON FUNCTION public.get_invitacion_by_id(bigint) TO anon, authenticated;
+
+--  B.2 — Apretar el GRANT. Correr SOLO DESPUÉS de deployar el código nuevo
+--        (que lee la invitación por los RPC de arriba). Si se corre antes,
+--        /invitacion se rompe (el código viejo hace select directo de
+--        nombre_cumpleanero). Cierra la cosecha masiva de nombres/edades.
 -- ---------------------------------------------------------------------
--- REVOKE SELECT ON public.reservas FROM anon;
--- GRANT SELECT (id, fecha, turno) ON public.reservas TO anon;
+REVOKE SELECT ON public.reservas FROM anon;
+GRANT SELECT (id, fecha, turno) ON public.reservas TO anon;
+
+--  CLEANUP (a partir del 2026-12-14): los links numéricos viejos ya no hacen falta.
+--    DROP FUNCTION IF EXISTS public.get_invitacion_by_id(bigint);
+--    + quitar la rama de id numérico en app/invitacion/[id]/page.tsx
 
 
 -- =====================================================================
@@ -214,6 +234,11 @@ GRANT SELECT (id, fecha, turno, nombre_cumpleanero, edad_cumple)
 -- =====================================================================
 -- Parte 1:
 --   GRANT SELECT ON public.reservas TO anon;
+-- Opción B (invitaciones por token):
+--   DROP FUNCTION IF EXISTS public.get_invitacion(uuid);
+--   DROP FUNCTION IF EXISTS public.get_invitacion_by_id(bigint);
+--   ALTER TABLE public.reservas DROP COLUMN IF EXISTS invitacion_token;
+--   (y revertir app/admin + app/invitacion al select directo por id)
 -- Parte 2:
 --   DROP POLICY IF EXISTS "anon insert reserva pendiente valida" ON public.reservas;
 --   DROP POLICY IF EXISTS "authenticated insert reserva pendiente valida" ON public.reservas;

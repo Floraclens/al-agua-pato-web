@@ -276,7 +276,7 @@ export default function AdminPage() {
     if (!reserva.telefono) return
     
     const phone = reserva.telefono.replace(/\D/g, "")
-    const urlInvitacion = `https://al-agua-pato-web.vercel.app/invitacion/${reserva.id}`
+    const urlInvitacion = `https://al-agua-pato-web.vercel.app/invitacion/${reserva.invitacion_token}`
     
     let mensaje = ""
     if (isActiva) {
