@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Nunito, Great_Vibes, Roboto_Condensed, Anton } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const nunito = Nunito({ 
@@ -108,6 +109,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         {children}
+        <Toaster position="top-center" richColors closeButton theme="light" />
         {process.env.NODE_ENV === 'production' && <Analytics />}
         {process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_META_PIXEL_ID && (
           <>
