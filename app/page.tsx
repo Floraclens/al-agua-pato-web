@@ -99,7 +99,7 @@ export default function LandingPage() {
         </header>
 
         <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
-          <video autoPlay loop muted playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
+          <video autoPlay loop muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />

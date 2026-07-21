@@ -411,36 +411,36 @@ export default function PaginaReserva() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-azul-marino">Nombre y Apellido *</label>
-                  <input type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${showErrors && datosCliente.nombre.trim().length < 3 ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: María Gómez" value={datosCliente.nombre} onChange={(e) => { setDatosCliente({...datosCliente, nombre: e.target.value}); if(showErrors) setShowErrors(false) }} />
-                  {showErrors && datosCliente.nombre.trim().length < 3 && <p className="text-xs text-red-500 font-semibold mt-1">Ingresá tu nombre completo.</p>}
+                  <input type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && datosCliente.nombre.trim().length < 3 ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: María Gómez" value={datosCliente.nombre} onChange={(e) => { setDatosCliente({...datosCliente, nombre: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  {showErrors && datosCliente.nombre.trim().length < 3 && <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá tu nombre completo.</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-azul-marino">Teléfono / WhatsApp *</label>
-                  <input type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); if(showErrors) setShowErrors(false) }} />
+                  <input type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); if(showErrors) setShowErrors(false) }} />
                   {(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? (
-                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>
+                    <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>
                   ) : (
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> Solo para enviarte tu confirmación.</p>
+                    <p className="text-[13px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> Solo para enviarte tu confirmación.</p>
                   )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-bold text-azul-marino">Email *</label>
-                  <input type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-sm outline-none transition-colors ${(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => { setDatosCliente({...datosCliente, email: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  <input type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => { setDatosCliente({...datosCliente, email: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? (
-                    <p className="text-xs text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>
+                    <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>
                   ) : (
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> 100% privado. Sin spam.</p>
+                    <p className="text-[13px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> 100% privado. Sin spam.</p>
                   )}
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-azul-marino">Nombre del Cumpleañero/a</label>
-                  <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Lucas" value={datosCliente.nombreCumpleanero} onChange={(e) => setDatosCliente({...datosCliente, nombreCumpleanero: e.target.value})} />
+                  <input type="text" className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: Lucas" value={datosCliente.nombreCumpleanero} onChange={(e) => setDatosCliente({...datosCliente, nombreCumpleanero: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-azul-marino">¿Cuántos años cumple?</label>
-                  <input type="text" inputMode="numeric" maxLength={2} className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: 5" value={datosCliente.edadCumple} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, edadCumple: soloNumeros}); }} />
+                  <input type="text" inputMode="numeric" maxLength={2} className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: 5" value={datosCliente.edadCumple} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, edadCumple: soloNumeros}); }} />
                 </div>
               </div>
             </section>

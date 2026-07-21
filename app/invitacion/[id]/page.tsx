@@ -80,7 +80,7 @@ interface TemaConfig {
 
 const TEMAS_CONFIG: Record<TemaFondo, TemaConfig> = {
   clasico: {
-    imagen: "/invitacion-clasico.png",
+    imagen: "/invitacion-clasico.webp",
     aspect: "1102/1427",
     colorTexto: "#FFFFFF",
     colorNombre: "#06BEDD",
@@ -96,7 +96,7 @@ const TEMAS_CONFIG: Record<TemaFondo, TemaConfig> = {
     infoDetailClass: "font-black text-[12px] sm:text-[13px] tracking-wide",
   },
   cuadradoblanco: {
-    imagen: "/invitacion-cuadradoblanco.png",
+    imagen: "/invitacion-cuadradoblanco.webp",
     aspect: "1081/1455",
     colorTexto: "#123B4A",
     colorNombre: "#06BEDD",
@@ -117,7 +117,7 @@ const TEMAS_CONFIG: Record<TemaFondo, TemaConfig> = {
     infoDetailClass: "font-medium text-[12px] sm:text-[13px]",
   },
   acuatico: {
-    imagen: "/invitacion-acuatico.png",
+    imagen: "/invitacion-acuatico.webp",
     aspect: "1087/1447",
     colorTexto: "#123B4A",
     colorNombre: "#06BEDD",
@@ -293,7 +293,7 @@ function TemaImagen({ tema, nombre, fechaLegible, horarioLimpio, detalleEdadOTur
 
   return (
     <div className="relative w-full overflow-hidden transition-[aspect-ratio] duration-500 ease-in-out" style={{ aspectRatio: cfg.aspect }}>
-      <Image src={cfg.imagen} alt={`Invitación ${tema}`} fill priority className="object-cover" />
+      <Image src={cfg.imagen} alt={`Invitación ${tema}`} fill priority sizes="420px" className="object-cover" />
 
       <CampoOverlay pos={cfg.nombre}>
         <div className="flex flex-col items-center">

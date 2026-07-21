@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Banknote, Building2, CreditCard } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { MetodoPago } from "@/app/page"
+import type { MetodoPago } from "@/app/reservar/page"
 import { cn } from "@/lib/utils"
 
 interface MetodoPagoSelectorProps {

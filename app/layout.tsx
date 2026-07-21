@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Nunito, Great_Vibes, Roboto_Condensed, Anton } from 'next/font/google'
+import { Nunito, Anton } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import { Toaster } from 'sonner'
@@ -10,21 +10,6 @@ const nunito = Nunito({
   variable: '--font-nunito',
   display: 'swap',
 });
-
-// FUENTE CURSIVA (Opcional, por si la usás en subtítulos)
-const greatVibes = Great_Vibes({ 
-  weight: '400', 
-  subsets: ['latin'], 
-  variable: '--font-great-vibes',
-  display: 'swap',
-})
-
-const robotoCondensed = Roboto_Condensed({ 
-  weight: ['400', '700', '900'], 
-  subsets: ['latin'], 
-  variable: '--font-roboto-condensed',
-  display: 'swap',
-})
 
 // FUENTE IMPONENTE PARA NOMBRE
 const anton = Anton({ 
@@ -100,7 +85,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="es" className={`${nunito.variable} ${greatVibes.variable} ${robotoCondensed.variable} ${anton.variable} bg-background`}>
+    <html lang="es" className={`${nunito.variable} ${anton.variable} bg-background`}>
       <head>
         <script
           type="application/ld+json"

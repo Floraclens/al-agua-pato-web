@@ -236,10 +236,10 @@ export function ReservationCalendar({
           )}
         >
           <div className="flex flex-col items-start overflow-hidden w-full">
-            <span className={cn("text-[10px] font-black uppercase tracking-widest mb-0.5", dateWarning && !fechaBuscada ? "text-red-500" : "text-slate-400")}>
+            <span className={cn("text-[13px] font-black uppercase tracking-widest mb-0.5", dateWarning && !fechaBuscada ? "text-red-500" : "text-slate-400")}>
               1. Fecha
             </span>
-            <span className={cn("text-xs sm:text-sm font-bold truncate w-full", fechaBuscada ? "text-azul-marino" : "text-slate-400")}>
+            <span className={cn("text-sm font-bold truncate w-full", fechaBuscada ? "text-azul-marino" : "text-slate-400")}>
               {fechaBuscada ? format(fechaBuscada, "d MMM yyyy", { locale: es }) : "Elegir día..."}
             </span>
           </div>
@@ -257,10 +257,10 @@ export function ReservationCalendar({
           )}
         >
           <div className="flex flex-col items-start overflow-hidden w-full">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+            <span className="text-[13px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
               2. Horario
             </span>
-            <span className={cn("text-xs sm:text-sm font-bold truncate w-full", turnoBuscado ? "text-azul-marino" : "text-slate-400")}>
+            <span className={cn("text-sm font-bold truncate w-full", turnoBuscado ? "text-azul-marino" : "text-slate-400")}>
               {turnoBuscado ? obtenerLabelTurnoCorto(turnoBuscado) : "Elegir hora..."}
             </span>
           </div>
@@ -273,7 +273,7 @@ export function ReservationCalendar({
       {dateWarning && !fechaBuscada && (
         <div className="flex items-center justify-center gap-2 text-red-500 bg-red-50 py-2.5 px-3 rounded-xl border border-red-100 animate-in fade-in">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span className="text-[11px] font-bold leading-tight text-center">Por favor, seleccioná la fecha primero.</span>
+          <span className="text-[13px] font-bold leading-tight text-center">Por favor, seleccioná la fecha primero.</span>
         </div>
       )}
 
@@ -281,7 +281,7 @@ export function ReservationCalendar({
       {feriadosNoCargadosAnio !== null && (
         <div className="flex items-center justify-center gap-2 text-red-500 bg-red-50 py-2.5 px-3 rounded-xl border border-red-100 animate-in fade-in">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span className="text-[11px] font-bold leading-tight text-center">
+          <span className="text-[13px] font-bold leading-tight text-center">
             Todavía no podemos calcular el precio para fechas de {feriadosNoCargadosAnio}. Escribinos por WhatsApp para reservar esa fecha.
           </span>
         </div>
@@ -298,22 +298,22 @@ export function ReservationCalendar({
               disabled={disabledDays}
               defaultMonth={fechaBuscada || defaultMonth} 
               locale={es}
-              className="rounded-xl border-none bg-transparent p-0 w-full max-w-[340px]"
+              className="rounded-xl border-none bg-transparent p-0 w-full max-w-[340px] [--cell-size:--spacing(11)]"
               classNames={{
                 months: "flex flex-col space-y-4",
                 month: "space-y-4 w-full",
                 caption: "flex justify-center pt-1 relative items-center mb-2",
                 caption_label: "text-[16px] font-black text-azul-marino capitalize",
                 nav: "space-x-1 flex items-center",
-                nav_button: "h-8 w-8 bg-white border border-slate-200 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100",
+                nav_button: "h-11 w-11 bg-white border border-slate-200 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100",
                 nav_button_previous: "absolute left-0",
                 nav_button_next: "absolute right-0",
                 table: "w-full border-collapse space-y-1",
                 head_row: "flex justify-between w-full mb-2",
-                head_cell: "text-slate-400 font-extrabold text-[10px] uppercase w-8 sm:w-10 text-center",
+                head_cell: "text-slate-400 font-extrabold text-[13px] uppercase w-11 text-center",
                 row: "flex justify-between w-full mt-1.5",
-                cell: "h-9 w-8 sm:w-10 text-center p-0",
-                day: "h-9 w-8 sm:w-10 p-0 font-bold text-slate-600 bg-white border border-transparent hover:border-slate-300 rounded-lg shadow-sm transition-all",
+                cell: "h-11 w-11 text-center p-0",
+                day: "h-11 w-11 p-0 font-bold text-slate-600 bg-white border border-transparent hover:border-slate-300 rounded-lg shadow-sm transition-all",
                 day_selected: "!bg-azul-marino !text-white !font-black scale-105 shadow-md",
                 day_today: "border-2 !border-amarillo",
                 day_outside: "text-slate-300 opacity-40 font-medium bg-transparent shadow-none border-none",
@@ -338,7 +338,7 @@ export function ReservationCalendar({
                   turnoBuscado === "primero" ? "bg-naranja text-white border-naranja font-bold shadow-md" : "bg-white text-azul-marino hover:border-naranja/40 border-slate-200"
                 )}
               >
-                <span className="text-[11px] font-black uppercase tracking-widest opacity-80">Turno Mañana</span>
+                <span className="text-[13px] font-black uppercase tracking-widest opacity-80">Turno Mañana</span>
                 <span className="text-base font-extrabold">{LABEL_MANANA}</span>
               </button>
               <button
@@ -349,7 +349,7 @@ export function ReservationCalendar({
                   turnoBuscado === "segundo" ? "bg-lavanda text-white border-lavanda font-bold shadow-md" : "bg-white text-azul-marino hover:border-lavanda/40 border-slate-200"
                 )}
               >
-                <span className="text-[11px] font-black uppercase tracking-widest opacity-80">Turno Tarde/Noche</span>
+                <span className="text-[13px] font-black uppercase tracking-widest opacity-80">Turno Tarde/Noche</span>
                 <span className="text-base font-extrabold">{LABEL_NOCHE}</span>
               </button>
             </div>
@@ -365,7 +365,7 @@ export function ReservationCalendar({
                     type="button"
                     onClick={() => handleTurnSelect({ id: "lun_vie", label: labelFormateado })}
                     className={cn(
-                      "py-3 px-2 text-xs sm:text-sm font-bold rounded-xl border-2 text-center transition-all",
+                      "min-h-11 py-3 px-2 text-sm font-bold rounded-xl border-2 text-center transition-all",
                       isSelected
                         ? "bg-azul-marino text-white border-azul-marino shadow-md scale-[1.03]"
                         : "bg-white text-azul-marino border-slate-200 hover:border-azul-marino hover:bg-slate-50"
@@ -383,14 +383,14 @@ export function ReservationCalendar({
       {/* 4. BOTÓN VERIFICAR Y RESPUESTA (Solo cuando todo está cerrado y elegido) */}
       {fechaBuscada && turnoBuscado && !showCalendar && !showHours && (
         <div className="animate-in fade-in slide-in-from-bottom-2 mt-2">
-          {verificacion === 'idle' || verificacion === 'loading' ? (
+          {verificacion === 'idle' || verificacion === 'checking' ? (
             <button
               type="button"
               onClick={handleVerify}
-              disabled={verificacion === 'loading'}
+              disabled={verificacion === 'checking'}
               className="w-full h-14 bg-verde hover:bg-green-600 text-white font-black rounded-xl shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
             >
-              {verificacion === 'loading' ? (
+              {verificacion === 'checking' ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Verificando...</>
               ) : (
                 <><Search className="w-5 h-5" /> Verificar Disponibilidad</>

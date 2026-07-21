@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
-import { PartyPopper, Clock, UserPlus, Users, Minus, Plus, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { PartyPopper, Clock, UserPlus, Users, Minus, Plus, Eye, EyeOff, AlertCircle, type LucideIcon } from "lucide-react"
 import { PRECIOS } from "@/lib/config-reservas"
 
 interface ExtrasSelectorProps {
@@ -12,6 +12,23 @@ interface ExtrasSelectorProps {
   onChangeExtras: (extras: any) => void
   showPileta?: boolean
   showErrors?: boolean // NUEVO: Propiedad para recibir el aviso de error desde el padre
+}
+
+interface ExtraOption {
+  id: string
+  titulo: string
+  descripcion: string
+  precio: number
+  precioTexto: string
+  icon?: LucideIcon
+  imagen?: string
+  bgColor?: string
+  iconColor?: string
+  needsAdultsCounter?: boolean
+  needsMozoCounter?: boolean
+  needsRobotCounter?: boolean
+  needsZancosCounter?: boolean
+  needsMultiSelect?: boolean
 }
 
 function formatPrice(price: number): string {
@@ -79,7 +96,7 @@ export function ExtrasSelector({
     "SPIDERMAN", "STICH", "SUPERMAN", "THOR", "UNICORNIO", "VISION", "WOLVERINE"
   ]
 
-  let extrasOptions = [
+  let extrasOptions: ExtraOption[] = [
     {
       id: "adultosAdicionales", 
       titulo: "Adultos Extra",
@@ -309,11 +326,11 @@ export function ExtrasSelector({
               {extra.needsAdultsCounter && isChecked && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-4 bg-white border border-emerald-200 shadow-sm rounded-lg p-1.5 w-fit">
-                    <button type="button" onClick={(e) => updateAdults(e, -1)} disabled={extras.adultosAdicionales <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateAdults(e, -1)} disabled={extras.adultosAdicionales <= 1} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
                     <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.adultosAdicionales}</span>
-                    <button type="button" onClick={(e) => updateAdults(e, 1)} disabled={extras.adultosAdicionales >= 10} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateAdults(e, 1)} disabled={extras.adultosAdicionales >= 10} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
@@ -323,11 +340,11 @@ export function ExtrasSelector({
               {extra.needsRobotCounter && isChecked && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-4 bg-white border border-blue-200 shadow-sm rounded-lg p-1.5 w-fit">
-                    <button type="button" onClick={(e) => updateRobot(e, -1)} disabled={(extras.robotLed || 0) <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateRobot(e, -1)} disabled={(extras.robotLed || 0) <= 1} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
                     <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.robotLed || 1}</span>
-                    <button type="button" onClick={(e) => updateRobot(e, 1)} disabled={(extras.robotLed || 0) >= 2} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateRobot(e, 1)} disabled={(extras.robotLed || 0) >= 2} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
@@ -337,11 +354,11 @@ export function ExtrasSelector({
               {extra.needsZancosCounter && isChecked && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-4 bg-white border border-purple-200 shadow-sm rounded-lg p-1.5 w-fit">
-                    <button type="button" onClick={(e) => updateZancos(e, -1)} disabled={(extras.zancosLed || 0) <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateZancos(e, -1)} disabled={(extras.zancosLed || 0) <= 1} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
                     <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.zancosLed || 1}</span>
-                    <button type="button" onClick={(e) => updateZancos(e, 1)} disabled={(extras.zancosLed || 0) >= 2} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateZancos(e, 1)} disabled={(extras.zancosLed || 0) >= 2} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
@@ -351,11 +368,11 @@ export function ExtrasSelector({
               {extra.needsMozoCounter && isChecked && (
                 <div className="animate-in slide-in-from-top-2 duration-300 w-full" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-4 bg-white border border-indigo-200 shadow-sm rounded-lg p-1.5 w-fit">
-                    <button type="button" onClick={(e) => updateMozos(e, -1)} disabled={extras.cantidadMozos <= 1} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateMozos(e, -1)} disabled={extras.cantidadMozos <= 1} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Minus className="w-5 h-5" />
                     </button>
                     <span className="w-8 text-center font-extrabold text-azul-marino text-xl">{extras.cantidadMozos}</span>
-                    <button type="button" onClick={(e) => updateMozos(e, 1)} disabled={extras.cantidadMozos >= 10} className="w-10 h-10 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
+                    <button type="button" onClick={(e) => updateMozos(e, 1)} disabled={extras.cantidadMozos >= 10} className="w-11 h-11 flex items-center justify-center rounded-md hover:bg-slate-100 disabled:opacity-50 text-azul-marino transition-all">
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
@@ -370,7 +387,7 @@ export function ExtrasSelector({
                         key={personaje}
                         onClick={(e) => togglePersonaje(e, personaje)}
                         className={cn(
-                          "px-3 py-1.5 rounded-full text-xs font-bold border transition-colors w-auto text-left whitespace-normal h-auto break-words",
+                          "min-h-11 px-3 py-1.5 rounded-full text-[13px] font-bold border transition-colors w-auto text-left whitespace-normal break-words",
                           (extras.personajesSeleccionados || []).includes(personaje)
                             ? "bg-amarillo text-azul-marino border-amarillo shadow-sm"
                             : hasPersonajeError ? "bg-white text-red-500 border-red-300 hover:bg-red-50" 
@@ -386,7 +403,7 @@ export function ExtrasSelector({
                   {hasPersonajeError && (
                     <div className="mt-2 flex items-start gap-1.5 text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <span className="text-[11px] font-bold leading-tight">
+                      <span className="text-[13px] font-bold leading-tight">
                         ¡Atención! No seleccionaste ningún personaje. Elegí al menos uno para continuar o destildá la opción.
                       </span>
                     </div>
