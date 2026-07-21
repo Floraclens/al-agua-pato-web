@@ -302,21 +302,23 @@ export default function AdminPage() {
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label>Usuario</Label>
-              <Input 
-                type="text" 
-                value={usuario} 
-                onChange={(e) => setUsuario(e.target.value)} 
-                required 
+              <Label htmlFor="admin-usuario">Usuario</Label>
+              <Input
+                id="admin-usuario"
+                type="text"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label>Contraseña</Label>
-              <Input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <Label htmlFor="admin-password">Contraseña</Label>
+              <Input
+                id="admin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             <Button type="submit" className="w-full h-12 bg-azul-marino hover:bg-azul-marino/90 font-bold text-white mt-4" disabled={isLoading}>

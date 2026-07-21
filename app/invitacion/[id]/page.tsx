@@ -297,12 +297,12 @@ function TemaImagen({ tema, nombre, fechaLegible, horarioLimpio, detalleEdadOTur
 
       <CampoOverlay pos={cfg.nombre}>
         <div className="flex flex-col items-center">
-          <h1
+          <p
             className={`font-[family-name:var(--font-anton)] ${tamañoNombre(nombre)} uppercase leading-tight ${claseSombraNombre}`}
             style={estiloNombre}
           >
             {nombre}
-          </h1>
+          </p>
           {detalleEdadOTurno && (
             <p className={`font-semibold ${edadTextClass} uppercase tracking-wide ${margenEdad(nombre)} ${claseSombraNombre}`} style={estiloEdad}>
               {detalleEdadOTurno}

@@ -214,16 +214,18 @@ export function PhotoGallery() {
           className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-300 overscroll-none"
           onClick={() => setSelectedIndex(null)}
         >
-          <button 
+          <button
             className="absolute top-6 right-6 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-all z-20"
             onClick={(e) => { e.stopPropagation(); setSelectedIndex(null); }}
+            aria-label="Cerrar"
           >
             <X className="w-6 h-6" />
           </button>
 
-          <button 
+          <button
             className="absolute left-2 sm:left-6 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-all z-20"
             onClick={handlePrev}
+            aria-label="Foto anterior"
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
@@ -241,9 +243,10 @@ export function PhotoGallery() {
             />
           </div>
 
-          <button 
+          <button
             className="absolute right-2 sm:right-6 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 p-3 rounded-full transition-all z-20"
             onClick={handleNext}
+            aria-label="Foto siguiente"
           >
             <ChevronRight className="w-8 h-8" />
           </button>

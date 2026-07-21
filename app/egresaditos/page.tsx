@@ -360,13 +360,13 @@ export default function PaginaReservaEgresaditos() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Tu Nombre y Apellido *</label>
-                  <input type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && datosCliente.nombre.trim().length < 3 ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: María Gómez" value={datosCliente.nombre} onChange={(e) => { setDatosCliente({...datosCliente, nombre: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  <label htmlFor="egresaditos-nombre" className="text-sm font-bold text-azul-marino">Tu Nombre y Apellido *</label>
+                  <input id="egresaditos-nombre" type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && datosCliente.nombre.trim().length < 3 ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: María Gómez" value={datosCliente.nombre} onChange={(e) => { setDatosCliente({...datosCliente, nombre: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {showErrors && datosCliente.nombre.trim().length < 3 && <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá tu nombre completo.</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Teléfono / WhatsApp *</label>
-                  <input type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); if(showErrors) setShowErrors(false) }} />
+                  <label htmlFor="egresaditos-telefono" className="text-sm font-bold text-azul-marino">Teléfono / WhatsApp *</label>
+                  <input id="egresaditos-telefono" type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); if(showErrors) setShowErrors(false) }} />
                   {(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? (
                     <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá un número válido.</p>
                   ) : (
@@ -374,26 +374,26 @@ export default function PaginaReservaEgresaditos() {
                   )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-azul-marino">Email *</label>
-                  <input type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => { setDatosCliente({...datosCliente, email: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  <label htmlFor="egresaditos-email" className="text-sm font-bold text-azul-marino">Email *</label>
+                  <input id="egresaditos-email" type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => { setDatosCliente({...datosCliente, email: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) && <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>}
                 </div>
               </div>
 
               <div className="pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-azul-marino flex items-center gap-2"><School className="w-4 h-4 text-lavanda"/> Nombre de la Institución *</label>
-                  <input type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && !datosCliente.institucion ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: Colegio San José" value={datosCliente.institucion} onChange={(e) => { setDatosCliente({...datosCliente, institucion: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  <label htmlFor="egresaditos-institucion" className="text-sm font-bold text-azul-marino flex items-center gap-2"><School className="w-4 h-4 text-lavanda"/> Nombre de la Institución *</label>
+                  <input id="egresaditos-institucion" type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && !datosCliente.institucion ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: Colegio San José" value={datosCliente.institucion} onChange={(e) => { setDatosCliente({...datosCliente, institucion: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {showErrors && !datosCliente.institucion && <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá la institución.</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Sala / Curso *</label>
-                  <input type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && !datosCliente.sala ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: Salita de 5 Verde" value={datosCliente.sala} onChange={(e) => { setDatosCliente({...datosCliente, sala: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  <label htmlFor="egresaditos-sala" className="text-sm font-bold text-azul-marino">Sala / Curso *</label>
+                  <input id="egresaditos-sala" type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && !datosCliente.sala ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: Salita de 5 Verde" value={datosCliente.sala} onChange={(e) => { setDatosCliente({...datosCliente, sala: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {showErrors && !datosCliente.sala && <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá la sala o curso.</p>}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-azul-marino">Turno (Mañana/Tarde) *</label>
-                  <input type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && !datosCliente.turno_colegio ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: Tarde" value={datosCliente.turno_colegio} onChange={(e) => { setDatosCliente({...datosCliente, turno_colegio: e.target.value}); if(showErrors) setShowErrors(false) }} />
+                  <label htmlFor="egresaditos-turno" className="text-sm font-bold text-azul-marino">Turno (Mañana/Tarde) *</label>
+                  <input id="egresaditos-turno" type="text" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${showErrors && !datosCliente.turno_colegio ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: Tarde" value={datosCliente.turno_colegio} onChange={(e) => { setDatosCliente({...datosCliente, turno_colegio: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {showErrors && !datosCliente.turno_colegio && <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá el turno escolar.</p>}
                 </div>
               </div>

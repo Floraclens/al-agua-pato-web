@@ -76,7 +76,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <h1 className="text-xl md:text-2xl font-extrabold text-azul-marino tracking-tight leading-none">Al Agua Pato</h1>
+                    <p className="text-xl md:text-2xl font-extrabold text-azul-marino tracking-tight leading-none">Al Agua Pato</p>
                     <Sparkles className="h-5 w-5 text-amarillo hidden sm:block" />
                   </div>
                   <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1 hidden sm:block">Predio de Eventos</span>
