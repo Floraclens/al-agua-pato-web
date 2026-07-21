@@ -19,7 +19,7 @@ import {
   ArrowDown
 } from "lucide-react"
 import Image from "next/image"
-import type { MetodoPago, Extras, DatosCliente } from "@/app/reservar/page"
+import type { MetodoPago, Extras, DatosCliente, Calculos } from "@/lib/reserva"
 import type { Turno } from "@/lib/turno"
 import { getTurnoLabel } from "@/lib/turno"
 import { format } from "date-fns"
@@ -32,15 +32,7 @@ interface ResumenReservaProps {
   extras: Extras
   metodoPago: MetodoPago
   datosCliente: DatosCliente
-  calculos: {
-    precioTurno: number
-    precioExtras: number
-    subtotal: number
-    descuento: number
-    recargo?: number
-    total: number
-    sena: number
-  }
+  calculos: Calculos
   canSubmit: boolean
   pagoTotalidad: boolean
   isEgresadito?: boolean 

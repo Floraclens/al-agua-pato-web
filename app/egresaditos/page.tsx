@@ -1,218 +1,40 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
 import { ReservationCalendar } from "@/components/reservation-calendar"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
 import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, GraduationCap, School, AlertCircle } from "lucide-react"
-import { type Turno } from "@/lib/turno"
-// IMPORTAMOS LOS RECARGOS Y LA SEÑA DESDE LA CONFIGURACIÓN
-import { obtenerReglasEgresaditos, PRECIOS, PRECIOS_EGRESADITOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS, FeriadosNoCargadosError } from "@/lib/config-reservas"
+import { PRECIOS_EGRESADITOS } from "@/lib/config-reservas"
+import { formatMoneyUI } from "@/lib/reserva"
+import { useReserva } from "@/hooks/use-reserva"
 import Link from "next/link"
 
-export type { Turno } from "@/lib/turno"
-export type MetodoPago = "efectivo" | "transferencia" | "tarjeta" | null
-
-export interface Extras {
-  adultosAdicionales: number
-  cantidadMozos: number
-  personajesSeleccionados: string[]
-  animacion: boolean
-  horaExtra: boolean
-  robotLed: number
-  zancosLed: number
-  personaje: boolean
-  mozoAdicional: boolean
-  pileta: boolean
-}
-
-export interface DatosCliente {
-  nombre: string
-  telefono: string
-  email: string
-  nombreCumpleanero: string
-  edadCumple: string
-  institucion?: string
-  sala?: string
-  turno_colegio?: string
-}
-
-const formatMoneyUI = (amount: number) => {
-  return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
-}
-
 export default function PaginaReservaEgresaditos() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [selectedTurno, setSelectedTurno] = useState<Turno>(null)
-  const [showErrors, setShowErrors] = useState(false)
-
-  const handleSelectDate = (date: Date | undefined) => {
-    setSelectedDate(date)
-    setSelectedTurno(null)
-    setShowErrors(false)
-  }
-  
-  const [extras, setExtras] = useState<Extras>({
-    adultosAdicionales: 0,
-    cantidadMozos: 1,
-    personajesSeleccionados: [], 
-    animacion: false,
-    horaExtra: false,
-    robotLed: 0,
-    zancosLed: 0,
-    personaje: false,
-    mozoAdicional: false,
-    pileta: false,
-  })
-  
-  const reglasFecha = useMemo(() => {
-    if (!selectedDate) return null
-    try {
-      return obtenerReglasEgresaditos(selectedDate)
-    } catch (e) {
-      // Defensa en profundidad: si una fecha de un año sin feriados cargados
-      // llegara hasta acá (el calendario ya la bloquea), no crashear el render.
-      if (e instanceof FeriadosNoCargadosError) return null
-      throw e
-    }
-  }, [selectedDate])
-
-  useEffect(() => {
-    if (reglasFecha && !reglasFecha.pileta_disponible && extras.pileta) {
-      setExtras(prev => ({ ...prev, pileta: false }))
-    }
-  }, [reglasFecha, extras.pileta])
-
-  const [metodoPago, setMetodoPago] = useState<MetodoPago>(null)
-  const [pagoTotalidad, setPagoTotalidad] = useState<boolean>(false)
-
-  const [datosCliente, setDatosCliente] = useState<DatosCliente>({
-    nombre: "",
-    telefono: "",
-    email: "",
-    nombreCumpleanero: "", 
-    edadCumple: "", 
-    institucion: "",
-    sala: "",
-    turno_colegio: ""
-  })
-
-  // === CALCULADORA CENTRAL DE PRECIOS ===
-  const calculos = useMemo(() => {
-    let subtotal = 0
-    let precioTurno = 0
-    let precioExtras = 0
-    let descuento = 0
-    let recargo = 0
-
-    if (selectedTurno && selectedDate && reglasFecha) {
-      if (reglasFecha.modalidad === 'doble_turno_fijo') {
-        if (reglasFecha.precios) {
-          if (selectedTurno === "primero") precioTurno = reglasFecha.precios.turno_1
-          else if (selectedTurno === "segundo") precioTurno = reglasFecha.precios.turno_2
-        } else {
-          precioTurno = reglasFecha.precio
-        }
-      } else {
-        precioTurno = reglasFecha.precio
-      }
-      subtotal += precioTurno
-    }
-
-    if (extras.adultosAdicionales > 0) precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
-    if (extras.mozoAdicional && extras.cantidadMozos > 0) precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
-    if (extras.personaje && extras.personajesSeleccionados.length > 0) precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
-    if (extras.animacion) precioExtras += PRECIOS.opcionales.animacion
-    if (extras.horaExtra) precioExtras += PRECIOS.opcionales.horaExtra
-    if (extras.robotLed === 1) precioExtras += PRECIOS.opcionales.robot_led.uno
-    else if (extras.robotLed === 2) precioExtras += PRECIOS.opcionales.robot_led.dos
-    if (extras.zancosLed > 0) precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
-    if (extras.pileta) precioExtras += PRECIOS.opcionales.pileta.precio
-
-    subtotal += precioExtras
-
-    // LÓGICA DE DESCUENTO (Efectivo)
-    if (metodoPago === "efectivo" && pagoTotalidad && subtotal > 0) {
-      descuento = subtotal * (RECARGOS_Y_DESCUENTOS.efectivo_totalidad_descuento_porcentaje / 100)
-    }
-
-    // LÓGICA DE RECARGO (Tarjeta)
-    if (metodoPago === "tarjeta" && subtotal > 0) {
-      recargo = subtotal * (RECARGOS_Y_DESCUENTOS.tarjeta_recargo_porcentaje / 100)
-    }
-
-    const total = subtotal - descuento + recargo
-    
-    // CORRECCIÓN LÓGICA DE SEÑA: La seña no recibe recargos.
-    let senaFinal = VALOR_SENA
-    
-    if (pagoTotalidad) {
-      senaFinal = total
-    }
-
-    return { precioTurno, precioExtras, subtotal, descuento, recargo, total, sena: senaFinal }
-  }, [selectedTurno, selectedDate, extras, metodoPago, pagoTotalidad, reglasFecha])
-
-  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isValidPhone = (phone: string) => {
-    const numbers = phone.replace(/\D/g, "");
-    return numbers.length >= 10;
-  };
-
-  const hasSeleccionados = extras.personajesSeleccionados.length > 0;
-  const isValidPersonaje = !extras.personaje || hasSeleccionados;
-  const errorPersonajeVacio = extras.personaje && !hasSeleccionados;
-
-  const canSubmit = 
-    selectedDate && 
-    selectedTurno && 
-    metodoPago && 
-    datosCliente.nombre.trim().length >= 3 && 
-    isValidPhone(datosCliente.telefono) &&
-    isValidEmail(datosCliente.email) &&
-    isValidPersonaje &&
-    (datosCliente.institucion?.trim() ?? "").length > 0 &&
-    (datosCliente.sala?.trim() ?? "").length > 0 &&
-    (datosCliente.turno_colegio?.trim() ?? "").length > 0
-
-  const handleSelectMetodoPago = (metodo: MetodoPago) => {
-    if (metodoPago === metodo) {
-      setMetodoPago(null)
-      setPagoTotalidad(false)
-    } else {
-      setMetodoPago(metodo)
-      if (metodo !== "efectivo") setPagoTotalidad(false)
-    }
-    setShowErrors(false)
-  }
-
-  const handleFailedSubmit = () => {
-    setShowErrors(true)
-    setTimeout(() => {
-      const firstError = document.querySelector('.error-field, .error-specific')
-
-      if (firstError) {
-        const headerOffset = 120
-        const elementPosition = firstError.getBoundingClientRect().top
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-        window.scrollTo({ top: offsetPosition, behavior: "smooth" })
-      }
-    }, 100)
-  }
-
-  const handleAccordionToggle = (e: React.MouseEvent<HTMLDetailsElement>) => {
-    const details = e.currentTarget;
-    if (!details.open) {
-      setTimeout(() => {
-        const headerOffset = 100;
-        const elementPosition = details.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
-      }, 150);
-    }
-  };
+  const {
+    selectedDate,
+    selectedTurno,
+    setSelectedTurno,
+    showErrors,
+    setShowErrors,
+    extras,
+    setExtras,
+    metodoPago,
+    pagoTotalidad,
+    setPagoTotalidad,
+    datosCliente,
+    setDatosCliente,
+    reglasFecha,
+    calculos,
+    canSubmit,
+    isValidEmail,
+    isValidPhone,
+    handleSelectDate,
+    handleSelectMetodoPago,
+    handleFailedSubmit,
+    handleAccordionToggle,
+  } = useReserva(true)
 
   return (
     <main className="relative isolate min-h-screen bg-slate-50/30 font-sans pb-16">
