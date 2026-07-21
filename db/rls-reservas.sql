@@ -230,6 +230,53 @@ GRANT SELECT (id, fecha, turno) ON public.reservas TO anon;
 
 
 -- =====================================================================
+--  PARTE 3 — I1: anti doble-venta + expiración de pendientes abandonadas
+--  APLICADA EN PRODUCCIÓN (2026-07-20).
+-- =====================================================================
+
+-- (0) Hygiene: el default era 'Pendiente' (mayúscula), nunca usado; la app
+--     siempre manda 'pendiente'. Se alinea para evitar un footgun futuro.
+ALTER TABLE public.reservas ALTER COLUMN estado SET DEFAULT 'pendiente';
+
+-- (1) Slot canónico GENERADO desde `turno`. La DB lo calcula sola en insert Y
+--     update (backfillea las filas existentes al crear la columna). La app NO lo
+--     manda. Modelo: día doble-fijo = 2 slots (turno_1/turno_2); día flexible =
+--     1 slot ('unico', exclusivo del día).
+ALTER TABLE public.reservas
+  ADD COLUMN IF NOT EXISTS slot text GENERATED ALWAYS AS (
+    CASE
+      WHEN turno LIKE '1er Turno%' THEN 'turno_1'
+      WHEN turno LIKE '2do Turno%' THEN 'turno_2'
+      ELSE 'unico'
+    END
+  ) STORED;
+
+-- (2) Índice único PARCIAL: 1 reserva ACTIVA por (fecha, slot). Excluye
+--     'expirado' para que una pendiente vencida libere el slot. Es la garantía
+--     real contra la doble venta (race entre chequeo y confirmación).
+CREATE UNIQUE INDEX IF NOT EXISTS reservas_fecha_slot_activa_uidx
+  ON public.reservas (fecha, slot)
+  WHERE estado IS DISTINCT FROM 'expirado';
+
+-- (3) Expiración de pendientes abandonadas (ventana: 48 h). Requiere pg_cron
+--     (habilitar en Dashboard → Database → Extensions, o el CREATE EXTENSION).
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+SELECT cron.schedule(
+  'expirar-reservas-pendientes',
+  '*/10 * * * *',
+  $$UPDATE public.reservas
+      SET estado = 'expirado'
+      WHERE estado = 'pendiente'
+        AND created_at < now() - interval '48 hours'$$
+);
+
+-- Expirar YA las pendientes ya vencidas (no esperar al primer cron):
+UPDATE public.reservas SET estado = 'expirado'
+  WHERE estado = 'pendiente' AND created_at < now() - interval '48 hours';
+
+
+-- =====================================================================
 --  ROLLBACK (si algo legítimo queda bloqueado)
 -- =====================================================================
 -- Parte 1:
@@ -247,6 +294,11 @@ GRANT SELECT (id, fecha, turno) ON public.reservas TO anon;
 --     ON public.reservas FOR INSERT TO anon WITH CHECK (true);
 --   CREATE POLICY "authenticated insert libre"
 --     ON public.reservas FOR INSERT TO authenticated WITH CHECK (true);
+-- Parte 3 (I1):
+--   SELECT cron.unschedule('expirar-reservas-pendientes');
+--   DROP INDEX IF EXISTS public.reservas_fecha_slot_activa_uidx;
+--   ALTER TABLE public.reservas DROP COLUMN IF EXISTS slot;
+--   (opcional) revertir estados 'expirado' -> 'pendiente' si hiciera falta.
 
 
 -- =====================================================================

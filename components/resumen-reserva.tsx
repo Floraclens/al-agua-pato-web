@@ -195,7 +195,15 @@ export function ResumenReserva({
 
       if (error) {
         console.error("[reservas] Error al guardar:", error.message, error)
-        toast.error(`No se pudo completar la reserva: ${error.message}`)
+        // 23505 = unique_violation del índice (fecha, slot): alguien reservó ese
+        // turno mientras el usuario completaba el formulario (race TOCTOU).
+        if (error.code === "23505") {
+          toast.error("Justo se ocupó esa fecha y turno", {
+            description: "Mientras completabas, alguien reservó ese horario. Elegí otra fecha u horario para continuar."
+          })
+        } else {
+          toast.error(`No se pudo completar la reserva: ${error.message}`)
+        }
         setIsSubmitting(false)
         return
       }
