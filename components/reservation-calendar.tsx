@@ -158,9 +158,7 @@ export function ReservationCalendar({
     const dateStr = `${y}-${m}-${d}`
 
     const supabase = createBrowserClient()
-    // Solo cuentan como ocupados los turnos ACTIVOS: una pendiente abandonada que
-    // el job de expiración marcó 'expirado' ya no bloquea la fecha.
-    let query = supabase.from("reservas").select("turno").eq("fecha", dateStr).neq("estado", "expirado")
+    let query = supabase.from("reservas").select("turno").eq("fecha", dateStr)
     if (ignoreReservaId) query = query.neq("id", ignoreReservaId)
 
     const { data, error } = await query

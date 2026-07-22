@@ -232,6 +232,10 @@ GRANT SELECT (id, fecha, turno) ON public.reservas TO anon;
 -- =====================================================================
 --  PARTE 3 — I1: anti doble-venta + expiración de pendientes abandonadas
 --  APLICADA EN PRODUCCIÓN (2026-07-20).
+--  ACTUALIZACIÓN 2026-07-22: el paso (3) de expiración automática fue
+--  REVERTIDO a pedido de la clienta — el borrado de pendientes viejas es
+--  manual desde el panel admin. Los pasos (0)-(2) siguen aplicados: son la
+--  garantía anti doble-venta y NO deben tocarse.
 -- =====================================================================
 
 -- (0) Hygiene: el default era 'Pendiente' (mayúscula), nunca usado; la app
@@ -251,29 +255,24 @@ ALTER TABLE public.reservas
     END
   ) STORED;
 
--- (2) Índice único PARCIAL: 1 reserva ACTIVA por (fecha, slot). Excluye
---     'expirado' para que una pendiente vencida libere el slot. Es la garantía
---     real contra la doble venta (race entre chequeo y confirmación).
+-- (2) Índice único PARCIAL: 1 reserva ACTIVA por (fecha, slot). Es la garantía
+--     real contra la doble venta (race entre chequeo y confirmación). La
+--     cláusula WHERE excluye 'expirado': hoy es letra muerta (ese estado ya no
+--     se usa, ver abajo) pero es inocua, y dejarla evita recrear el índice en
+--     producción sin necesidad.
 CREATE UNIQUE INDEX IF NOT EXISTS reservas_fecha_slot_activa_uidx
   ON public.reservas (fecha, slot)
   WHERE estado IS DISTINCT FROM 'expirado';
 
--- (3) Expiración de pendientes abandonadas (ventana: 48 h). Requiere pg_cron
---     (habilitar en Dashboard → Database → Extensions, o el CREATE EXTENSION).
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-
-SELECT cron.schedule(
-  'expirar-reservas-pendientes',
-  '*/10 * * * *',
-  $$UPDATE public.reservas
-      SET estado = 'expirado'
-      WHERE estado = 'pendiente'
-        AND created_at < now() - interval '48 hours'$$
-);
-
--- Expirar YA las pendientes ya vencidas (no esperar al primer cron):
-UPDATE public.reservas SET estado = 'expirado'
-  WHERE estado = 'pendiente' AND created_at < now() - interval '48 hours';
+-- (3) REVERTIDO (2026-07-22) — Expiración automática de pendientes (48 h).
+--     La clienta prefiere decidir manualmente cuándo borrar una reserva vieja
+--     desde el panel, igual que maneja sus finanzas. Se ejecutó:
+--       SELECT cron.unschedule('expirar-reservas-pendientes');
+--       UPDATE public.reservas SET estado = 'pendiente'
+--         WHERE id = 109 AND estado = 'expirado';  -- única real afectada
+--     La extensión pg_cron queda instalada (sin jobs). El estado 'expirado'
+--     ya no lo produce nadie; el calendario de disponibilidad volvió a contar
+--     todas las reservas de la fecha sin filtrar por estado.
 
 
 -- =====================================================================
@@ -294,11 +293,10 @@ UPDATE public.reservas SET estado = 'expirado'
 --     ON public.reservas FOR INSERT TO anon WITH CHECK (true);
 --   CREATE POLICY "authenticated insert libre"
 --     ON public.reservas FOR INSERT TO authenticated WITH CHECK (true);
--- Parte 3 (I1):
---   SELECT cron.unschedule('expirar-reservas-pendientes');
+-- Parte 3 (I1) — el cron ya fue des-schedulado el 2026-07-22; para revertir
+-- lo que QUEDA aplicado (índice + slot):
 --   DROP INDEX IF EXISTS public.reservas_fecha_slot_activa_uidx;
 --   ALTER TABLE public.reservas DROP COLUMN IF EXISTS slot;
---   (opcional) revertir estados 'expirado' -> 'pendiente' si hiciera falta.
 
 
 -- =====================================================================
