@@ -11,6 +11,7 @@ export function LogoWatermark() {
         alt=""
         width={992}
         height={533}
+        priority
         className="w-[clamp(320px,80vw,900px)] max-w-none h-auto opacity-[0.1] select-none"
       />
     </div>

@@ -6,6 +6,8 @@ import Link from "next/link"
 import { ServiciosIncluidos } from "@/components/servicios-incluidos"
 import { PhotoGallery } from "@/components/photo-gallery"
 import { LogoWatermark } from "@/components/logo-watermark"
+import { useInView } from "@/hooks/use-in-view"
+import { BLUR_PLACEHOLDERS } from "@/lib/blur-placeholders"
 import { 
   Sparkles, MapPin, CheckCircle2, Star, ArrowDown, 
   PartyPopper, Wand2, ArrowRight, ShieldCheck, X, MessageCircle,
@@ -26,6 +28,10 @@ export default function LandingPage() {
   const [showEventMenu, setShowEventMenu] = useState(false);
   const reservaFinalRef = useRef<HTMLElement>(null);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+  // La sección de extras está varias pantallas más abajo (después de hero, galería,
+  // reseñas y servicios), así que acá sí vale la pena un margen amplio: empieza a
+  // pedir las 3 fotos ~1-2 pantallas antes de que el usuario llegue a verlas.
+  const { ref: extrasRef, inView: extrasCerca } = useInView<HTMLDivElement>("1000px");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -316,13 +322,16 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-[220px]">
-              
-              <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-2 row-span-2 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
+            <div ref={extrasRef} className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-[220px]">
+
+              <div
+                className="relative group overflow-hidden rounded-[2rem] col-span-1 md:col-span-2 row-span-2 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in bg-cover bg-center"
+                style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS['/extras/robot.jpg']})` }}
                 onClick={() => setSelectedImage('/extras/robot.jpg')}
               >
-                <Image src="/extras/robot.jpg" alt="Robot LED" fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                {extrasCerca && (
+                  <Image src="/extras/robot.jpg" alt="Robot LED" fill sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition-transform duration-700 group-hover:scale-105" placeholder="blur" blurDataURL={BLUR_PLACEHOLDERS['/extras/robot.jpg']} />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-azul-marino via-azul-marino/40 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
                   <span className="bg-amarillo text-azul-marino text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 inline-block shadow-lg shadow-amarillo/20">El más pedido</span>
@@ -331,11 +340,14 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
+              <div
+                className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in bg-cover bg-center"
+                style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS['/extras/zancos.jpg']})` }}
                 onClick={() => setSelectedImage('/extras/zancos.jpg')}
               >
-                <Image src="/extras/zancos.jpg" alt="Zancos LED" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                {extrasCerca && (
+                  <Image src="/extras/zancos.jpg" alt="Zancos LED" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" placeholder="blur" blurDataURL={BLUR_PLACEHOLDERS['/extras/zancos.jpg']} />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-lavanda/90 via-lavanda/30 to-transparent mix-blend-multiply" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -344,11 +356,14 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div 
-                className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in"
+              <div
+                className="relative group overflow-hidden rounded-[2rem] col-span-1 row-span-1 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-300 cursor-zoom-in bg-cover bg-center"
+                style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS['/extras/personajes.jpg']})` }}
                 onClick={() => setSelectedImage('/extras/personajes.jpg')}
               >
-                <Image src="/extras/personajes.jpg" alt="Personajes" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                {extrasCerca && (
+                  <Image src="/extras/personajes.jpg" alt="Personajes" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" placeholder="blur" blurDataURL={BLUR_PLACEHOLDERS['/extras/personajes.jpg']} />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-rosa/90 via-rosa/30 to-transparent mix-blend-multiply" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -605,12 +620,15 @@ export default function LandingPage() {
             <X className="w-8 h-8" />
           </button>
           <div className="relative w-full max-w-5xl h-[70vh] md:h-[80vh]">
-            <Image 
-              src={selectedImage} 
-              alt="Vista previa" 
-              fill 
+            <Image
+              src={selectedImage}
+              alt="Vista previa"
+              fill
               sizes="100vw"
               className="object-contain animate-in zoom-in-95 duration-300"
+              priority
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDERS[selectedImage]}
             />
           </div>
         </div>

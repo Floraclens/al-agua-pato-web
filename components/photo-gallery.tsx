@@ -3,11 +3,18 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight, Pause, ZoomIn } from "lucide-react"
+import { useInView } from "@/hooks/use-in-view"
+import { BLUR_PLACEHOLDERS } from "@/lib/blur-placeholders"
 
 export function PhotoGallery() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-  const [currentIndex, setCurrentIndex] = useState(0) 
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  // La sección entera está a ~1 pantalla del hero, así que un solo observer alcanza:
+  // en cuanto la galería entra en el margen expandido, las fotos no-prioritarias
+  // (miniaturas mobile + rotativas de desktop) empiezan a pedirse, no cuando ya están
+  // por aparecer en pantalla.
+  const { ref: galleryRef, inView: galeriaCerca } = useInView<HTMLElement>("1000px")
 
   // -------------------------------------------------------------------------
   // 📸 CONFIGURACIÓN DINÁMICA: 
@@ -71,7 +78,7 @@ export function PhotoGallery() {
 
   return (
     <>
-      <section className="w-full max-w-7xl mx-auto px-4 pt-6 pb-2 relative group/gallery">
+      <section ref={galleryRef} className="w-full max-w-7xl mx-auto px-4 pt-6 pb-2 relative group/gallery">
         
         {/* 📱 VISTA MÓVIL (Foto 1 Fija + Miniaturas Scrollables) */}
         <div className="flex md:hidden flex-col gap-2 pb-4">
@@ -81,13 +88,15 @@ export function PhotoGallery() {
             onClick={() => setSelectedIndex(0)}
           >
             {images[0] && (
-              <Image 
-                src={images[0].src} 
-                alt={images[0].alt} 
-                fill 
-                className="object-cover transition-transform duration-700 group-hover/mob:scale-105" 
-                priority 
-                sizes="(max-width: 768px) 100vw, 50vw" 
+              <Image
+                src={images[0].src}
+                alt={images[0].alt}
+                fill
+                className="object-cover transition-transform duration-700 group-hover/mob:scale-105"
+                priority
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDERS[images[0].src]}
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             )}
             <div className="absolute inset-0 bg-black/10 transition-colors" />
@@ -102,19 +111,23 @@ export function PhotoGallery() {
             {images.slice(1).map((img, index) => {
               const actualIndex = index + 1; // El índice real en el array principal
               return (
-                <div 
-                  key={actualIndex} 
-                  className="relative min-w-[40%] h-[100px] snap-center rounded-xl overflow-hidden shadow-sm active:scale-[0.98] transition-transform duration-300 cursor-pointer"
+                <div
+                  key={actualIndex}
+                  className="relative min-w-[40%] h-[100px] snap-center rounded-xl overflow-hidden shadow-sm active:scale-[0.98] transition-transform duration-300 cursor-pointer bg-cover bg-center"
+                  style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS[img.src]})` }}
                   onClick={() => setSelectedIndex(actualIndex)}
                 >
-                  <Image 
-                    src={img.src} 
-                    alt={img.alt} 
-                    fill 
-                    className="object-cover" 
-                    sizes="(max-width: 768px) 40vw" 
-                    loading="lazy" 
-                  />
+                  {galeriaCerca && (
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 40vw"
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDERS[img.src]}
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/10 hover:bg-transparent transition-colors" />
                 </div>
               );
@@ -131,12 +144,14 @@ export function PhotoGallery() {
           {/* Foto Principal Izquierda - FIJA */}
           <div className="col-span-2 row-span-2 relative w-full h-full rounded-l-3xl overflow-hidden group/item cursor-pointer shadow-sm border-r-2 border-white/5" onClick={() => setSelectedIndex(i0)}>
             {images[i0] && (
-              <Image 
-                src={images[i0].src} 
-                alt={images[i0].alt} 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover/item:scale-105" 
-                priority 
+              <Image
+                src={images[i0].src}
+                alt={images[i0].alt}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover/item:scale-105"
+                priority
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDERS[images[i0].src]}
                 sizes="(max-width: 1200px) 50vw, 33vw"
               />
             )}
@@ -154,48 +169,63 @@ export function PhotoGallery() {
           </div>
 
           {/* Foto Superior Derecha (Horizontal Rotativa) */}
-          <div className="col-span-2 row-span-1 relative w-full h-full rounded-tr-3xl overflow-hidden group/item cursor-pointer shadow-sm" onClick={() => setSelectedIndex(safeI1)}>
-            {images[safeI1] && (
-              <Image 
+          <div
+            className="col-span-2 row-span-1 relative w-full h-full rounded-tr-3xl overflow-hidden group/item cursor-pointer shadow-sm bg-cover bg-center"
+            style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS[images[safeI1]?.src]})` }}
+            onClick={() => setSelectedIndex(safeI1)}
+          >
+            {images[safeI1] && galeriaCerca && (
+              <Image
                 key={safeI1} // Fuerza la animación suave al cambiar
-                src={images[safeI1].src} 
-                alt={images[safeI1].alt} 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover/item:scale-105 animate-in fade-in" 
+                src={images[safeI1].src}
+                alt={images[safeI1].alt}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover/item:scale-105 animate-in fade-in"
                 sizes="(max-width: 1200px) 50vw, 33vw"
-                loading="lazy"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDERS[images[safeI1].src]}
               />
             )}
             <div className="absolute inset-0 bg-black/10 group-hover/item:bg-black/5 transition-colors duration-300" />
           </div>
 
           {/* Foto Inferior Medio (Cuadrada Rotativa) */}
-          <div className="col-span-1 row-span-1 relative w-full h-full overflow-hidden group/item cursor-pointer shadow-sm" onClick={() => setSelectedIndex(safeI2)}>
-            {images[safeI2] && (
-              <Image 
+          <div
+            className="col-span-1 row-span-1 relative w-full h-full overflow-hidden group/item cursor-pointer shadow-sm bg-cover bg-center"
+            style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS[images[safeI2]?.src]})` }}
+            onClick={() => setSelectedIndex(safeI2)}
+          >
+            {images[safeI2] && galeriaCerca && (
+              <Image
                 key={safeI2}
-                src={images[safeI2].src} 
-                alt={images[safeI2].alt} 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover/item:scale-105 animate-in fade-in" 
+                src={images[safeI2].src}
+                alt={images[safeI2].alt}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover/item:scale-105 animate-in fade-in"
                 sizes="(max-width: 1200px) 25vw, 20vw"
-                loading="lazy"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDERS[images[safeI2].src]}
               />
             )}
             <div className="absolute inset-0 bg-black/10 group-hover/item:bg-black/5 transition-colors duration-300" />
           </div>
 
           {/* Foto Inferior Derecha (Cuadrada Rotativa con Overlay de +X) */}
-          <div className="col-span-1 row-span-1 relative w-full h-full rounded-br-3xl overflow-hidden group/item cursor-pointer shadow-sm" onClick={() => setSelectedIndex(safeI3)}>
-            {images[safeI3] && (
-              <Image 
+          <div
+            className="col-span-1 row-span-1 relative w-full h-full rounded-br-3xl overflow-hidden group/item cursor-pointer shadow-sm bg-cover bg-center"
+            style={{ backgroundImage: `url(${BLUR_PLACEHOLDERS[images[safeI3]?.src]})` }}
+            onClick={() => setSelectedIndex(safeI3)}
+          >
+            {images[safeI3] && galeriaCerca && (
+              <Image
                 key={safeI3}
-                src={images[safeI3].src} 
-                alt={images[safeI3].alt} 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover/item:scale-105 animate-in fade-in" 
+                src={images[safeI3].src}
+                alt={images[safeI3].alt}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover/item:scale-105 animate-in fade-in"
                 sizes="(max-width: 1200px) 25vw, 20vw"
-                loading="lazy"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDERS[images[safeI3].src]}
               />
             )}
             <div className="absolute inset-0 bg-black/10 group-hover/item:bg-black/5 transition-colors duration-300" />
@@ -234,15 +264,17 @@ export function PhotoGallery() {
           </button>
           
           <div className="relative w-full max-w-5xl h-full max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
-            <Image 
-              src={images[selectedIndex].src} 
-              alt={images[selectedIndex].alt} 
-              fill 
-              className="object-contain animate-in fade-in zoom-in-95 duration-300" 
+            <Image
+              src={images[selectedIndex].src}
+              alt={images[selectedIndex].alt}
+              fill
+              className="object-contain animate-in fade-in zoom-in-95 duration-300"
               key={selectedIndex}
               quality={95} // ¡ACÁ ESTÁ LA MAGIA! Calidad casi perfecta cuando hacen zoom
-              sizes="100vw" 
+              sizes="100vw"
               priority
+              placeholder="blur"
+              blurDataURL={BLUR_PLACEHOLDERS[images[selectedIndex].src]}
             />
           </div>
 
