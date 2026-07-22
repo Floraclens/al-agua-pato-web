@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useLayoutEffect, useState, useRef } from "react"
 import { useParams } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase/client"
 import { Loader2, Download, Share2, AlertTriangle, Sparkles, Palette, Calendar, Clock, MapPin } from "lucide-react"
@@ -23,6 +23,15 @@ interface DatosInvitacion {
   horarioLimpio: string
   detalleEdadOTurno: string
 }
+
+/**
+ * Ancho de diseño de la tarjeta, en px. La tarjeta SIEMPRE se maqueta a este ancho —
+ * en ningún dispositivo se recalculan tipografías ni posiciones. En pantallas más
+ * angostas el render completo se reduce con transform: scale() (ver `escala` abajo),
+ * de modo que el resultado sea idéntico en todos lados y coincida con el de escritorio.
+ * Corolario: dentro de la tarjeta no puede haber breakpoints sm:, clamp() ni unidades vw.
+ */
+const ANCHO_TARJETA = 420
 
 const UBICACION_NOMBRE = "AL AGUA PATO"
 const UBICACION_DETALLE = "Los Flores, Santiago del Estero"
@@ -92,8 +101,8 @@ const TEMAS_CONFIG: Record<TemaFondo, TemaConfig> = {
     ubicacion: { top: "75.5%", left: "23%", align: "left" },
     filasAgrupadas: { top: "69%", gap: "14px" },
     colorSombraNombre: "#046E82",
-    infoMainClass: "font-black text-[16px] sm:text-[18px] tracking-wide",
-    infoDetailClass: "font-black text-[12px] sm:text-[13px] tracking-wide",
+    infoMainClass: "font-black text-[18px] tracking-wide",
+    infoDetailClass: "font-black text-[13px] tracking-wide",
   },
   cuadradoblanco: {
     imagen: "/invitacion-cuadradoblanco.webp",
@@ -111,10 +120,10 @@ const TEMAS_CONFIG: Record<TemaFondo, TemaConfig> = {
     sombraOffsetEdad: "0.05em",
     margenEdadFn: margenEdadClassAmplio,
     tamañoNombreFn: tamañoNombreClassGrande,
-    edadTextClass: "text-sm sm:text-base",
+    edadTextClass: "text-base",
     iconSize: 24,
-    infoMainClass: "font-extrabold text-[16px] sm:text-[18px]",
-    infoDetailClass: "font-medium text-[12px] sm:text-[13px]",
+    infoMainClass: "font-extrabold text-[18px]",
+    infoDetailClass: "font-medium text-[13px]",
   },
   acuatico: {
     imagen: "/invitacion-acuatico.webp",
@@ -132,27 +141,27 @@ const TEMAS_CONFIG: Record<TemaFondo, TemaConfig> = {
     colorSombraNombre: "#046E82",
     sinSombraEdad: true,
     iconSize: 20,
-    infoMainClass: "font-extrabold text-[14px] sm:text-[16px]",
-    infoDetailClass: "font-medium text-[11px] sm:text-[12px]",
+    infoMainClass: "font-extrabold text-[16px]",
+    infoDetailClass: "font-medium text-[12px]",
   },
 }
 
 /** Achica la tipografía Anton del nombre a medida que el texto es más largo (evita overflow) */
 function tamañoNombreClass(nombre: string): string {
   const len = nombre?.length ?? 0
-  if (len <= 10) return "text-3xl sm:text-4xl"
-  if (len <= 16) return "text-2xl sm:text-3xl"
-  if (len <= 24) return "text-xl sm:text-2xl"
-  return "text-lg sm:text-xl"
+  if (len <= 10) return "text-4xl"
+  if (len <= 16) return "text-3xl"
+  if (len <= 24) return "text-2xl"
+  return "text-xl"
 }
 
 /** Variante más grande de tamañoNombreClass, para temas con más espacio disponible arriba de la info */
 function tamañoNombreClassGrande(nombre: string): string {
   const len = nombre?.length ?? 0
-  if (len <= 10) return "text-4xl sm:text-5xl"
-  if (len <= 16) return "text-3xl sm:text-4xl"
-  if (len <= 24) return "text-2xl sm:text-3xl"
-  return "text-xl sm:text-2xl"
+  if (len <= 10) return "text-5xl"
+  if (len <= 16) return "text-4xl"
+  if (len <= 24) return "text-3xl"
+  return "text-2xl"
 }
 
 /** Margen entre nombre y edad, proporcional al tamaño de fuente del nombre (mismos tiers que tamañoNombreClass) */
@@ -251,8 +260,8 @@ function TemaImagen({ tema, nombre, fechaLegible, horarioLimpio, detalleEdadOTur
   const sombraClass = cfg.sombra ? "drop-shadow-[0_3px_10px_rgba(0,0,0,0.5)]" : ""
   const colorNombre = cfg.colorNombre ?? cfg.colorTexto
   const colorEdad = cfg.colorEdad ?? colorNombre
-  const infoMainClass = cfg.infoMainClass ?? "font-extrabold text-[13px] sm:text-[15px]"
-  const infoDetailClass = cfg.infoDetailClass ?? "font-medium text-[10px] sm:text-[11px]"
+  const infoMainClass = cfg.infoMainClass ?? "font-extrabold text-[15px]"
+  const infoDetailClass = cfg.infoDetailClass ?? "font-medium text-[11px]"
 
   // Sombra sólida offset (bubble-letter, sin blur) en vez del drop-shadow pesado, cuando el tema lo define
   const estiloNombre: React.CSSProperties = cfg.colorSombraNombre
@@ -263,7 +272,7 @@ function TemaImagen({ tema, nombre, fechaLegible, horarioLimpio, detalleEdadOTur
     : { color: colorEdad, opacity: cfg.sinSombraEdad ? 1 : 0.9 }
   const margenEdad = cfg.margenEdadFn ?? margenEdadClass
   const tamañoNombre = cfg.tamañoNombreFn ?? tamañoNombreClass
-  const edadTextClass = cfg.edadTextClass ?? "text-xs sm:text-sm"
+  const edadTextClass = cfg.edadTextClass ?? "text-sm"
   const iconSize = cfg.iconSize ?? 20
   const claseSombraNombre = cfg.colorSombraNombre ? "" : sombraClass
 
@@ -292,7 +301,7 @@ function TemaImagen({ tema, nombre, fechaLegible, horarioLimpio, detalleEdadOTur
   )
 
   return (
-    <div className="relative w-full overflow-hidden transition-[aspect-ratio] duration-500 ease-in-out" style={{ aspectRatio: cfg.aspect }}>
+    <div className="relative w-full overflow-hidden" style={{ aspectRatio: cfg.aspect }}>
       <Image src={cfg.imagen} alt={`Invitación ${tema}`} fill priority sizes="420px" className="object-cover" />
 
       <CampoOverlay pos={cfg.nombre}>
@@ -350,6 +359,26 @@ export default function InvitacionVIP() {
   const [temaActual, setTemaActual] = useState<TemaFondo>("acuatico")
 
   const tarjetaRef = useRef<HTMLDivElement>(null)
+  const contenedorTarjetaRef = useRef<HTMLDivElement>(null)
+  const [escala, setEscala] = useState(1)
+
+  // La tarjeta se maqueta siempre a ANCHO_TARJETA px; acá solo calculamos cuánto hay que
+  // reducirla para que entre en el ancho disponible. Nunca se agranda (tope en 1).
+  // useLayoutEffect corre antes del paint, así que no hay parpadeo con la escala inicial.
+  useLayoutEffect(() => {
+    const contenedor = contenedorTarjetaRef.current
+    if (!contenedor) return
+    const medir = () => {
+      const ancho = contenedor.getBoundingClientRect().width
+      if (ancho > 0) setEscala(Math.min(1, ancho / ANCHO_TARJETA))
+    }
+    medir()
+    const observer = new ResizeObserver(medir)
+    observer.observe(contenedor)
+    return () => observer.disconnect()
+    // `reserva` como dependencia: el contenedor recién se monta cuando terminó el fetch
+    // (antes de eso el componente devuelve el spinner y el ref todavía es null).
+  }, [reserva])
 
   useEffect(() => {
     async function fetchReserva() {
@@ -490,13 +519,34 @@ export default function InvitacionVIP() {
           ))}
         </div>
 
-        {/* TARJETA — wrapper con sombra (sin recorte) > wrapper con esquinas redondeadas (solo visual, recorta en pantalla) > nodo capturado para descarga (sin redondeo, para que el PNG exportado mantenga bordes rectos) */}
-        <div className="relative mx-auto w-full mb-8 sm:mb-12" style={{
-          filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.15))'
-        }}>
-          <div className="rounded-[24px] sm:rounded-[28px] overflow-hidden">
-            <div ref={tarjetaRef} className="relative w-full">
-              <TemaImagen tema={temaActual} {...datosInvitacion} />
+        {/* TARJETA — contenedor fluido con sombra (mide el ancho disponible y reserva el alto vía aspect-ratio)
+            > wrapper de ANCHO_TARJETA px reducido con scale() (mismo render en todo dispositivo)
+            > wrapper con esquinas redondeadas (solo visual, recorta en pantalla; escala junto con la tarjeta)
+            > nodo capturado para descarga (sin redondeo, para que el PNG exportado mantenga bordes rectos).
+            El scale es un transform estático a propósito: no usar will-change ni transiciones sobre él,
+            porque fijarían la escala de rasterizado en 1 y el texto se vería borroso en pantallas de alta densidad. */}
+        <div
+          ref={contenedorTarjetaRef}
+          className="relative mx-auto w-full mb-8 sm:mb-12 transition-[aspect-ratio] duration-500 ease-in-out"
+          style={{
+            filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.15))',
+            aspectRatio: TEMAS_CONFIG[temaActual].aspect,
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: `${ANCHO_TARJETA}px`,
+              transform: `scale(${escala})`,
+              transformOrigin: 'top left',
+            }}
+          >
+            <div className="rounded-[28px] overflow-hidden">
+              <div ref={tarjetaRef} className="relative w-full">
+                <TemaImagen tema={temaActual} {...datosInvitacion} />
+              </div>
             </div>
           </div>
         </div>
