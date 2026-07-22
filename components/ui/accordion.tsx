@@ -55,11 +55,11 @@ function AccordionContent({
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"
-      // OPTIMIZACIÓN: transform-gpu y will-change fuerzan el uso de la placa de video del celular
-      className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm transform-gpu will-change-[height]"
+      // OPTIMIZACIÓN: grid-template-rows en vez de height (ver @keyframes accordion-down-grid en globals.css)
+      className="data-[state=closed]:animate-[accordion-up-grid_0.2s_ease-out] data-[state=open]:animate-[accordion-down-grid_0.2s_ease-out] grid text-sm"
       {...props}
     >
-      <div className={cn('pt-0 pb-4', className)}>{children}</div>
+      <div className={cn('overflow-hidden pt-0 pb-4', className)}>{children}</div>
     </AccordionPrimitive.Content>
   )
 }

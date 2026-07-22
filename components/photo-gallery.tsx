@@ -22,9 +22,12 @@ export function PhotoGallery() {
   }))
 
   // 🔄 AUTOPLAY MÁGICO: Cambia las fotos de las ranuras pequeñas de PC cada 3.5 segundos
+  // Solo corre en desktop (md+): en mobile esas ranuras rotativas no se muestran (ver vista móvil abajo),
+  // así que el interval no tiene ningún efecto visible y solo consume batería/CPU de más.
   useEffect(() => {
-    if (selectedIndex !== null || isPaused || images.length <= 1) return 
-    
+    if (selectedIndex !== null || isPaused || images.length <= 1) return
+    if (!window.matchMedia('(min-width: 768px)').matches) return
+
     const timer = setInterval(() => {
       setCurrentIndex((prev) => prev + 1);
     }, 3500);

@@ -23,15 +23,16 @@ import {
 export default function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showFloatingButton, setShowFloatingButton] = useState(true);
-  const [showEventMenu, setShowEventMenu] = useState(false); 
+  const [showEventMenu, setShowEventMenu] = useState(false);
   const reservaFinalRef = useRef<HTMLElement>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setShowFloatingButton(!entry.isIntersecting);
       },
-      { threshold: 0.1 } 
+      { threshold: 0.1 }
     );
 
     if (reservaFinalRef.current) {
@@ -42,6 +43,39 @@ export default function LandingPage() {
       if (reservaFinalRef.current) {
         observer.unobserve(reservaFinalRef.current);
       }
+    };
+  }, []);
+
+  // Pausa el video del hero fuera de viewport o con la pestaña en background,
+  // para no seguir decodificando frames sin necesidad.
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+
+    let isInView = false;
+
+    const syncPlayback = () => {
+      if (isInView && document.visibilityState === 'visible') {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    };
+
+    const videoObserver = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry.isIntersecting;
+        syncPlayback();
+      },
+      { threshold: 0.1 }
+    );
+    videoObserver.observe(video);
+
+    document.addEventListener('visibilitychange', syncPlayback);
+
+    return () => {
+      videoObserver.disconnect();
+      document.removeEventListener('visibilitychange', syncPlayback);
     };
   }, []);
 
@@ -99,7 +133,7 @@ export default function LandingPage() {
         </header>
 
         <section className="relative pt-20 pb-20 md:pt-32 md:pb-28 text-center px-4 overflow-hidden min-h-[85vh] flex flex-col justify-center">
-          <video autoPlay loop muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
+          <video ref={heroVideoRef} autoPlay loop muted playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover z-0" poster="/logo-circular.png" >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-[#081524]/60 z-10 mix-blend-multiply" />
@@ -108,7 +142,6 @@ export default function LandingPage() {
           <div className="relative z-20 max-w-5xl mx-auto space-y-10">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg text-white font-black text-sm uppercase tracking-widest">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amarillo opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-amarillo"></span>
               </span>
               ¡Agenda 2026 Abierta!
@@ -150,13 +183,13 @@ export default function LandingPage() {
               {/* CARTEL PROMOCIONAL - EQUILIBRADO Y ELEGANTE */}
               <div className="relative inline-block w-full sm:w-auto px-4 sm:px-0 mx-auto max-w-2xl">
                 {/* Resplandor sutil pero notorio */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-2xl md:rounded-full blur-md opacity-60 animate-pulse"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-amarillo via-naranja to-rosa rounded-2xl md:rounded-full blur-md opacity-60"></div>
                 
                 {/* Contenedor principal equilibrado */}
                 <div className="relative flex flex-col sm:flex-row items-center justify-center gap-4 px-6 py-4 md:px-8 md:py-5 rounded-2xl md:rounded-full bg-[#081524]/80 backdrop-blur-xl border border-white/20 shadow-2xl hover:-translate-y-1 transition-transform duration-300 text-center sm:text-left">
                   
                   <div className="bg-gradient-to-br from-rosa to-naranja p-3 rounded-full shrink-0 shadow-inner">
-                    <Sparkles className="w-6 h-6 text-white animate-pulse" />
+                    <Sparkles className="w-6 h-6 text-white" />
                   </div>
                   
                   <div className="flex flex-col">

@@ -165,6 +165,25 @@
   }
 }
 
+/* Accordion: anima grid-template-rows en vez de height (evita depender de la
+   altura medida por Radix vía ResizeObserver en cada apertura/cierre) */
+@keyframes accordion-down-grid {
+  from {
+    grid-template-rows: 0fr;
+  }
+  to {
+    grid-template-rows: 1fr;
+  }
+}
+@keyframes accordion-up-grid {
+  from {
+    grid-template-rows: 1fr;
+  }
+  to {
+    grid-template-rows: 0fr;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
