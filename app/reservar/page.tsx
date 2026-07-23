@@ -107,7 +107,7 @@ export default function PaginaReserva() {
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
                         <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/12!</strong>
-                        Abonando la seña hoy congelas precio. <br/> 
+                        Abonando la seña hoy, congelás el precio. <br/> 
                         <span className="opacity-80 italic">(Precio sujeto a actualización)</span>
                       </p>
                     </div>
@@ -146,7 +146,7 @@ export default function PaginaReserva() {
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
                         <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/12!</strong>
-                        Abonando la seña hoy congelas precio. <br/> 
+                        Abonando la seña hoy, congelás el precio. <br/> 
                         <span className="opacity-80 italic">(Precio sujeto a actualización)</span>
                       </p>
                     </div>
