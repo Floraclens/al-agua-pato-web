@@ -203,7 +203,7 @@ export function ResumenReserva({
       const reservaId = data?.id || "N/A"
       const NUMERO_WHATSAPP_SALON = "5493854043737" 
       
-      const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM", { locale: es })
+      const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })
       const turnoLabel = getTurnoLabel(selectedTurno)
       
       let mensajeWhatsApp = ""
@@ -309,7 +309,7 @@ export function ResumenReserva({
               <div className="relative z-10 space-y-2.5">
                 <p className="text-sm flex justify-between">
                   <span className="font-semibold text-muted-foreground">Fecha:</span> 
-                  <span className="font-bold text-azul-marino capitalize text-right">{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</span>
+                  <span className="font-bold text-azul-marino capitalize text-right">{format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}</span>
                 </p>
                 <p className="text-sm flex justify-between">
                   <span className="font-semibold text-muted-foreground">Turno:</span> 

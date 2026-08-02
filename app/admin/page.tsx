@@ -196,7 +196,7 @@ export default function AdminPage() {
     activas.forEach(r => {
       let fechaFmt = r.fecha
       try { 
-        fechaFmt = format(parseISO(r.fecha), "EEEE d 'de' MMMM", { locale: es }).toUpperCase() 
+        fechaFmt = format(parseISO(r.fecha), "EEEE d 'de' MMMM, yyyy", { locale: es }).toUpperCase()
       } catch (e) {}
       
       textoCopiar += `📅 *${fechaFmt}*\n`
