@@ -65,7 +65,7 @@ export function feriadosCargadosParaAnio(fecha: Date): boolean {
 export const PRECIOS = {
   temporada_baja: { lunes_a_viernes: 700000, fines_de_semana: 700000 },
   temporada_media: { 
-    lunes_a_viernes: 1000000, 
+    lunes_a_viernes: 1050000, 
     turno_1_fijo: 970000, 
     turno_2_fijo: 1050000 
   },
