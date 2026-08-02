@@ -54,7 +54,7 @@ No se modificó ningún archivo de lógica real (`lib/`, `app/reservar`, `app/eg
 | Temporada | `temporada_media` |
 | `esFinDeSemanaOFeriado` | `false` |
 | Modalidad | `turno_flexible` |
-| Precio base | `1000000` |
+| Precio base | `1050000` |
 | Franja horaria | 12:00 a 22:30 (último inicio 18:30) |
 | Pileta disponible | `false` |
 
@@ -126,7 +126,7 @@ egresaditos (cambio de régimen de precios `nov_a_dic14` → `dic15_a_fin`), el 
 
 | Fecha | Tipo | Temporada / régimen | Modalidad | Precio |
 |---|---|---|---|---|
-| 2026-12-14 (lunes) | cumpleaños | `temporada_media` | `turno_flexible` | `1000000` |
+| 2026-12-14 (lunes) | cumpleaños | `temporada_media` | `turno_flexible` | `1050000` |
 | 2026-12-15 (martes) | cumpleaños | `temporada_alta` | `doble_turno_fijo` | T1 `970000` / T2 `1050000` |
 | 2026-12-14 (lunes) | egresadito | `nov_a_dic14` | `turno_flexible` | `1100000` |
 | 2026-12-15 (martes) | egresadito | `dic15_a_fin` | `doble_turno_fijo` | T1 `1100000` / T2 `1100000` |
