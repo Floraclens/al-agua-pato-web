@@ -26,6 +26,9 @@ import { extrasALabels } from "@/lib/extras"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { createBrowserClient } from "@/lib/supabase/client"
+import { preciosIguales } from "@/lib/precios"
+import { WHATSAPP_SALON } from "@/lib/config-reservas"
+import { usePreciosListos } from "@/components/precios-provider"
 
 interface ResumenReservaProps {
   selectedDate: Date | undefined
@@ -74,6 +77,7 @@ export function ResumenReserva({
   isEgresadito = false,
   onSubmitAttempt 
 }: ResumenReservaProps) {
+  const { precios, recargar } = usePreciosListos()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [waUrl, setWaUrl] = useState("")
@@ -130,6 +134,29 @@ export function ResumenReserva({
 
     setIsSubmitting(true)
     try {
+      // Re-verificar los precios contra la base ANTES de guardar: la admin pudo cambiarlos
+      // mientras el cliente completaba el formulario. Nunca se guarda un total calculado con
+      // precios viejos ni sin poder verificar.
+      const preciosVigentes = await recargar()
+      if (!preciosVigentes) {
+        toast.error("No pudimos verificar los precios", {
+          description: "Para no cotizarte un valor incorrecto, escribinos por WhatsApp y reservamos tu fecha por ahí.",
+          action: {
+            label: "WhatsApp",
+            onClick: () => window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_SALON}`, "_blank"),
+          },
+        })
+        setIsSubmitting(false)
+        return
+      }
+      if (!preciosIguales(preciosVigentes, precios)) {
+        toast.warning("Los precios se actualizaron", {
+          description: "Revisá el total en el resumen y volvé a confirmar la reserva.",
+        })
+        setIsSubmitting(false)
+        return
+      }
+
       const extras_elegidos = selectedExtras.length > 0 ? selectedExtras.join(", ") : "Ninguno"
       
       const textoMetodoPago = pagoTotalidad 
@@ -244,7 +271,7 @@ export function ResumenReserva({
       toast.error(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }
-  }, [canSubmit, onSubmitAttempt, selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, extras.horaExtra, pagoTotalidad, isEgresadito])
+  }, [canSubmit, onSubmitAttempt, selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, extras.horaExtra, pagoTotalidad, isEgresadito, precios, recargar])
 
   if (isSuccess && selectedDate && selectedTurno) {
     return (
@@ -420,8 +447,8 @@ export function ResumenReserva({
                   <p className="font-semibold text-azul-marino">
                     {metodoPagoLabels[metodoPago]}
                   </p>
-                  {metodoPago === "efectivo" && pagoTotalidad && (
-                    <Badge className="bg-verde text-white text-xs">10% OFF</Badge>
+                  {metodoPago === "efectivo" && pagoTotalidad && precios.descuento_efectivo_pct > 0 && (
+                    <Badge className="bg-verde text-white text-xs">{precios.descuento_efectivo_pct}% OFF</Badge>
                   )}
                 </div>
               </div>
@@ -461,11 +488,23 @@ export function ResumenReserva({
           {calculos.descuento > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-verde font-medium flex flex-col">
-                Descuento 10%
+                Descuento {precios.descuento_efectivo_pct}%
                 <span className="text-[10px] opacity-80 leading-tight">(Abonando la totalidad)</span>
               </span>
               <span className="text-verde font-medium">
                 -{formatPrice(calculos.descuento)}
+              </span>
+            </div>
+          )}
+
+          {/* LÓGICA VISUAL: RECARGO (hoy 0%; la admin puede subirlo en /admin) */}
+          {calculos.recargo > 0 && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground font-medium">
+                Recargo tarjeta {precios.recargo_tarjeta_pct}%
+              </span>
+              <span className="font-medium text-foreground">
+                +{formatPrice(calculos.recargo)}
               </span>
             </div>
           )}

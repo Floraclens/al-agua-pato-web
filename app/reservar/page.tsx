@@ -6,12 +6,13 @@ import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
 import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react"
-import { PRECIOS } from "@/lib/config-reservas"
+import { usePreciosListos } from "@/components/precios-provider"
 import { formatMoneyUI } from "@/lib/reserva"
 import { useReserva } from "@/hooks/use-reserva"
 import Link from "next/link"
 
 export default function PaginaReserva() {
+  const { precios } = usePreciosListos()
   const {
     selectedDate,
     selectedTurno,
@@ -83,7 +84,7 @@ export default function PaginaReserva() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>
-                          <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_baja.lunes_a_viernes)}</span>
+                          <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.baja)}</span>
                           <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2 relative -top-0.5">Costo Fijo</span>
                         </li>
                         <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
@@ -115,7 +116,7 @@ export default function PaginaReserva() {
                     <div className="block mb-5">
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Lunes a Viernes:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
-                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_media.lunes_a_viernes)}</span></li>
+                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_lun_vie)}</span></li>
                         <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
                         <li>🕒 <strong className="text-slate-800">4 horas a elección</strong> (12:00 a 22:30 hs).</li>
                       </ul>
@@ -126,8 +127,8 @@ export default function PaginaReserva() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Sábados, Domingos y Feriados:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
-                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_media.turno_1_fijo)}</span></li>
-                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_media.turno_2_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_turno_1)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_turno_2)}</span></li>
                       </ul>
                     </div>
 
@@ -155,8 +156,8 @@ export default function PaginaReserva() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
-                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_alta.turno_1_fijo)}</span></li>
-                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS.temporada_alta.turno_2_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.alta_turno_1)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.alta_turno_2)}</span></li>
                       </ul>
                     </div>
 

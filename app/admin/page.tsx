@@ -37,7 +37,8 @@ import { getTurnoLabel, horarioConHoraExtra, type Turno } from "@/lib/turno"
 import { ExtrasSelector } from "@/components/extras-selector"
 import { calcularPrecioExtras, type Extras } from "@/lib/reserva"
 import { textoAExtras, extrasATexto, tieneHoraExtra, EXTRAS_VACIOS } from "@/lib/extras"
-import { PRECIOS } from "@/lib/config-reservas"
+import { OPCIONALES_INFO } from "@/lib/config-reservas"
+import { PreciosProvider, usePrecios } from "@/components/precios-provider"
 
 type FiltroEstado = "todas" | "pendiente" | "confirmadas" | "completadas"
 
@@ -48,8 +49,18 @@ function toLocalDateString(date: Date) {
   return `${y}-${m}-${d}`
 }
 
+// Los precios (editar extras, calendario de reprogramación) vienen de la tabla `precios`.
 export default function AdminPage() {
+  return (
+    <PreciosProvider>
+      <AdminContenido />
+    </PreciosProvider>
+  )
+}
+
+function AdminContenido() {
   const [supabase] = useState(() => createBrowserClient())
+  const { precios } = usePrecios()
 
   const [usuario, setUsuario] = useState("")
   const [password, setPassword] = useState("")
@@ -164,7 +175,12 @@ export default function AdminPage() {
     }
   }
 
+  // Sin precios cargados no se abren los modales que los usan (calendario y selector de extras).
+  const avisarSinPrecios = () =>
+    toast.error("No se pudieron cargar los precios. Recargá la página e intentá de nuevo.")
+
   const abrirModalReprogramar = (reserva: any) => {
+    if (!precios) return avisarSinPrecios()
     setModalReprogramar(reserva)
     setReprogramDate(undefined)
     setReprogramTurno(null)
@@ -194,6 +210,7 @@ export default function AdminPage() {
   }
 
   const abrirModalExtras = (reserva: any) => {
+    if (!precios) return avisarSinPrecios()
     const { extras, desconocidos } = textoAExtras(reserva.extras_elegidos)
     setModalExtras(reserva)
     setExtrasOriginales(extras)
@@ -205,15 +222,15 @@ export default function AdminPage() {
   // Diferencia a precios ACTUALES entre los extras nuevos y los que tenía la reserva.
   // No se recalcula el total desde cero: el precio del turno pudo cambiar desde que se reservó.
   const calculoExtras = useMemo(() => {
-    if (!modalExtras) return null
+    if (!modalExtras || !precios) return null
     const totalActual = Number(modalExtras.total) || 0
-    const diferencia = calcularPrecioExtras(extrasEdit) - calcularPrecioExtras(extrasOriginales)
+    const diferencia = calcularPrecioExtras(extrasEdit, precios) - calcularPrecioExtras(extrasOriginales, precios)
     const totalSugerido = Math.max(0, totalActual + diferencia)
     const totalFinal = totalManual !== null ? Number(totalManual) : totalSugerido
     const estado = (modalExtras.estado || "pendiente").toLowerCase()
     const vuelveASenado = estado === "completado" && totalFinal > totalActual
     return { totalActual, diferencia, totalSugerido, totalFinal, vuelveASenado }
-  }, [modalExtras, extrasEdit, extrasOriginales, totalManual])
+  }, [modalExtras, extrasEdit, extrasOriginales, totalManual, precios])
 
   const guardarExtras = async () => {
     if (!modalExtras || !calculoExtras) return
@@ -777,7 +794,7 @@ export default function AdminPage() {
                 onChangeExtras={setExtrasEdit}
                 showPileta={
                   extrasOriginales.pileta ||
-                  PRECIOS.opcionales.pileta.meses_disponibles.includes(Number(String(modalExtras.fecha).split("-")[1]))
+                  OPCIONALES_INFO.pileta.meses_disponibles.includes(Number(String(modalExtras.fecha).split("-")[1]))
                 }
                 showErrors={extrasEdit.personaje && extrasEdit.personajesSeleccionados.length === 0}
               />

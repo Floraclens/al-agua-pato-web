@@ -14,8 +14,12 @@ import { useState, useMemo, useEffect } from "react"
 import { type Turno } from "@/lib/turno"
 import { obtenerReglasParaFecha, obtenerReglasEgresaditos, FeriadosNoCargadosError } from "@/lib/config-reservas"
 import { calcularPrecios, type MetodoPago, type Extras, type DatosCliente } from "@/lib/reserva"
+import { usePreciosListos } from "@/components/precios-provider"
 
 export function useReserva(esEgresadito: boolean) {
+  // Los layouts de /reservar y /egresaditos envuelven con <PreciosGate>: acá siempre hay precios.
+  const { precios } = usePreciosListos()
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTurno, setSelectedTurno] = useState<Turno>(null)
   const [showErrors, setShowErrors] = useState(false)
@@ -42,7 +46,7 @@ export function useReserva(esEgresadito: boolean) {
   const reglasFecha = useMemo(() => {
     if (!selectedDate) return null
     try {
-      return esEgresadito ? obtenerReglasEgresaditos(selectedDate) : obtenerReglasParaFecha(selectedDate)
+      return esEgresadito ? obtenerReglasEgresaditos(selectedDate, precios) : obtenerReglasParaFecha(selectedDate, precios)
     } catch (e) {
       // Defensa en profundidad: si una fecha de un año sin feriados cargados
       // llegara hasta acá (el calendario ya la bloquea), no crashear el render.
@@ -50,7 +54,7 @@ export function useReserva(esEgresadito: boolean) {
       throw e
     }
     // esEgresadito es literal constante en cada página: nunca invalida el memo.
-  }, [selectedDate, esEgresadito])
+  }, [selectedDate, esEgresadito, precios])
 
   useEffect(() => {
     if (reglasFecha && !reglasFecha.pileta_disponible && extras.pileta) {
@@ -74,10 +78,10 @@ export function useReserva(esEgresadito: boolean) {
 
   // === CALCULADORA CENTRAL DE PRECIOS ===
   const calculos = useMemo(
-    () => calcularPrecios({ selectedDate, selectedTurno, reglasFecha, extras, metodoPago, pagoTotalidad }),
-    // Mismo array de deps que tenían ambas páginas (calcularPrecios es módulo-level, estable).
+    () => calcularPrecios({ selectedDate, selectedTurno, reglasFecha, extras, metodoPago, pagoTotalidad, precios }),
+    // Mismo array de deps que tenían ambas páginas (calcularPrecios es módulo-level, estable) + precios.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedTurno, selectedDate, extras, metodoPago, pagoTotalidad, reglasFecha]
+    [selectedTurno, selectedDate, extras, metodoPago, pagoTotalidad, reglasFecha, precios]
   )
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

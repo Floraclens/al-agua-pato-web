@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { PreciosProvider, PreciosGate } from '@/components/precios-provider'
 
 export const metadata: Metadata = {
   title: 'Fiesta de Egresados | Al Agua Pato — Santiago del Estero',
@@ -13,5 +14,9 @@ export const metadata: Metadata = {
 }
 
 export default function EgresaditosLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return (
+    <PreciosProvider>
+      <PreciosGate>{children}</PreciosGate>
+    </PreciosProvider>
+  )
 }

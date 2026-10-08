@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils"
 import type { Turno, LunVieTurno } from "@/lib/turno"
 import { createBrowserClient } from "@/lib/supabase/client"
 import { obtenerReglasParaFecha, obtenerReglasEgresaditos, feriadosCargadosParaAnio } from "@/lib/config-reservas"
+import type { Precios } from "@/lib/precios"
+import { usePreciosListos } from "@/components/precios-provider"
 import { Calendar as CalendarIcon, CheckCircle, ChevronDown, Search, AlertCircle, Clock, Loader2 } from "lucide-react"
 
 const LABEL_MANANA = "12:00 a 16:00 hs"
@@ -40,8 +42,8 @@ function isLunVieTurn(t: NonNullable<Turno>): t is LunVieTurno {
   return typeof t === "object" && t !== null && "id" in t && t.id === "lun_vie"
 }
 
-function showDualFixedSlots(date: Date, isEgresadito: boolean = false): boolean {
-  const reglas = isEgresadito ? obtenerReglasEgresaditos(date) : obtenerReglasParaFecha(date)
+function showDualFixedSlots(date: Date, precios: Precios, isEgresadito: boolean = false): boolean {
+  const reglas = isEgresadito ? obtenerReglasEgresaditos(date, precios) : obtenerReglasParaFecha(date, precios)
   return reglas?.modalidad === 'doble_turno_fijo'
 }
 
@@ -82,7 +84,9 @@ export function ReservationCalendar({
   ignoreReservaId,
   isEgresadito = false 
 }: ReservationCalendarProps) {
-  
+  // Las reglas de fecha incluyen precios; acá solo se usa su estructura (modalidad/horarios).
+  const { precios } = usePreciosListos()
+
   const [fechaBuscada, setFechaBuscada] = useState<Date | undefined>(selectedDate)
   const [turnoBuscado, setTurnoBuscado] = useState<Turno | null>(null)
   
@@ -170,7 +174,7 @@ export function ReservationCalendar({
     }
 
     const bookedSlots = data ? data.map(r => r.turno) : []
-    const isDual = showDualFixedSlots(fechaBuscada, isEgresadito)
+    const isDual = showDualFixedSlots(fechaBuscada, precios, isEgresadito)
 
     let isOverlap = false
     if (isDual) {
@@ -203,7 +207,7 @@ export function ReservationCalendar({
 
   const lunVieStartOptions: number[] = []
   if (fechaBuscada) {
-    const reglas = isEgresadito ? obtenerReglasEgresaditos(fechaBuscada) : obtenerReglasParaFecha(fechaBuscada)
+    const reglas = isEgresadito ? obtenerReglasEgresaditos(fechaBuscada, precios) : obtenerReglasParaFecha(fechaBuscada, precios)
     if (reglas && reglas.modalidad === 'turno_flexible' && reglas.ultimo_inicio_permitido) {
       const [horaInicio] = reglas.franja_horaria.inicio.split(':').map(Number)
       const [horaUltimoInicio, minutoUltimoInicio] = reglas.ultimo_inicio_permitido.split(':').map(Number)
@@ -214,7 +218,7 @@ export function ReservationCalendar({
     }
   }
 
-  const isDual = fechaBuscada ? showDualFixedSlots(fechaBuscada, isEgresadito) : false
+  const isDual = fechaBuscada ? showDualFixedSlots(fechaBuscada, precios, isEgresadito) : false
 
   return (
     <div className="w-full space-y-4">

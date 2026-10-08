@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { PreciosProvider, PreciosGate } from '@/components/precios-provider'
 
 export const metadata: Metadata = {
   title: 'Reservá tu Fecha | Al Agua Pato — Fiestas Infantiles en Santiago del Estero',
@@ -13,5 +14,9 @@ export const metadata: Metadata = {
 }
 
 export default function ReservarLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return (
+    <PreciosProvider>
+      <PreciosGate>{children}</PreciosGate>
+    </PreciosProvider>
+  )
 }

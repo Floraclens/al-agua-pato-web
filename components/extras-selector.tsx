@@ -5,7 +5,8 @@ import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { PartyPopper, Clock, UserPlus, Users, Minus, Plus, Eye, EyeOff, AlertCircle, type LucideIcon } from "lucide-react"
-import { PRECIOS } from "@/lib/config-reservas"
+import { OPCIONALES_INFO } from "@/lib/config-reservas"
+import { usePreciosListos } from "@/components/precios-provider"
 
 interface ExtrasSelectorProps {
   extras: any
@@ -46,7 +47,8 @@ export function ExtrasSelector({
   showPileta = false,
   showErrors = false // Recibe si debe mostrar errores
 }: ExtrasSelectorProps) {
-  
+
+  const { precios } = usePreciosListos()
   const [preciosRevelados, setPreciosRevelados] = useState<string[]>([])
 
   const updateAdults = (e: React.MouseEvent, delta: number) => {
@@ -101,70 +103,70 @@ export function ExtrasSelector({
       id: "adultosAdicionales", 
       titulo: "Adultos Extra",
       descripcion: "Agregá invitados adultos extra (Límite máximo: 10 adultos).",
-      precio: PRECIOS.opcionales.adultosAdicionales,
+      precio: precios.adulto_adicional,
       icon: Users,
       bgColor: "bg-emerald-500/10",
       iconColor: "text-emerald-500",
-      needsAdultsCounter: true, 
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.adultosAdicionales)} c/u`
+      needsAdultsCounter: true,
+      precioTexto: `+${formatPrice(precios.adulto_adicional)} c/u`
     },
     {
       id: "animacion",
       titulo: "Animación",
       descripcion: "Globología, pinta cara, baile, juegos adentro/fuera pileta.",
-      precio: PRECIOS.opcionales.animacion,
+      precio: precios.animacion,
       icon: PartyPopper,
       bgColor: "bg-rosa/20",
       iconColor: "text-rosa",
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.animacion)}`
+      precioTexto: `+${formatPrice(precios.animacion)}`
     },
     {
       id: "horaExtra",
       titulo: "Hora Extra",
       descripcion: "Extiende tu fiesta una hora más para seguir disfrutando.",
-      precio: PRECIOS.opcionales.horaExtra,
+      precio: precios.hora_extra,
       icon: Clock,
       bgColor: "bg-azul-claro/20",
       iconColor: "text-azul-claro",
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.horaExtra)}`
+      precioTexto: `+${formatPrice(precios.hora_extra)}`
     },
     {
       id: "mozoAdicional",
       titulo: "Mozo Adicional",
       descripcion: "Agregá mozos extra si tenés muchos invitados.",
-      precio: PRECIOS.opcionales.mozoAdicional,
+      precio: precios.mozo_adicional,
       icon: UserPlus,
       bgColor: "bg-indigo-500/10",
       iconColor: "text-indigo-500",
       needsMozoCounter: true,
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.mozoAdicional)} c/u`
+      precioTexto: `+${formatPrice(precios.mozo_adicional)} c/u`
     },
     {
       id: "robotLed",
       titulo: "Robot LED",
       descripcion: "Show interactivo de Robot LED. 1 hora de servicio.",
-      precio: PRECIOS.opcionales.robot_led.uno,
+      precio: precios.robot_led_1,
       imagen: "/extras/robot.jpg",
       needsRobotCounter: true,
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.robot_led.uno)} (o 2 x ${formatPrice(PRECIOS.opcionales.robot_led.dos)})`
+      precioTexto: `+${formatPrice(precios.robot_led_1)} (o 2 x ${formatPrice(precios.robot_led_2)})`
     },
     {
       id: "zancosLed",
       titulo: "Zancos LED",
       descripcion: "Artista en zancos con traje de luces LED. 1 hora de servicio.",
-      precio: PRECIOS.opcionales.zancos_led.precio_unidad,
+      precio: precios.zancos_led,
       imagen: "/extras/zancos.jpg",
       needsZancosCounter: true,
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.zancos_led.precio_unidad)} c/u`
+      precioTexto: `+${formatPrice(precios.zancos_led)} c/u`
     },
     {
       id: "personaje",
       titulo: "Personajes a elección",
       descripcion: "Podes elegir 1 o más personajes para animar la fiesta. 1 hora de servicio.",
-      precio: PRECIOS.opcionales.personaje.precio_unidad,
+      precio: precios.personaje,
       imagen: "/extras/personajes.jpg",
       needsMultiSelect: true,
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.personaje.precio_unidad)} c/u`
+      precioTexto: `+${formatPrice(precios.personaje)} c/u`
     },
   ]
 
@@ -172,12 +174,12 @@ export function ExtrasSelector({
     extrasOptions.push({
       id: "pileta",
       titulo: "Acceso a la Pileta",
-      descripcion: PRECIOS.opcionales.pileta.detalle,
-      precio: PRECIOS.opcionales.pileta.precio,
-      imagen: "/extras/pileta.jpg", 
+      descripcion: OPCIONALES_INFO.pileta.detalle,
+      precio: precios.pileta,
+      imagen: "/extras/pileta.jpg",
       bgColor: "bg-cyan-500/10",
       iconColor: "text-cyan-500",
-      precioTexto: `+${formatPrice(PRECIOS.opcionales.pileta.precio)}`
+      precioTexto: `+${formatPrice(precios.pileta)}`
     })
   }
 

@@ -6,12 +6,13 @@ import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
 import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, GraduationCap, School, AlertCircle } from "lucide-react"
-import { PRECIOS_EGRESADITOS } from "@/lib/config-reservas"
+import { usePreciosListos } from "@/components/precios-provider"
 import { formatMoneyUI } from "@/lib/reserva"
 import { useReserva } from "@/hooks/use-reserva"
 import Link from "next/link"
 
 export default function PaginaReservaEgresaditos() {
+  const { precios } = usePreciosListos()
   const {
     selectedDate,
     selectedTurno,
@@ -88,7 +89,7 @@ export default function PaginaReservaEgresaditos() {
                     <div className="block mb-5">
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Lunes a Viernes:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
-                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.lunes_a_viernes)}</span></li>
+                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.egre_nov_lun_vie)}</span></li>
                         <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
                         <li>🕒 <strong className="text-slate-800">4 horas a elección</strong> (12:00 a 22:30 hs).</li>
                       </ul>
@@ -99,8 +100,8 @@ export default function PaginaReservaEgresaditos() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Sábados, Domingos y Feriados:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
-                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_1_fijo)}</span></li>
-                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.nov_a_dic14.turno_2_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.egre_nov_turno_1)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.egre_nov_turno_2)}</span></li>
                       </ul>
                     </div>
                   </div>
@@ -127,8 +128,8 @@ export default function PaginaReservaEgresaditos() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
-                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_1_fijo)}</span></li>
-                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(PRECIOS_EGRESADITOS.dic15_a_fin.turno_2_fijo)}</span></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.egre_dic_turno_1)}</span></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.egre_dic_turno_2)}</span></li>
                       </ul>
                     </div>
 
