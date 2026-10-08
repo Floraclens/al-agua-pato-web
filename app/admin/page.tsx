@@ -28,11 +28,16 @@ import {
   CheckCircle,
   CalendarDays,
   Share2,
-  X
+  X,
+  Sparkles
 } from "lucide-react"
 
 import { ReservationCalendar } from "@/components/reservation-calendar"
-import { getTurnoLabel, type Turno } from "@/lib/turno"
+import { getTurnoLabel, horarioConHoraExtra, type Turno } from "@/lib/turno"
+import { ExtrasSelector } from "@/components/extras-selector"
+import { calcularPrecioExtras, type Extras } from "@/lib/reserva"
+import { textoAExtras, extrasATexto, tieneHoraExtra, EXTRAS_VACIOS } from "@/lib/extras"
+import { PRECIOS } from "@/lib/config-reservas"
 
 type FiltroEstado = "todas" | "pendiente" | "confirmadas" | "completadas"
 
@@ -59,6 +64,14 @@ export default function AdminPage() {
   const [modalReprogramar, setModalReprogramar] = useState<any>(null)
   const [reprogramDate, setReprogramDate] = useState<Date | undefined>(undefined)
   const [reprogramTurno, setReprogramTurno] = useState<Turno>(null)
+
+  // --- Edición de extras ---
+  const [modalExtras, setModalExtras] = useState<any>(null)
+  const [extrasOriginales, setExtrasOriginales] = useState<Extras>(EXTRAS_VACIOS)
+  const [extrasEdit, setExtrasEdit] = useState<Extras>(EXTRAS_VACIOS)
+  const [extrasDesconocidos, setExtrasDesconocidos] = useState<string[]>([])
+  const [totalManual, setTotalManual] = useState<string | null>(null)
+  const [isGuardandoExtras, setIsGuardandoExtras] = useState(false)
 
   const fetchReservas = useCallback(async () => {
     setIsFetching(true)
@@ -180,6 +193,69 @@ export default function AdminPage() {
     }
   }
 
+  const abrirModalExtras = (reserva: any) => {
+    const { extras, desconocidos } = textoAExtras(reserva.extras_elegidos)
+    setModalExtras(reserva)
+    setExtrasOriginales(extras)
+    setExtrasEdit(extras)
+    setExtrasDesconocidos(desconocidos)
+    setTotalManual(null)
+  }
+
+  // Diferencia a precios ACTUALES entre los extras nuevos y los que tenía la reserva.
+  // No se recalcula el total desde cero: el precio del turno pudo cambiar desde que se reservó.
+  const calculoExtras = useMemo(() => {
+    if (!modalExtras) return null
+    const totalActual = Number(modalExtras.total) || 0
+    const diferencia = calcularPrecioExtras(extrasEdit) - calcularPrecioExtras(extrasOriginales)
+    const totalSugerido = Math.max(0, totalActual + diferencia)
+    const totalFinal = totalManual !== null ? Number(totalManual) : totalSugerido
+    const estado = (modalExtras.estado || "pendiente").toLowerCase()
+    const vuelveASenado = estado === "completado" && totalFinal > totalActual
+    return { totalActual, diferencia, totalSugerido, totalFinal, vuelveASenado }
+  }, [modalExtras, extrasEdit, extrasOriginales, totalManual])
+
+  const guardarExtras = async () => {
+    if (!modalExtras || !calculoExtras) return
+
+    if (extrasEdit.personaje && extrasEdit.personajesSeleccionados.length === 0) {
+      toast.error("Elegí al menos un personaje o desmarcá la opción.")
+      return
+    }
+    if (!Number.isFinite(calculoExtras.totalFinal) || calculoExtras.totalFinal < 0) {
+      toast.error("El total final no es válido.")
+      return
+    }
+
+    const cambios: Record<string, any> = {
+      extras_elegidos: extrasATexto(extrasEdit, extrasDesconocidos),
+      total: calculoExtras.totalFinal,
+    }
+    // Si ya figuraba "Pago Completo" y el total sube, queda saldo pendiente → vuelve a "Seña Confirmada".
+    if (calculoExtras.vuelveASenado) cambios.estado = "senado"
+
+    setIsGuardandoExtras(true)
+    const { data, error } = await supabase
+      .from("reservas")
+      .update(cambios)
+      .eq("id", modalExtras.id)
+      .select("id")
+    setIsGuardandoExtras(false)
+
+    if (error || !data || data.length === 0) {
+      toast.error("No se pudieron guardar los extras.")
+      return
+    }
+
+    toast.success(
+      calculoExtras.vuelveASenado
+        ? "Extras actualizados. La reserva volvió a \"Seña Confirmada\" porque quedó saldo pendiente."
+        : "Extras actualizados con éxito."
+    )
+    setReservas(reservas.map(r => r.id === modalExtras.id ? { ...r, ...cambios } : r))
+    setModalExtras(null)
+  }
+
   const handleCompartirMes = () => {
     const activas = reservas.filter(r => {
       const est = (r.estado || "").toLowerCase()
@@ -200,7 +276,8 @@ export default function AdminPage() {
       } catch (e) {}
       
       textoCopiar += `📅 *${fechaFmt}*\n`
-      textoCopiar += `⏰ Horario: ${r.turno}\n`
+      const horaExtraR = tieneHoraExtra(r.extras_elegidos)
+      textoCopiar += `⏰ Horario: ${horarioConHoraExtra(r.turno, horaExtraR)}${horaExtraR ? " (incluye hora extra)" : ""}\n`
       textoCopiar += `👤 Cliente: ${r.nombre} (${r.telefono})\n`
       if (r.nombre_cumpleanero) {
         if (r.nombre_cumpleanero.includes("🎓")) {
@@ -456,6 +533,7 @@ export default function AdminPage() {
               const isPagoTotalidadDesdeInicio = reserva.sena >= reserva.total || (reserva.metodo_pago && reserva.metodo_pago.includes("Totalidad"))
               
               const isEgresadito = reserva.nombre_cumpleanero?.includes("🎓")
+              const horaExtra = tieneHoraExtra(reserva.extras_elegidos)
 
               return (
                 <div key={reserva.id} className={`bg-white rounded-2xl border-2 shadow-sm p-5 md:p-6 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between transition-all hover:shadow-md ${isActiva ? "border-transparent" : "border-orange-200"}`}>
@@ -481,8 +559,13 @@ export default function AdminPage() {
                       </div>
                       <p className="font-black text-xl text-azul-marino capitalize leading-tight">{fechaFormateada}</p>
                       <p className="text-slate-600 font-bold flex items-center gap-1.5">
-                        <Clock className="w-4 h-4 text-azul-claro" /> {reserva.turno}
+                        <Clock className="w-4 h-4 text-azul-claro" /> {horarioConHoraExtra(reserva.turno, horaExtra)}
                       </p>
+                      {horaExtra && (
+                        <span className="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider bg-azul-claro/15 text-azul-claro">
+                          Incluye hora extra
+                        </span>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -595,6 +678,14 @@ export default function AdminPage() {
                       </Button>
                       <Button 
                         variant="outline" 
+                        title="Editar extras"
+                        className="flex-1 h-10 border-naranja/40 text-naranja hover:bg-naranja/10" 
+                        onClick={() => abrirModalExtras(reserva)}
+                      >
+                        <Sparkles className="h-4 w-4 shrink-0" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
                         className="flex-1 h-10 border-red-200 text-red-500 hover:bg-red-50" 
                         onClick={() => handleEliminarReserva(reserva.id, reserva.nombre)}
                       >
@@ -646,6 +737,101 @@ export default function AdminPage() {
                 className="w-full h-12 bg-amarillo hover:bg-amarillo/90 text-azul-marino font-extrabold text-base mt-4 shadow-md disabled:opacity-50"
               >
                 Guardar Nueva Fecha
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL PARA EDITAR EXTRAS --- */}
+      {modalExtras && calculoExtras && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[90vh]">
+            <div className="bg-azul-marino p-4 flex items-center justify-between text-white shrink-0">
+              <h3 className="font-bold flex items-center gap-2">
+                <Sparkles className="w-5 h-5" /> Editar Extras
+              </h3>
+              <button onClick={() => setModalExtras(null)} className="hover:bg-white/20 p-1 rounded-md transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-5">
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <p className="text-sm text-slate-500 font-medium">Cliente: <strong className="text-azul-marino">{modalExtras.nombre}</strong></p>
+                <p className="text-sm text-slate-500 font-medium">Extras actuales: <strong className="text-azul-marino">{modalExtras.extras_elegidos || "Ninguno"}</strong></p>
+              </div>
+
+              {extrasDesconocidos.length > 0 && (
+                <div className="flex gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-lg">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <p>
+                    Estos extras no se pudieron leer y se van a conservar tal cual (no suman ni restan al total):{" "}
+                    <strong>{extrasDesconocidos.join(", ")}</strong>
+                  </p>
+                </div>
+              )}
+
+              <ExtrasSelector
+                extras={extrasEdit}
+                onChangeExtras={setExtrasEdit}
+                showPileta={
+                  extrasOriginales.pileta ||
+                  PRECIOS.opcionales.pileta.meses_disponibles.includes(Number(String(modalExtras.fecha).split("-")[1]))
+                }
+                showErrors={extrasEdit.personaje && extrasEdit.personajesSeleccionados.length === 0}
+              />
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-600 font-medium">Total actual</span>
+                  <span className="font-bold text-slate-700">{formatMoney(calculoExtras.totalActual)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-600 font-medium">Diferencia por extras (precios de hoy)</span>
+                  <span className={`font-bold ${calculoExtras.diferencia > 0 ? "text-verde" : calculoExtras.diferencia < 0 ? "text-red-500" : "text-slate-500"}`}>
+                    {calculoExtras.diferencia > 0 ? "+" : ""}{formatMoney(calculoExtras.diferencia)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm border-t border-slate-200 pt-2">
+                  <span className="text-slate-600 font-medium">Total sugerido</span>
+                  <span className="font-bold text-azul-marino">{formatMoney(calculoExtras.totalSugerido)}</span>
+                </div>
+                <div className="pt-2">
+                  <Label htmlFor="total-final" className="text-azul-marino font-bold">Total final (podés corregirlo)</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="total-final"
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      value={totalManual ?? String(calculoExtras.totalSugerido)}
+                      onChange={(e) => setTotalManual(e.target.value)}
+                      className="h-11 font-bold"
+                    />
+                    {totalManual !== null && (
+                      <Button variant="outline" className="h-11" onClick={() => setTotalManual(null)}>
+                        Usar sugerido
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">La seña no se modifica.</p>
+                </div>
+              </div>
+
+              {calculoExtras.vuelveASenado && (
+                <div className="flex gap-2 bg-blue-50 border border-blue-200 text-blue-800 text-sm p-3 rounded-lg">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <p>Esta reserva figura con <strong>Pago Completo</strong>. Como el total sube, al guardar vuelve a <strong>Seña Confirmada</strong> hasta que se cobre la diferencia.</p>
+                </div>
+              )}
+
+              <Button
+                onClick={guardarExtras}
+                disabled={isGuardandoExtras}
+                className="w-full h-12 bg-amarillo hover:bg-amarillo/90 text-azul-marino font-extrabold text-base shadow-md disabled:opacity-50"
+              >
+                {isGuardandoExtras ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar Extras"}
               </Button>
             </div>
           </div>

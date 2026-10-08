@@ -51,6 +51,41 @@ export const formatMoneyUI = (amount: number) => {
   return new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(amount)
 }
 
+/**
+ * Precio de los extras a precios ACTUALES de config-reservas. Extraído tal cual de
+ * calcularPrecios (mismo resultado) para reusarlo en el panel admin al editar extras.
+ */
+export function calcularPrecioExtras(extras: Extras): number {
+  let precioExtras = 0
+  if (extras.adultosAdicionales > 0) {
+    precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
+  }
+  if (extras.mozoAdicional && extras.cantidadMozos > 0) {
+    precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
+  }
+  if (extras.personaje && extras.personajesSeleccionados.length > 0) {
+    precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
+  }
+  if (extras.animacion) {
+    precioExtras += PRECIOS.opcionales.animacion
+  }
+  if (extras.horaExtra) {
+    precioExtras += PRECIOS.opcionales.horaExtra
+  }
+  if (extras.robotLed === 1) {
+    precioExtras += PRECIOS.opcionales.robot_led.uno
+  } else if (extras.robotLed === 2) {
+    precioExtras += PRECIOS.opcionales.robot_led.dos
+  }
+  if (extras.zancosLed > 0) {
+    precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
+  }
+  if (extras.pileta) {
+    precioExtras += PRECIOS.opcionales.pileta.precio
+  }
+  return precioExtras
+}
+
 // reglasFecha queda `any` a propósito: obtenerReglasParaFecha/obtenerReglasEgresaditos
 // devuelven any (construyen sobre baseReglas: any). Tiparlas es un refactor aparte.
 export function calcularPrecios({
@@ -88,32 +123,7 @@ export function calcularPrecios({
     subtotal += precioTurno
   }
 
-  if (extras.adultosAdicionales > 0) {
-    precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
-  }
-  if (extras.mozoAdicional && extras.cantidadMozos > 0) {
-    precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
-  }
-  if (extras.personaje && extras.personajesSeleccionados.length > 0) {
-    precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
-  }
-  if (extras.animacion) {
-    precioExtras += PRECIOS.opcionales.animacion
-  }
-  if (extras.horaExtra) {
-    precioExtras += PRECIOS.opcionales.horaExtra
-  }
-  if (extras.robotLed === 1) {
-    precioExtras += PRECIOS.opcionales.robot_led.uno
-  } else if (extras.robotLed === 2) {
-    precioExtras += PRECIOS.opcionales.robot_led.dos
-  }
-  if (extras.zancosLed > 0) {
-    precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
-  }
-  if (extras.pileta) {
-    precioExtras += PRECIOS.opcionales.pileta.precio
-  }
+  precioExtras = calcularPrecioExtras(extras)
 
   subtotal += precioExtras
 

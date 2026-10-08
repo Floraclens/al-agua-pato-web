@@ -7,12 +7,15 @@ import { Loader2, Download, Share2, AlertTriangle, Sparkles, Palette, Calendar, 
 import Image from "next/image"
 import { toPng } from "html-to-image"
 import { Button } from "@/components/ui/button"
+import { horarioConHoraExtra } from "@/lib/turno"
 
 interface ReservaInfo {
   fecha: string
   turno: string
   nombre_cumpleanero: string
   edad_cumple: string
+  /** Lo calcula el RPC desde extras_elegidos. Puede venir undefined si el SQL todavía no se aplicó. */
+  hora_extra?: boolean
 }
 
 type TemaFondo = "clasico" | "cuadradoblanco" | "acuatico"
@@ -460,7 +463,9 @@ export default function InvitacionVIP() {
 
   // EXTRAER SOLO LA HORA (ej: si es "1er Turno(12 a 16)" saca "12 a 16")
   const matchHora = reserva.turno?.match(/\((.*?)\)/);
-  const horarioLimpio = matchHora ? matchHora[1].trim() : reserva.turno;
+  const horarioBase = matchHora ? matchHora[1].trim() : reserva.turno;
+  // Con hora extra contratada, la fiesta termina 1h más tarde (12 a 16 → 12 a 17)
+  const horarioLimpio = horarioConHoraExtra(horarioBase, reserva.hora_extra === true);
 
   const datosInvitacion: DatosInvitacion = {
     nombre: nombreLimpio,

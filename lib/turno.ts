@@ -17,3 +17,26 @@ export function precioTurnoKey(turno: NonNullable<Turno>): PrecioTurnoKey {
   if (turno === "segundo") return "segundo"
   return "lun_vie"
 }
+
+/**
+ * Suma 1 hora a la hora de FIN de un horario si la reserva tiene hora extra.
+ * Toma la última hora que aparece en el texto, así funciona con todos los
+ * formatos guardados: "1er Turno (12:00 - 16:00)", "12:00 a 16:00 hs", "12 a 16".
+ * Respeta el formato original (con o sin ":mm", con o sin cero adelante).
+ */
+export function horarioConHoraExtra(horario: string, horaExtra: boolean): string {
+  if (!horaExtra || !horario) return horario
+
+  const regex = /(\d{1,2})(?::(\d{2}))?/g
+  let ultima: RegExpExecArray | null = null
+  let m: RegExpExecArray | null
+  while ((m = regex.exec(horario)) !== null) ultima = m
+  if (!ultima) return horario
+
+  const [textoOriginal, horaStr, minutos] = ultima
+  const nuevaHora = (Number(horaStr) + 1) % 24
+  const horaFmt = horaStr.length === 2 ? String(nuevaHora).padStart(2, "0") : String(nuevaHora)
+  const reemplazo = minutos !== undefined ? `${horaFmt}:${minutos}` : horaFmt
+
+  return horario.slice(0, ultima.index) + reemplazo + horario.slice(ultima.index + textoOriginal.length)
+}

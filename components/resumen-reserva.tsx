@@ -22,6 +22,7 @@ import Image from "next/image"
 import type { MetodoPago, Extras, DatosCliente, Calculos } from "@/lib/reserva"
 import type { Turno } from "@/lib/turno"
 import { getTurnoLabel } from "@/lib/turno"
+import { extrasALabels } from "@/lib/extras"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { createBrowserClient } from "@/lib/supabase/client"
@@ -106,38 +107,8 @@ export function ResumenReserva({
     return () => { document.body.style.overflow = "unset" }
   }, [isSuccess])
 
-  const getSelectedExtrasLabels = useCallback(() => {
-    const labels: string[] = []
-    
-    if (extras.adultosAdicionales > 0) {
-      labels.push(`+${extras.adultosAdicionales} Adulto/s`)
-    }
-
-    if (extras.mozoAdicional && extras.cantidadMozos > 0) {
-      labels.push(`+${extras.cantidadMozos} Mozo/s`)
-    }
-
-    if (extras.animacion) labels.push("Animación")
-    if (extras.horaExtra) labels.push("Hora Extra")
-    
-    if (extras.robotLed > 0) {
-      labels.push(`Robot LED (x${extras.robotLed})`)
-    }
-    
-    if (extras.zancosLed > 0) {
-      labels.push(`Zancos LED (x${extras.zancosLed})`)
-    }
-    
-    if (extras.pileta) {
-      labels.push("Acceso a la Pileta")
-    }
-
-    if (extras.personaje && extras.personajesSeleccionados.length > 0) {
-      labels.push(`Personajes (${extras.personajesSeleccionados.join(", ")})`)
-    }
-
-    return labels
-  }, [extras])
+  // Formato de extras_elegidos centralizado en lib/extras.ts (lo lee también el panel admin)
+  const getSelectedExtrasLabels = useCallback(() => extrasALabels(extras), [extras])
 
   const selectedExtras = getSelectedExtrasLabels()
 
