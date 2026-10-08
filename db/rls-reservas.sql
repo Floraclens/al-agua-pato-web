@@ -4,9 +4,10 @@
 --  Aplicar MANUALMENTE en el SQL Editor de Supabase, por bloques.
 --  NO ejecutar todo de una: leé las notas de cada parte.
 --
---  Fuente de verdad de precios: lib/config-reservas.ts
---    -> Si cambian PRECIOS o PRECIOS_EGRESADITOS, actualizá
---       precio_base_minimo() en la PARTE 2.
+--  Fuente de verdad de precios: tabla public.precios (ver db/precios.sql).
+--    -> precio_base_minimo() y reserva_insert_valida() de la PARTE 2 fueron
+--       REEMPLAZADAS por las versiones de db/precios.sql, que leen la tabla.
+--       Las de abajo quedan como registro histórico (y sirven de rollback).
 --
 --  Supuestos de tipos de columna: `fecha` es DATE, `total`/`sena` numéricos.
 --    -> Si `fecha` es TEXT, usá `fecha::date` donde se le pasa a las funciones.
