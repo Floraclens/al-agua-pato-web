@@ -96,7 +96,7 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
   egresaditos: [
     {
       icono: "📅",
-      titulo: "Egresaditos",
+      titulo: "Primera etapa",
       fechas: "1 nov – 14 dic",
       fondo: "bg-violet-50",
       items: [
@@ -107,7 +107,7 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
     },
     {
       icono: "🔥",
-      titulo: "Egresaditos",
+      titulo: "Segunda etapa",
       fechas: "15 – 31 dic",
       fondo: "bg-orange-50",
       items: [
@@ -434,7 +434,7 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
               return (
                 <div key={`${sub.titulo}-${sub.fechas}`} className="border-b border-border/50 last:border-b-0">
                   <h4 className={`px-5 py-2.5 text-sm font-bold text-azul-marino ${sub.fondo}`}>
-                    {sub.icono} {sub.titulo} <span className="font-medium opacity-70 text-xs ml-1">· {sub.fechas}</span>
+                    {sub.icono} {sub.titulo} <span className="font-bold text-xs ml-1">· {sub.fechas}</span>
                   </h4>
                   <div className="divide-y divide-border/50">
                     {items.map(({ campo, etiqueta }) => renderCampo(campo, etiqueta))}
