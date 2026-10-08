@@ -11,6 +11,18 @@ casos y confirmar que el resultado es idéntico byte a byte.
 > tras el refactor y coincidieron caso por caso (18/18 checks OK). Para futuras verificaciones,
 > importar `calcularPrecios` directamente desde `lib/reserva.ts` en el caso I.
 
+> **Actualización "precios editables" (2026-10-08):** los precios ya no están en `lib/config-reservas.ts`
+> sino en la tabla `precios` de Supabase (`db/precios.sql`, `lib/precios.ts`); `obtenerReglasParaFecha`,
+> `obtenerReglasEgresaditos`, `calcularPrecioExtras` y `calcularPrecios` reciben los precios por parámetro.
+> Con los valores iniciales de la tabla (iguales a los de abajo) todos los casos A–J dan el mismo resultado:
+> se verificó con un script temporal (no commiteado) que lee los precios reales de Supabase con la anon key y
+> compara el código nuevo contra el de `main` anterior en las 1.460 combinaciones fecha×tipo de
+> 2026-01-01 a 2027-12-31 y en 350.400 combinaciones de `calcularPrecios` (turno × extras × método de pago ×
+> pago total), más los valores literales de este documento: 0 diferencias. **Los valores de abajo son los
+> vigentes al 2026-10-08; si la admin cambia un precio desde /admin, esta tabla deja de reflejar la base.**
+> Para re-verificar: importar `parsePrecios`/`cargarPrecios` de `lib/precios.ts` y pasar los precios a las
+> funciones de arriba.
+
 **Cómo se generó esta tabla:** NO se calculó a mano. Se escribió un script temporal
 (`_tmp_casos_referencia.mts`, borrado al terminar, nunca commiteado) que importa directamente las
 funciones y constantes reales exportadas por `lib/config-reservas.ts`

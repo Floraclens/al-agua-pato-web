@@ -8,7 +8,7 @@
  * (scripts de verificación) sin depender del alias @/ de tsconfig.
  */
 
-import { PRECIOS, VALOR_SENA, RECARGOS_Y_DESCUENTOS } from "./config-reservas"
+import type { Precios } from "./precios"
 import type { Turno } from "./turno"
 
 export type MetodoPago = "efectivo" | "transferencia" | "tarjeta" | null
@@ -52,36 +52,36 @@ export const formatMoneyUI = (amount: number) => {
 }
 
 /**
- * Precio de los extras a precios ACTUALES de config-reservas. Extraído tal cual de
+ * Precio de los extras a los precios VIGENTES (tabla `precios`). Extraído tal cual de
  * calcularPrecios (mismo resultado) para reusarlo en el panel admin al editar extras.
  */
-export function calcularPrecioExtras(extras: Extras): number {
+export function calcularPrecioExtras(extras: Extras, precios: Precios): number {
   let precioExtras = 0
   if (extras.adultosAdicionales > 0) {
-    precioExtras += extras.adultosAdicionales * PRECIOS.opcionales.adultosAdicionales
+    precioExtras += extras.adultosAdicionales * precios.adulto_adicional
   }
   if (extras.mozoAdicional && extras.cantidadMozos > 0) {
-    precioExtras += extras.cantidadMozos * PRECIOS.opcionales.mozoAdicional
+    precioExtras += extras.cantidadMozos * precios.mozo_adicional
   }
   if (extras.personaje && extras.personajesSeleccionados.length > 0) {
-    precioExtras += extras.personajesSeleccionados.length * PRECIOS.opcionales.personaje.precio_unidad
+    precioExtras += extras.personajesSeleccionados.length * precios.personaje
   }
   if (extras.animacion) {
-    precioExtras += PRECIOS.opcionales.animacion
+    precioExtras += precios.animacion
   }
   if (extras.horaExtra) {
-    precioExtras += PRECIOS.opcionales.horaExtra
+    precioExtras += precios.hora_extra
   }
   if (extras.robotLed === 1) {
-    precioExtras += PRECIOS.opcionales.robot_led.uno
+    precioExtras += precios.robot_led_1
   } else if (extras.robotLed === 2) {
-    precioExtras += PRECIOS.opcionales.robot_led.dos
+    precioExtras += precios.robot_led_2
   }
   if (extras.zancosLed > 0) {
-    precioExtras += extras.zancosLed * PRECIOS.opcionales.zancos_led.precio_unidad
+    precioExtras += extras.zancosLed * precios.zancos_led
   }
   if (extras.pileta) {
-    precioExtras += PRECIOS.opcionales.pileta.precio
+    precioExtras += precios.pileta
   }
   return precioExtras
 }
@@ -95,6 +95,7 @@ export function calcularPrecios({
   extras,
   metodoPago,
   pagoTotalidad,
+  precios,
 }: {
   selectedDate: Date | undefined
   selectedTurno: Turno
@@ -102,6 +103,7 @@ export function calcularPrecios({
   extras: Extras
   metodoPago: MetodoPago
   pagoTotalidad: boolean
+  precios: Precios
 }): Calculos {
   let subtotal = 0
   let precioTurno = 0
@@ -123,25 +125,25 @@ export function calcularPrecios({
     subtotal += precioTurno
   }
 
-  precioExtras = calcularPrecioExtras(extras)
+  precioExtras = calcularPrecioExtras(extras, precios)
 
   subtotal += precioExtras
 
   // LÓGICA DE DESCUENTO (Efectivo)
   if (metodoPago === "efectivo" && pagoTotalidad && subtotal > 0) {
-    descuento = subtotal * (RECARGOS_Y_DESCUENTOS.efectivo_totalidad_descuento_porcentaje / 100)
+    descuento = subtotal * (precios.descuento_efectivo_pct / 100)
   }
 
   // LÓGICA DE RECARGO (Tarjeta) — hoy el porcentaje es 0, pero la rama debe
-  // existir para cuando ese valor cambie en config-reservas.
+  // existir para cuando la admin cambie ese valor en /admin.
   if (metodoPago === "tarjeta" && subtotal > 0) {
-    recargo = subtotal * (RECARGOS_Y_DESCUENTOS.tarjeta_recargo_porcentaje / 100)
+    recargo = subtotal * (precios.recargo_tarjeta_pct / 100)
   }
 
   const total = subtotal - descuento + recargo
 
   // CORRECCIÓN LÓGICA DE SEÑA: La seña no recibe recargos. Se mantiene estática salvo que abonen la totalidad.
-  let senaFinal = VALOR_SENA
+  let senaFinal = precios.sena
 
   if (pagoTotalidad) {
     senaFinal = total

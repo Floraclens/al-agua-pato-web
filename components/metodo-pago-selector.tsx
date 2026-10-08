@@ -5,6 +5,7 @@ import { Banknote, Building2, CreditCard } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { MetodoPago } from "@/lib/reserva"
 import { cn } from "@/lib/utils"
+import { usePreciosListos } from "@/components/precios-provider"
 
 interface MetodoPagoSelectorProps {
   metodoPago: MetodoPago
@@ -46,6 +47,9 @@ export function MetodoPagoSelector({
   pagoTotalidad,
   onSelectPagoTotalidad
 }: MetodoPagoSelectorProps) {
+  const { precios } = usePreciosListos()
+  const descuentoPct = precios.descuento_efectivo_pct
+
   return (
     <div className="space-y-3">
       {metodos.map((metodo) => {
@@ -93,7 +97,7 @@ export function MetodoPagoSelector({
               </div>
             </button>
 
-            {/* DESPLEGABLE EFECTIVO: 10% OFF */}
+            {/* DESPLEGABLE EFECTIVO: descuento (%) editable desde /admin */}
             {isSelected && metodo.id === "efectivo" && (
               <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2 duration-300 pl-[4.5rem]">
                 <label className="flex items-start gap-3 cursor-pointer p-3 bg-white border border-verde/20 rounded-lg shadow-sm">
@@ -105,12 +109,16 @@ export function MetodoPagoSelector({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                       <span className="text-sm font-bold text-azul-marino">Abonar la totalidad ahora</span>
-                      <Badge className="bg-verde text-white text-[10px] font-bold px-1.5 py-0 uppercase tracking-wider">
-                        10% OFF
-                      </Badge>
+                      {descuentoPct > 0 && (
+                        <Badge className="bg-verde text-white text-[10px] font-bold px-1.5 py-0 uppercase tracking-wider">
+                          {descuentoPct}% OFF
+                        </Badge>
+                      )}
                     </div>
                     <span className="text-xs text-muted-foreground leading-snug">
-                      Accedé al descuento pagando el total hoy. Si no lo marcás, solo abonarás la seña sin descuento.
+                      {descuentoPct > 0
+                        ? "Accedé al descuento pagando el total hoy. Si no lo marcás, solo abonarás la seña sin descuento."
+                        : "Pagá el total hoy. Si no lo marcás, solo abonarás la seña."}
                     </span>
                   </div>
                 </label>
