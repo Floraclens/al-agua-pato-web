@@ -21,7 +21,7 @@ import {
 import Image from "next/image"
 import type { MetodoPago, Extras, DatosCliente, Calculos } from "@/lib/reserva"
 import type { Turno } from "@/lib/turno"
-import { getTurnoLabel } from "@/lib/turno"
+import { getTurnoLabel, horarioConHoraExtra } from "@/lib/turno"
 import { extrasALabels } from "@/lib/extras"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -112,6 +112,11 @@ export function ResumenReserva({
 
   const selectedExtras = getSelectedExtrasLabels()
 
+  // Horario para MOSTRAR (resumen, pantalla de éxito, WhatsApp): suma la hora extra al fin.
+  // Lo que se guarda en la base sigue siendo el turno base (getTurnoLabel): el admin y la
+  // invitación ya le suman la hora al leer.
+  const turnoMostrado = selectedTurno ? horarioConHoraExtra(getTurnoLabel(selectedTurno), extras.horaExtra) : null
+
   const handleReserva = useCallback(async () => {
     if (!canSubmit) {
       if (onSubmitAttempt) onSubmitAttempt()
@@ -175,8 +180,8 @@ export function ResumenReserva({
       const NUMERO_WHATSAPP_SALON = "5493854043737" 
       
       const fechaFormateada = format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })
-      const turnoLabel = getTurnoLabel(selectedTurno)
-      
+      const turnoLabel = horarioConHoraExtra(getTurnoLabel(selectedTurno), extras.horaExtra) + (extras.horaExtra ? " (incluye hora extra)" : "")
+
       let mensajeWhatsApp = ""
 
       if (isEgresadito) {
@@ -239,7 +244,7 @@ export function ResumenReserva({
       toast.error(`Error al procesar la reserva: ${msg}`)
       setIsSubmitting(false)
     }
-  }, [canSubmit, onSubmitAttempt, selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, pagoTotalidad, isEgresadito])
+  }, [canSubmit, onSubmitAttempt, selectedDate, selectedTurno, metodoPago, datosCliente, calculos.total, calculos.sena, selectedExtras, extras.horaExtra, pagoTotalidad, isEgresadito])
 
   if (isSuccess && selectedDate && selectedTurno) {
     return (
@@ -284,7 +289,7 @@ export function ResumenReserva({
                 </p>
                 <p className="text-sm flex justify-between">
                   <span className="font-semibold text-muted-foreground">Turno:</span> 
-                  <span className="font-bold text-azul-marino text-right">{getTurnoLabel(selectedTurno)}</span>
+                  <span className="font-bold text-azul-marino text-right">{turnoMostrado}</span>
                 </p>
                 <p className="text-sm flex justify-between">
                   <span className="font-semibold text-muted-foreground">A nombre de:</span> 
@@ -381,7 +386,7 @@ export function ResumenReserva({
             <div>
               <p className="text-xs text-muted-foreground">Turno</p>
               <p className="font-semibold text-azul-marino">
-                {selectedTurno ? getTurnoLabel(selectedTurno) : "Sin seleccionar"}
+                {turnoMostrado ?? "Sin seleccionar"}
               </p>
             </div>
           </div>
