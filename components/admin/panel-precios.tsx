@@ -54,6 +54,7 @@ interface Subseccion {
   icono: string
   titulo: string
   fechas: string
+  fondo: string // tono suave del encabezado, para distinguirlo de las filas de precios
   items: { clave: string; etiqueta: string }[]
 }
 
@@ -67,12 +68,14 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
       icono: "📅",
       titulo: "Temporada Baja",
       fechas: "1 abr – 31 ago",
+      fondo: "bg-sky-50",
       items: [{ clave: "baja", etiqueta: "Todos los días" }],
     },
     {
       icono: "⭐",
       titulo: "Temporada Media",
       fechas: "1 sep – 14 dic",
+      fondo: "bg-amber-50",
       items: [
         { clave: "media_lun_vie", etiqueta: "Lunes a viernes" },
         { clave: "media_turno_1", etiqueta: `${FIN_DE_SEMANA} · ${TURNO_1}` },
@@ -83,6 +86,7 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
       icono: "🔥",
       titulo: "Temporada Alta",
       fechas: "15 dic – 31 mar",
+      fondo: "bg-orange-50",
       items: [
         { clave: "alta_turno_1", etiqueta: TURNO_1 },
         { clave: "alta_turno_2", etiqueta: TURNO_2 },
@@ -94,6 +98,7 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
       icono: "📅",
       titulo: "Egresaditos",
       fechas: "1 nov – 14 dic",
+      fondo: "bg-violet-50",
       items: [
         { clave: "egre_nov_lun_vie", etiqueta: "Lunes a viernes" },
         { clave: "egre_nov_turno_1", etiqueta: `${FIN_DE_SEMANA} · ${TURNO_1}` },
@@ -104,6 +109,7 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
       icono: "🔥",
       titulo: "Egresaditos",
       fechas: "15 – 31 dic",
+      fondo: "bg-orange-50",
       items: [
         { clave: "egre_dic_turno_1", etiqueta: TURNO_1 },
         { clave: "egre_dic_turno_2", etiqueta: TURNO_2 },
@@ -116,13 +122,40 @@ const SUBSECCIONES: Record<string, Subseccion[]> = {
 const UMBRAL_CAMBIO_GRANDE = 30
 
 // Historial: se muestran pocos y se piden de a más (paginado en la consulta).
-const HISTORIAL_INICIAL = 5
+const HISTORIAL_INICIAL = 3
 const HISTORIAL_PAGINA = 20
 
 const pct = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1, signDisplay: "always" })
 
 function formatearValor(tipo: TipoPrecio, valor: number): string {
   return tipo === "porcentaje" ? `${valor}%` : formatMoneyUI(valor)
+}
+
+// --- Montos con puntos de miles en los inputs (1050000 → 1.050.000) ---
+
+function conPuntosDeMiles(digitos: string): string {
+  return digitos.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+}
+
+/**
+ * Da formato de miles a lo que se escribe en un campo de monto. Lo que no es un entero bien escrito
+ * (comas, letras, signos, decimales como "90000.5" o "250.00") se deja tal cual para que la validación
+ * lo marque en rojo: nunca se "arregla" en silencio un número que significa otra cosa.
+ */
+function formatearMontoEscrito(escrito: string, borrando: boolean): string {
+  if (escrito === "" || !/^[\d.]*$/.test(escrito)) return escrito
+  if (!borrando && escrito.includes(".")) {
+    // Al escribir/pegar, los puntos son separadores de miles solo si cada grupo que sigue a un punto tiene al menos
+    // 3 dígitos (puede tener más: es lo que pasa al agregar un dígito a "1.050"). Un grupo corto ("90000.5", "250.00",
+    // "1.") es un decimal o un tipeo a medias: se deja como está y la validación lo marca.
+    const [primero, ...resto] = escrito.split(".")
+    if (primero === "" || primero === "0" || resto.some((g) => g.length < 3)) return escrito
+  }
+  return conPuntosDeMiles(escrito.replace(/\./g, "").replace(/^0+(?=\d)/, ""))
+}
+
+function textoInicial(fila: FilaPrecio): string {
+  return fila.tipo === "monto" ? conPuntosDeMiles(String(fila.valor)) : String(fila.valor)
 }
 
 function variacion(anterior: number, nuevo: number): number {
@@ -204,7 +237,7 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
   const campos = useMemo(
     () =>
       filas.map((fila) => {
-        const texto = edits[fila.clave] ?? String(fila.valor)
+        const texto = edits[fila.clave] ?? textoInicial(fila)
         const r = validarValorPrecio(fila.tipo, texto)
         return {
           fila,
@@ -295,6 +328,32 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
     )
   }
 
+  const alEscribir = (fila: FilaPrecio, e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget
+    const escrito = input.value
+    if (fila.tipo !== "monto") {
+      setEdits((prev) => ({ ...prev, [fila.clave]: escrito }))
+      return
+    }
+    const inputType = (e.nativeEvent as InputEvent).inputType ?? ""
+    const formateado = formatearMontoEscrito(escrito, inputType.startsWith("delete"))
+    setEdits((prev) => ({ ...prev, [fila.clave]: formateado }))
+
+    // Al reformatear, el cursor saltaría al final: se lo deja después del mismo dígito en el que estaba.
+    if (formateado !== escrito) {
+      const digitosAntes = escrito.slice(0, input.selectionStart ?? escrito.length).replace(/\D/g, "").length
+      let pos = formateado.length
+      if (digitosAntes < formateado.replace(/\D/g, "").length) {
+        let vistos = 0
+        pos = 0
+        while (vistos < digitosAntes) if (/\d/.test(formateado[pos++])) vistos++
+      }
+      requestAnimationFrame(() => {
+        if (document.activeElement === input) input.setSelectionRange(pos, pos)
+      })
+    }
+  }
+
   const renderCampo = ({ fila, texto, error, nuevo }: (typeof campos)[number], etiqueta: string) => {
     const cambiado = nuevo !== null && nuevo !== fila.valor
     const esSena = fila.clave === "sena"
@@ -316,7 +375,7 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
               value={texto}
               disabled={guardando}
               aria-invalid={errorMostrado ? true : undefined}
-              onChange={(e) => setEdits((prev) => ({ ...prev, [fila.clave]: e.target.value }))}
+              onChange={(e) => alEscribir(fila, e)}
               className={`h-11 text-base font-bold text-right ${errorMostrado ? "border-red-500 focus-visible:ring-red-500/30" : ""}`}
             />
             {fila.tipo === "porcentaje" && <span className="font-bold text-slate-400">%</span>}
@@ -374,7 +433,7 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
               if (items.length === 0) return null
               return (
                 <div key={`${sub.titulo}-${sub.fechas}`} className="border-b border-border/50 last:border-b-0">
-                  <h4 className="px-5 pt-4 pb-2 text-sm font-bold text-azul-marino">
+                  <h4 className={`px-5 py-2.5 text-sm font-bold text-azul-marino ${sub.fondo}`}>
                     {sub.icono} {sub.titulo} <span className="font-medium opacity-70 text-xs ml-1">· {sub.fechas}</span>
                   </h4>
                   <div className="divide-y divide-border/50">
