@@ -47,8 +47,77 @@ const GRUPOS: { id: string; titulo: string }[] = [
   { id: "pagos", titulo: "Seña y pagos" },
 ]
 
+// Cumpleaños y egresaditos se muestran por sub-sección (temporada / período), con etiquetas cortas.
+// Es solo presentación: las claves y las etiquetas largas de la base (que usan el modal y el historial) no cambian.
+// Los íconos son los de /reservar y /egresaditos.
+interface Subseccion {
+  icono: string
+  titulo: string
+  fechas: string
+  items: { clave: string; etiqueta: string }[]
+}
+
+const TURNO_1 = "Turno 1 (12 a 16 hs)"
+const TURNO_2 = "Turno 2 (18:30 a 22:30 hs)"
+const FIN_DE_SEMANA = "Sáb, dom y feriados"
+
+const SUBSECCIONES: Record<string, Subseccion[]> = {
+  turnos: [
+    {
+      icono: "📅",
+      titulo: "Temporada Baja",
+      fechas: "1 abr – 31 ago",
+      items: [{ clave: "baja", etiqueta: "Todos los días" }],
+    },
+    {
+      icono: "⭐",
+      titulo: "Temporada Media",
+      fechas: "1 sep – 14 dic",
+      items: [
+        { clave: "media_lun_vie", etiqueta: "Lunes a viernes" },
+        { clave: "media_turno_1", etiqueta: `${FIN_DE_SEMANA} · ${TURNO_1}` },
+        { clave: "media_turno_2", etiqueta: `${FIN_DE_SEMANA} · ${TURNO_2}` },
+      ],
+    },
+    {
+      icono: "🔥",
+      titulo: "Temporada Alta",
+      fechas: "15 dic – 31 mar",
+      items: [
+        { clave: "alta_turno_1", etiqueta: TURNO_1 },
+        { clave: "alta_turno_2", etiqueta: TURNO_2 },
+      ],
+    },
+  ],
+  egresaditos: [
+    {
+      icono: "📅",
+      titulo: "Egresaditos",
+      fechas: "1 nov – 14 dic",
+      items: [
+        { clave: "egre_nov_lun_vie", etiqueta: "Lunes a viernes" },
+        { clave: "egre_nov_turno_1", etiqueta: `${FIN_DE_SEMANA} · ${TURNO_1}` },
+        { clave: "egre_nov_turno_2", etiqueta: `${FIN_DE_SEMANA} · ${TURNO_2}` },
+      ],
+    },
+    {
+      icono: "🔥",
+      titulo: "Egresaditos",
+      fechas: "15 – 31 dic",
+      items: [
+        { clave: "egre_dic_turno_1", etiqueta: TURNO_1 },
+        { clave: "egre_dic_turno_2", etiqueta: TURNO_2 },
+      ],
+    },
+  ],
+}
+
 // Cambios de más de este % en un monto se marcan como "revisá que no sea un error de tipeo".
 const UMBRAL_CAMBIO_GRANDE = 30
+
+// Historial: se muestran pocos y se piden de a más (paginado en la consulta).
+const HISTORIAL_INICIAL = 5
+const HISTORIAL_PAGINA = 20
 
 const pct = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1, signDisplay: "always" })
 
@@ -67,29 +136,64 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
   const [filas, setFilas] = useState<FilaPrecio[]>([])
   const [historial, setHistorial] = useState<FilaHistorial[]>([])
   const [cargando, setCargando] = useState(true)
+  const [hayMasHistorial, setHayMasHistorial] = useState(false)
+  const [cargandoMas, setCargandoMas] = useState(false)
   const [errorCarga, setErrorCarga] = useState(false)
   const [edits, setEdits] = useState<Record<string, string>>({})
   const [confirmando, setConfirmando] = useState(false)
   const [guardando, setGuardando] = useState(false)
 
-  const cargar = useCallback(async () => {
-    const [p, h] = await Promise.all([
-      supabase.from("precios").select("clave, valor, tipo, grupo, etiqueta, orden").order("orden"),
-      supabase
+  // Pide `cantidad` filas del historial desde `desde`, más una de sobra para saber si quedan más.
+  // Desempata por id: un guardado de varios precios comparte la misma fecha y sin esto la paginación se mezclaría.
+  const pedirHistorial = useCallback(
+    async (desde: number, cantidad: number) => {
+      const { data, error } = await supabase
         .from("precios_historial")
         .select("id, clave, valor_anterior, valor_nuevo, usuario_email, cambiado_en")
         .order("cambiado_en", { ascending: false })
-        .limit(50),
+        .order("id", { ascending: false })
+        .range(desde, desde + cantidad)
+      if (error || !data) return { error: error ?? new Error("sin datos") }
+      const filas: FilaHistorial[] = data
+        .slice(0, cantidad)
+        .map((f: any) => ({ ...f, valor_anterior: Number(f.valor_anterior), valor_nuevo: Number(f.valor_nuevo) }))
+      return { filas, hayMas: data.length > cantidad }
+    },
+    [supabase]
+  )
+
+  const cargar = useCallback(async () => {
+    const [p, h] = await Promise.all([
+      supabase.from("precios").select("clave, valor, tipo, grupo, etiqueta, orden").order("orden"),
+      pedirHistorial(0, HISTORIAL_INICIAL),
     ])
-    if (p.error || h.error || !p.data || !h.data) {
-      console.error("[precios] Error al cargar el panel:", p.error ?? h.error)
+    if (p.error || !p.data || "error" in h) {
+      console.error("[precios] Error al cargar el panel:", p.error ?? ("error" in h ? h.error : null))
       setErrorCarga(true)
       return
     }
     setFilas(p.data.map((f: any) => ({ ...f, valor: Number(f.valor) })))
-    setHistorial(h.data.map((f: any) => ({ ...f, valor_anterior: Number(f.valor_anterior), valor_nuevo: Number(f.valor_nuevo) })))
+    setHistorial(h.filas)
+    setHayMasHistorial(h.hayMas)
     setErrorCarga(false)
-  }, [supabase])
+  }, [supabase, pedirHistorial])
+
+  const verMasHistorial = async () => {
+    setCargandoMas(true)
+    const h = await pedirHistorial(historial.length, HISTORIAL_PAGINA)
+    if ("error" in h) {
+      console.error("[precios] Error al cargar más historial:", h.error)
+      toast.error("No se pudo cargar más historial.")
+    } else {
+      // Si entró un cambio nuevo mientras tanto, el corrimiento podría repetir filas: se descartan por id.
+      setHistorial((prev) => {
+        const ids = new Set(prev.map((x) => x.id))
+        return [...prev, ...h.filas.filter((x) => !ids.has(x.id))]
+      })
+      setHayMasHistorial(h.hayMas)
+    }
+    setCargandoMas(false)
+  }
 
   useEffect(() => {
     setCargando(true)
@@ -191,6 +295,51 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
     )
   }
 
+  const renderCampo = ({ fila, texto, error, nuevo }: (typeof campos)[number], etiqueta: string) => {
+    const cambiado = nuevo !== null && nuevo !== fila.valor
+    const esSena = fila.clave === "sena"
+    const esRecargo = fila.clave === "recargo_tarjeta_pct"
+    const errorMostrado = error ?? (esSena ? errorSena : null)
+    return (
+      <div key={fila.clave} className={`px-5 py-4 ${cambiado ? "bg-amarillo/10" : ""}`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <label htmlFor={`precio-${fila.clave}`} className="text-sm font-semibold text-slate-700 leading-snug">
+            {etiqueta}
+          </label>
+          <div className="flex items-center gap-2 sm:w-56 shrink-0">
+            {fila.tipo === "monto" && <span className="font-bold text-slate-400">$</span>}
+            <Input
+              id={`precio-${fila.clave}`}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={texto}
+              disabled={guardando}
+              aria-invalid={errorMostrado ? true : undefined}
+              onChange={(e) => setEdits((prev) => ({ ...prev, [fila.clave]: e.target.value }))}
+              className={`h-11 text-base font-bold text-right ${errorMostrado ? "border-red-500 focus-visible:ring-red-500/30" : ""}`}
+            />
+            {fila.tipo === "porcentaje" && <span className="font-bold text-slate-400">%</span>}
+          </div>
+        </div>
+
+        {cambiado && (
+          <p className="text-xs text-slate-500 mt-1.5 sm:text-right">Actual: {formatearValor(fila.tipo, fila.valor)}</p>
+        )}
+        {errorMostrado && <p className="text-xs font-semibold text-red-600 mt-1.5 sm:text-right">{errorMostrado}</p>}
+        {fila.tipo === "porcentaje" && !errorMostrado && (
+          <p className="text-xs text-slate-400 mt-1.5 sm:text-right">Entre 0 y {MAX_PORCENTAJE}.</p>
+        )}
+        {esRecargo && (
+          <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-2 mt-2 leading-snug">
+            En la web, la opción Tarjeta dice “hasta en 3 cuotas sin interés”. Si cargás un recargo mayor a 0, pasa a
+            decir “hasta en 3 cuotas (recargo X%)”.
+          </p>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 pb-28">
       <div className="bg-blue-50 border border-blue-200 text-blue-900 text-sm rounded-2xl p-4 flex gap-3">
@@ -204,61 +353,39 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
       {GRUPOS.map((grupo) => {
         const delGrupo = campos.filter((c) => c.fila.grupo === grupo.id)
         if (delGrupo.length === 0) return null
+
+        // Grupos con sub-secciones (cumpleaños, egresaditos): cada precio va bajo su temporada/período con etiqueta corta.
+        // Lo que no figure en SUBSECCIONES (una clave nueva en la base) se muestra al final con su etiqueta larga.
+        const subsecciones = SUBSECCIONES[grupo.id]
+        const porClave = new Map(delGrupo.map((c) => [c.fila.clave, c]))
+        const enSubsecciones = new Set((subsecciones ?? []).flatMap((s) => s.items.map((i) => i.clave)))
+        const sueltos = delGrupo.filter((c) => !enSubsecciones.has(c.fila.clave))
+
         return (
           <section key={grupo.id} className="bg-white rounded-3xl border border-border/50 shadow-sm overflow-hidden">
             <h3 className="px-5 py-4 font-extrabold text-azul-marino bg-slate-50/70 border-b border-border/50">
               {grupo.titulo}
             </h3>
-            <div className="divide-y divide-border/50">
-              {delGrupo.map(({ fila, texto, error, nuevo }) => {
-                const cambiado = nuevo !== null && nuevo !== fila.valor
-                const esSena = fila.clave === "sena"
-                const esRecargo = fila.clave === "recargo_tarjeta_pct"
-                const errorMostrado = error ?? (esSena ? errorSena : null)
-                return (
-                  <div key={fila.clave} className={`px-5 py-4 ${cambiado ? "bg-amarillo/10" : ""}`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <label htmlFor={`precio-${fila.clave}`} className="text-sm font-semibold text-slate-700 leading-snug">
-                        {fila.etiqueta}
-                      </label>
-                      <div className="flex items-center gap-2 sm:w-56 shrink-0">
-                        {fila.tipo === "monto" && <span className="font-bold text-slate-400">$</span>}
-                        <Input
-                          id={`precio-${fila.clave}`}
-                          type="text"
-                          inputMode="numeric"
-                          autoComplete="off"
-                          value={texto}
-                          disabled={guardando}
-                          aria-invalid={errorMostrado ? true : undefined}
-                          onChange={(e) => setEdits((prev) => ({ ...prev, [fila.clave]: e.target.value }))}
-                          className={`h-11 text-base font-bold text-right ${errorMostrado ? "border-red-500 focus-visible:ring-red-500/30" : ""}`}
-                        />
-                        {fila.tipo === "porcentaje" && <span className="font-bold text-slate-400">%</span>}
-                      </div>
-                    </div>
-
-                    {cambiado && (
-                      <p className="text-xs text-slate-500 mt-1.5 sm:text-right">
-                        Actual: {formatearValor(fila.tipo, fila.valor)}
-                      </p>
-                    )}
-                    {errorMostrado && (
-                      <p className="text-xs font-semibold text-red-600 mt-1.5 sm:text-right">{errorMostrado}</p>
-                    )}
-                    {fila.tipo === "porcentaje" && !errorMostrado && (
-                      <p className="text-xs text-slate-400 mt-1.5 sm:text-right">Entre 0 y {MAX_PORCENTAJE}.</p>
-                    )}
-                    {esRecargo && (
-                      <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-2 mt-2 leading-snug">
-                        En la web, la opción Tarjeta dice “hasta en 3 cuotas sin interés”. Si cargás un recargo mayor a 0,
-                        pasa a decir “hasta en 3 cuotas (recargo X%)”.
-                      </p>
-                    )}
+            {(subsecciones ?? []).map((sub) => {
+              const items = sub.items.flatMap((i) => {
+                const campo = porClave.get(i.clave)
+                return campo ? [{ campo, etiqueta: i.etiqueta }] : []
+              })
+              if (items.length === 0) return null
+              return (
+                <div key={`${sub.titulo}-${sub.fechas}`} className="border-b border-border/50 last:border-b-0">
+                  <h4 className="px-5 pt-4 pb-2 text-sm font-bold text-azul-marino">
+                    {sub.icono} {sub.titulo} <span className="font-medium opacity-70 text-xs ml-1">· {sub.fechas}</span>
+                  </h4>
+                  <div className="divide-y divide-border/50">
+                    {items.map(({ campo, etiqueta }) => renderCampo(campo, etiqueta))}
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
+            {sueltos.length > 0 && (
+              <div className="divide-y divide-border/50">{sueltos.map((c) => renderCampo(c, c.fila.etiqueta))}</div>
+            )}
           </section>
         )
       })}
@@ -291,6 +418,13 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
               )
             })}
           </ul>
+        )}
+        {hayMasHistorial && (
+          <div className="p-3 border-t border-border/50">
+            <Button variant="outline" className="h-11 w-full" disabled={cargandoMas} onClick={verMasHistorial}>
+              {cargandoMas ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ver más"}
+            </Button>
+          </div>
         )}
       </section>
 
