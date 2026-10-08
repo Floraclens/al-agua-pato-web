@@ -39,6 +39,7 @@ import { calcularPrecioExtras, type Extras } from "@/lib/reserva"
 import { textoAExtras, extrasATexto, tieneHoraExtra, EXTRAS_VACIOS } from "@/lib/extras"
 import { OPCIONALES_INFO } from "@/lib/config-reservas"
 import { PreciosProvider, usePrecios } from "@/components/precios-provider"
+import { PanelPrecios } from "@/components/admin/panel-precios"
 
 type FiltroEstado = "todas" | "pendiente" | "confirmadas" | "completadas"
 
@@ -69,6 +70,7 @@ function AdminContenido() {
   const [reservas, setReservas] = useState<any[]>([])
   const [isFetching, setIsFetching] = useState(true)
   const [filtroActivo, setFiltroActivo] = useState<FiltroEstado>("todas")
+  const [vista, setVista] = useState<"reservas" | "precios">("reservas")
 
   const [isCopied, setIsCopied] = useState(false)
 
@@ -440,8 +442,34 @@ function AdminContenido() {
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 mt-8 max-w-7xl">
-        
+      <div className="container mx-auto px-4 mt-6 max-w-7xl">
+        <div className="inline-flex gap-1 p-1 bg-slate-200/70 rounded-xl" role="tablist">
+          <button
+            role="tab"
+            aria-selected={vista === "reservas"}
+            onClick={() => setVista("reservas")}
+            className={`min-h-11 px-5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${vista === "reservas" ? "bg-white text-azul-marino shadow-sm" : "text-slate-500 hover:text-azul-marino"}`}
+          >
+            <Calendar className="w-4 h-4" /> Reservas
+          </button>
+          <button
+            role="tab"
+            aria-selected={vista === "precios"}
+            onClick={() => setVista("precios")}
+            className={`min-h-11 px-5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all ${vista === "precios" ? "bg-white text-azul-marino shadow-sm" : "text-slate-500 hover:text-azul-marino"}`}
+          >
+            <DollarSign className="w-4 h-4" /> Precios
+          </button>
+        </div>
+      </div>
+
+      {vista === "precios" ? (
+        <div className="container mx-auto px-4 mt-6 max-w-3xl">
+          <PanelPrecios supabase={supabase} />
+        </div>
+      ) : (
+      <div className="container mx-auto px-4 mt-6 max-w-7xl">
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-5 rounded-2xl border border-border/50 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
@@ -716,6 +744,7 @@ function AdminContenido() {
           </div>
         )}
       </div>
+      )}
 
       {/* --- MODAL PARA REPROGRAMAR CON CALENDARIO INTERACTIVO --- */}
       {modalReprogramar && (
@@ -810,6 +839,9 @@ function AdminContenido() {
                     {calculoExtras.diferencia > 0 ? "+" : ""}{formatMoney(calculoExtras.diferencia)}
                   </span>
                 </div>
+                <p className="text-xs text-slate-500 leading-snug">
+                  La diferencia se calcula con los <strong>precios actuales</strong> de cada extra, no con los de cuando se hizo la reserva.
+                </p>
                 <div className="flex justify-between text-sm border-t border-slate-200 pt-2">
                   <span className="text-slate-600 font-medium">Total sugerido</span>
                   <span className="font-bold text-azul-marino">{formatMoney(calculoExtras.totalSugerido)}</span>
