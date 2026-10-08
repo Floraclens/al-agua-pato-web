@@ -14,6 +14,12 @@ interface MetodoPagoSelectorProps {
   onSelectPagoTotalidad: (val: boolean) => void
 }
 
+// Con recargo > 0 (editable desde /admin) ya no son cuotas "sin interés". Con 0 el texto queda como siempre.
+function descripcionTarjeta(recargoPct: number): string {
+  const cuotas = recargoPct > 0 ? `(recargo ${recargoPct}%)` : "sin interés"
+  return `Solo tarjetas bancarizadas hasta en 3 cuotas ${cuotas} (Hasta el 31/08)`
+}
+
 const metodos = [
   {
     id: "efectivo" as const,
@@ -34,7 +40,7 @@ const metodos = [
   {
     id: "tarjeta" as const,
     titulo: "Tarjeta",
-    descripcion: "Solo tarjetas bancarizadas hasta en 3 cuotas sin interés (Hasta el 31/08)",
+    descripcion: descripcionTarjeta(0),
     icon: CreditCard,
     color: "text-lavanda",
     bgColor: "bg-lavanda/10",
@@ -92,7 +98,7 @@ export function MetodoPagoSelector({
               <div className="flex-1">
                 <h4 className="font-bold text-azul-marino mb-0.5">{metodo.titulo}</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metodo.descripcion}
+                  {metodo.id === "tarjeta" ? descripcionTarjeta(precios.recargo_tarjeta_pct) : metodo.descripcion}
                 </p>
               </div>
             </button>

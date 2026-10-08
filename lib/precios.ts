@@ -93,6 +93,36 @@ export async function cargarPrecios(supabase: SupabaseClient): Promise<Precios> 
   return parsePrecios(data)
 }
 
+export type TipoPrecio = "monto" | "porcentaje"
+
+export const MAX_PORCENTAJE = 50
+
+// Enteros: "250000" o con puntos como separador de miles bien formado ("250.000", "1.250.000").
+// Un punto que no separa grupos de 3 dígitos ("90.5", "250.00") es un decimal y se rechaza.
+const REGEX_ENTERO = /^(\d+|[1-9]\d{0,2}(\.\d{3})+)$/
+
+/**
+ * Validación de lo que escribe la admin en el panel de precios. Espeja los CHECK de la base
+ * (db/precios.sql): entero; monto > 0; porcentaje 0–50. La base es la barrera final; esto
+ * es para avisar antes, campo por campo. Acepta puntos como separador de miles; rechaza
+ * comas, decimales y signos.
+ */
+export function validarValorPrecio(tipo: TipoPrecio, texto: string): { valor: number } | { error: string } {
+  const t = texto.trim()
+  if (t === "") return { error: "Ingresá un valor." }
+  if (!REGEX_ENTERO.test(t)) return { error: "Solo números enteros: sin comas, decimales ni signos (los puntos de miles sí)." }
+  const valor = Number(t.replace(/\./g, ""))
+  if (!Number.isSafeInteger(valor)) return { error: "El número es demasiado grande." }
+  if (tipo === "monto" && valor <= 0) return { error: "Tiene que ser mayor a 0." }
+  if (tipo === "porcentaje" && valor > MAX_PORCENTAJE) return { error: `Máximo ${MAX_PORCENTAJE}%.` }
+  return { valor }
+}
+
+/** La seña tiene que ser menor que el turno más barato (si no, ninguna reserva con seña sería válida). */
+export function senaEsValida(sena: number, minimoTurno: number): boolean {
+  return sena < minimoTurno
+}
+
 export function preciosIguales(a: Precios, b: Precios): boolean {
   return CLAVES_PRECIOS.every((clave) => a[clave] === b[clave])
 }
