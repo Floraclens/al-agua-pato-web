@@ -5,7 +5,7 @@ Sistema de reservas online para eventos de cumpleaños/egresados con actividades
 **Stack**: Next.js 16.2.4 (App Router) + React 19 + TypeScript + Tailwind v4 + Supabase (auth + DB) + Vercel (deploy automático).
 **Repo**: `Floraclens/al-agua-pato-web`
 
-> Nota: no existen migraciones SQL ni tipos generados de Supabase en el repo. El esquema de la base de datos documentado abajo está **inferido del código** (queries `supabase.from(...)`), no de un schema oficial.
+> Nota: no hay tipos generados de Supabase. Los cambios de base van como SQL en `db/` y se aplican **a mano en el SQL Editor** de Supabase (cada archivo trae su verificación y su reversa). El esquema de abajo se infirió del código; los permisos (§5, RLS) se leyeron en producción el 22/10/2026.
 
 ---
 
@@ -61,7 +61,7 @@ No hay rutas bajo `app/api/`: toda la persistencia se hace directo desde el nave
 
 ## 5. Base de datos Supabase (inferida del código)
 
-⚠️ No hay migraciones SQL, tipos generados ni definición de RLS en el repo. Esto es lo que se pudo inferir de las queries.
+Columnas inferidas de las queries. Los cambios aplicados están en `db/` (ver RLS abajo).
 
 ### Tabla `reservas`
 
@@ -81,10 +81,15 @@ No hay rutas bajo `app/api/`: toda la persistencia se hace directo desde el nave
 | `edad_cumple` | texto \| null | en egresaditos: `"Turno: {turno_colegio}"` |
 | `estado` | texto | `"pendiente"` (default), `"senado"` (legado: `"confirmada"`), `"completado"` |
 
-No hay tabla de perfiles/roles visible; la autenticación admin usa **Supabase Auth** directamente (un único usuario, login `{usuario}@alaguapato.com`).
+La autenticación admin usa **Supabase Auth** (2 cuentas `@alaguapato.com`, creadas a mano; registro y acceso anónimo apagados). Quién es admin lo dice la tabla `private.admins` (ver RLS).
 
 ### RLS
-No se puede confirmar desde el código. Dado que INSERT/SELECT ocurren sin sesión desde `/reservar` y `/egresaditos`, es probable que la tabla tenga RLS deshabilitado o políticas públicas de lectura/escritura — **conviene verificar directamente en el dashboard de Supabase**.
+Leído en producción el 22/10/2026 (después de `db/p1-13-splinter.sql`):
+- **Visitantes (`anon`)**: crean reservas solo si pasan `reserva_insert_valida()` (estado pendiente, piso de precio, seña, formato). Ven solo `id, fecha, turno` (calendario). No pueden modificar ni borrar.
+- **Usuarios con sesión**: el mismo alta validada (caso «admin logueada en otra pestaña»). Modificar y borrar reservas, y cambiar precios, **solo si son admin** (`private.es_admin()`, que mira `private.admins`).
+- **`private.admins`**: schema `private`, fuera de la API; RLS activo, sin políticas y sin permisos para `anon`/`authenticated`. Para agregar un admin: `INSERT INTO private.admins (user_id) SELECT id FROM auth.users WHERE email = '...';` en el SQL Editor.
+- **Invitaciones**: `get_invitacion(token)` (permanente) y `get_invitacion_by_id(id)` (temporal, solo fiestas de hoy en adelante; se borra desde el 14/12/2026).
+- Historial: `db/rls-reservas.sql`, `db/precios.sql`, `db/invitacion-hora-extra.sql`, `db/p1-13-splinter.sql` (+ `-reversa`).
 
 ---
 
