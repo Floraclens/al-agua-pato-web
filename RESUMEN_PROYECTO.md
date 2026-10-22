@@ -87,7 +87,7 @@ La autenticación admin usa **Supabase Auth** (2 cuentas `@alaguapato.com`, crea
 Leído en producción el 22/10/2026 (después de `db/p1-13-splinter.sql`):
 - **Visitantes (`anon`)**: crean reservas solo si pasan `reserva_insert_valida()` (estado pendiente, piso de precio, seña, formato). Ven solo `id, fecha, turno` (calendario). No pueden modificar ni borrar.
 - **Usuarios con sesión**: el mismo alta validada (caso «admin logueada en otra pestaña»). Modificar y borrar reservas, y cambiar precios, **solo si son admin** (`private.es_admin()`, que mira `private.admins`).
-- **`private.admins`**: schema `private`, fuera de la API; RLS activo, sin políticas y sin permisos para `anon`/`authenticated`. Para agregar un admin: `INSERT INTO private.admins (user_id) SELECT id FROM auth.users WHERE email = '...';` en el SQL Editor.
+- **`private.admins`**: schema `private`, fuera de la API; RLS activo, una sola regla explícita «nadie por la API» (`USING (false)`) y sin permisos para `anon`/`authenticated`. Para agregar un admin: `INSERT INTO private.admins (user_id) SELECT id FROM auth.users WHERE email = '...';` en el SQL Editor.
 - **Invitaciones**: `get_invitacion(token)` (permanente) y `get_invitacion_by_id(id)` (temporal, solo fiestas de hoy en adelante; se borra desde el 14/12/2026).
 - Historial: `db/rls-reservas.sql`, `db/precios.sql`, `db/invitacion-hora-extra.sql`, `db/p1-13-splinter.sql` (+ `-reversa`).
 
@@ -123,3 +123,15 @@ No hay `.env.example` en el repo. Variables detectadas por uso en código:
 - **UI**: Radix UI, `lucide-react`, Tailwind v4, `sonner`, `vaul`, `embla-carousel-react`, `recharts` (sin uso evidente), `cmdk`
 - **Analítica**: `@vercel/analytics`
 - **Sin integrar**: pasarela de pago (Mercado Pago/Stripe) y envío de emails (Resend/SendGrid/etc.)
+
+---
+
+## 8. Estado y pendientes (actualizado 22/10/2026)
+
+- **Último cambio:** P1 #13 (Splinter) aplicado en producción el 22/10/2026 (`db/p1-13-splinter.sql`, commits `38ff9dd` + merge `a9abafa`). Security Advisor después: 0 errores, 5 avisos, 0 info. Los 4 avisos de `get_invitacion` / `get_invitacion_by_id` (visitantes y usuarios) están **aceptados**: son públicas a propósito.
+- **Pendientes:**
+  - Borrar `get_invitacion_by_id` y la rama numérica de `app/invitacion/[id]/page.tsx` desde el 14/12/2026 — DECIDIDO (ver `db/rls-reservas.sql`, CLEANUP).
+  - Leaked Password Protection (aviso del linter): en KREW se vio que solo existe en el plan Pro — SIN DEFINIR.
+  - SELECT de `reservas` y de `precios_historial` para usuarios con sesión sigue en `true` (hoy todos los usuarios son admin) — PROPUESTA: pasarlo a `es_admin()` si algún día hay usuarios que no sean admin.
+  - `authenticated` conserva TRUNCATE, REFERENCES, TRIGGER y MAINTAIN en `reservas` (la API no los expone) — PROPUESTA.
+
