@@ -29,6 +29,11 @@ import { createBrowserClient } from "@/lib/supabase/client"
 import { preciosIguales } from "@/lib/precios"
 import { WHATSAPP_SALON } from "@/lib/config-reservas"
 import { usePreciosListos } from "@/components/precios-provider"
+import { PrecioSinImpuestos } from "@/components/precio-sin-impuestos"
+import { CondicionesReserva } from "@/components/condiciones-reserva"
+import { condicionesParaWhatsApp } from "@/lib/condiciones"
+import { SITIO_URL } from "@/lib/datos-titular"
+import Link from "next/link"
 
 interface ResumenReservaProps {
   selectedDate: Date | undefined
@@ -231,6 +236,8 @@ export function ResumenReserva({
 ☀️ Turno: ${datosCliente.turno_colegio}
 👤 A nombre de: ${datosCliente.nombre}
 
+${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
+
 *(ID interno de reserva: ${reservaId})*
 
 ¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
@@ -251,6 +258,8 @@ export function ResumenReserva({
 *Mis datos:*
 👤 A nombre de: ${datosCliente.nombre}
 🎂 Cumpleañero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " añitos" : "-"})
+
+${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
 
 *(ID interno de reserva: ${reservaId})*
 
@@ -325,15 +334,19 @@ export function ResumenReserva({
               </div>
               <Separator className="my-4 border-dashed border-slate-300 relative z-10" />
               <div className="relative z-10">
-                <p className="text-sm flex justify-between items-center mb-3">
-                  <span className="font-semibold text-muted-foreground">Total:</span> 
-                  <span className="font-bold text-lg text-azul-marino">{formatPrice(calculos.total)}</span>
-                </p>
+                <div className="mb-3">
+                  <p className="text-sm flex justify-between items-center">
+                    <span className="font-semibold text-muted-foreground">Total:</span> 
+                    <span className="font-bold text-lg text-azul-marino">{formatPrice(calculos.total)}</span>
+                  </p>
+                  <PrecioSinImpuestos monto={calculos.total} className="text-right" />
+                </div>
                 <div className="bg-gradient-to-r from-amarillo/20 to-amarillo/10 p-4 rounded-xl border border-amarillo/30">
                   <p className="text-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 text-azul-marino">
                     <span className="font-bold">{pagoTotalidad ? "Monto a transferir ahora:" : "Seña a transferir:"}</span> 
                     <span className="font-extrabold text-2xl text-azul-marino">{formatPrice(calculos.sena)}</span>
                   </p>
+                  <PrecioSinImpuestos monto={calculos.sena} className="sm:text-right" />
                 </div>
               </div>
             </div>
@@ -347,6 +360,17 @@ export function ResumenReserva({
                 <MessageCircle className="w-6 h-6 mr-2" /> 
                 1. Enviar comprobante
               </a>
+            </div>
+            <div className="border-2 border-azul-marino/30 rounded-xl p-4 mb-6 text-left text-[13px] leading-snug text-slate-700">
+              <p className="font-extrabold text-azul-marino mb-1">Condiciones de tu reserva</p>
+              <p>
+                <strong>DERECHO DE REVOCACIÓN:</strong> podés revocar la reserva dentro de los 10 días corridos, sin costo:
+                te devolvemos el 100 % de la seña. Pasado ese plazo, si cancelás, la seña se pierde; podés reprogramar para
+                las fechas siguientes disponibles y la seña queda a cuenta.
+              </p>
+              <Link href="/condiciones" target="_blank" className="inline-flex items-center min-h-11 font-bold text-azul-marino underline underline-offset-2">
+                Ver las condiciones completas
+              </Link>
             </div>
             <div className="bg-azul-claro/10 border border-azul-claro/20 rounded-xl p-5 mb-8 text-left shadow-sm">
               <div className="flex items-start gap-3">
@@ -514,8 +538,9 @@ export function ResumenReserva({
 
         <div className="flex justify-between items-center mb-6">
           <span className="text-lg font-bold text-azul-marino">TOTAL</span>
-          <span className="text-3xl font-extrabold text-azul-marino">
+          <span className="text-3xl font-extrabold text-azul-marino text-right">
             {formatPrice(calculos.total)}
+            <PrecioSinImpuestos monto={calculos.total} />
           </span>
         </div>
 
@@ -528,8 +553,11 @@ export function ResumenReserva({
           <p className="text-2xl font-extrabold text-azul-marino">
             {formatPrice(calculos.sena)}
           </p>
+          <PrecioSinImpuestos monto={calculos.sena} />
           {/* SE ELIMINÓ EL MENSAJE DE RECARGO DE LA SEÑA ACÁ */}
         </div>
+
+        <CondicionesReserva sena={pagoTotalidad ? undefined : formatPrice(calculos.sena)} className="mb-4" />
 
         <Button
           type="button"
@@ -552,7 +580,7 @@ export function ResumenReserva({
           <div className="flex items-start gap-2 text-sm bg-azul-claro/10 p-3 rounded-lg">
             <CalendarDays className="w-4 h-4 shrink-0 mt-0.5 text-azul-claro" />
             <p className="text-azul-marino">
-              <span className="font-semibold">Cancelación:</span> El evento se debe cancelar (abonar la totalidad) 1 semana antes del evento.
+              <span className="font-semibold">Saldo:</span> La totalidad se abona hasta 1 semana antes del evento.
             </p>
           </div>
           <div className="flex items-start gap-2 text-sm bg-lavanda/10 p-3 rounded-lg">
@@ -582,6 +610,7 @@ export function ResumenReserva({
             <span className="text-xl font-extrabold text-azul-marino leading-none mt-1">
               {formatPrice(calculos.total)}
             </span>
+            <PrecioSinImpuestos monto={calculos.total} className="mt-0.5 text-[9px]" />
           </div>
           <Button
             type="button"

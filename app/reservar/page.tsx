@@ -5,7 +5,11 @@ import { ExtrasSelector } from "@/components/extras-selector"
 import { MetodoPagoSelector } from "@/components/metodo-pago-selector"
 import { ResumenReserva } from "@/components/resumen-reserva"
 import { LogoWatermark } from "@/components/logo-watermark"
-import { Info, ArrowLeft, PartyPopper, MessageCircle, Lock, ChevronDown, AlertCircle } from "lucide-react"
+import { Info, ArrowLeft, PartyPopper, MessageCircle, ChevronDown, AlertCircle } from "lucide-react"
+import { PrecioSinImpuestos } from "@/components/precio-sin-impuestos"
+import { AvisoPrivacidad } from "@/components/aviso-privacidad"
+import { FranjaArrepentimiento } from "@/components/link-arrepentimiento"
+import { PieLegal } from "@/components/pie-legal"
 import { usePreciosListos } from "@/components/precios-provider"
 import { formatMoneyUI } from "@/lib/reserva"
 import { useReserva } from "@/hooks/use-reserva"
@@ -38,9 +42,10 @@ export default function PaginaReserva() {
   } = useReserva(false)
 
   return (
-    <main className="relative isolate min-h-screen bg-slate-50/30 font-sans pb-16">
+    <main className="relative isolate min-h-screen bg-slate-50/30 font-sans">
       <LogoWatermark />
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 shadow-sm">
+        <FranjaArrepentimiento />
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="inline-flex items-center gap-2 text-azul-marino font-bold hover:text-azul-marino/80 transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -86,6 +91,7 @@ export default function PaginaReserva() {
                         <li>
                           <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.baja)}</span>
                           <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2 relative -top-0.5">Costo Fijo</span>
+                          <PrecioSinImpuestos monto={precios.baja} />
                         </li>
                         <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
                         <li>🕒 <strong className="text-slate-800">4 horas a elección</strong> (12:00 a 19:00 hs).</li>
@@ -107,7 +113,7 @@ export default function PaginaReserva() {
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/12!</strong>
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/12/2026!</strong>
                         Abonando la seña hoy, congelás el precio. <br/> 
                         <span className="opacity-80 italic">(Precio sujeto a actualización)</span>
                       </p>
@@ -116,7 +122,7 @@ export default function PaginaReserva() {
                     <div className="block mb-5">
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Lunes a Viernes:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
-                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_lun_vie)}</span></li>
+                        <li><span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_lun_vie)}</span><PrecioSinImpuestos monto={precios.media_lun_vie} /></li>
                         <li>✨ <strong className="text-slate-800">Exclusividad total:</strong> Solo 1 evento por día.</li>
                         <li>🕒 <strong className="text-slate-800">4 horas a elección</strong> (12:00 a 22:30 hs).</li>
                       </ul>
@@ -127,8 +133,8 @@ export default function PaginaReserva() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Sábados, Domingos y Feriados:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
-                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_turno_1)}</span></li>
-                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_turno_2)}</span></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_turno_1)}</span><PrecioSinImpuestos monto={precios.media_turno_1} /></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.media_turno_2)}</span><PrecioSinImpuestos monto={precios.media_turno_2} /></li>
                       </ul>
                     </div>
 
@@ -146,7 +152,7 @@ export default function PaginaReserva() {
                     <div className="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                       <p className="text-[13px] text-orange-900 leading-snug">
-                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/12!</strong>
+                        <strong className="block text-orange-700 mb-0.5 uppercase tracking-wide text-xs">¡Precios congelados hasta el 31/12/2026!</strong>
                         Abonando la seña hoy, congelás el precio. <br/> 
                         <span className="opacity-80 italic">(Precio sujeto a actualización)</span>
                       </p>
@@ -156,8 +162,8 @@ export default function PaginaReserva() {
                       <div className="inline-block bg-lavanda/20 text-azul-marino font-bold px-3 py-1.5 rounded-lg text-xs md:text-sm border border-lavanda/30 shadow-sm mb-3">Todos los días:</div>
                       <ul className="list-disc pl-4 space-y-2 text-sm text-slate-700">
                         <li>🗓️ <strong className="text-slate-800">2 turnos disponibles por día.</strong></li>
-                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.alta_turno_1)}</span></li>
-                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.alta_turno_2)}</span></li>
+                        <li><strong className="text-slate-800">Turno 1 (12:00 a 16:00 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.alta_turno_1)}</span><PrecioSinImpuestos monto={precios.alta_turno_1} /></li>
+                        <li><strong className="text-slate-800">Turno 2 (18:30 a 22:30 hs):</strong> <span className="font-extrabold text-azul-marino">{formatMoneyUI(precios.alta_turno_2)}</span><PrecioSinImpuestos monto={precios.alta_turno_2} /></li>
                       </ul>
                     </div>
 
@@ -219,18 +225,14 @@ export default function PaginaReserva() {
                   <input id="reserva-telefono" type="tel" inputMode="numeric" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: 3843123456" value={datosCliente.telefono} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, telefono: soloNumeros}); if(showErrors) setShowErrors(false) }} />
                   {(showErrors || datosCliente.telefono) && !isValidPhone(datosCliente.telefono) ? (
                     <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá un número válido (Mínimo 10 dígitos).</p>
-                  ) : (
-                    <p className="text-[13px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> Solo para enviarte tu confirmación.</p>
-                  )}
+                  ) : null}
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label htmlFor="reserva-email" className="text-sm font-bold text-azul-marino">Email *</label>
                   <input id="reserva-email" type="email" className={`flex h-11 w-full rounded-lg border bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors ${(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20" : "border-input focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20"}`} placeholder="Ej: maria@email.com" value={datosCliente.email} onChange={(e) => { setDatosCliente({...datosCliente, email: e.target.value}); if(showErrors) setShowErrors(false) }} />
                   {(showErrors || datosCliente.email) && !isValidEmail(datosCliente.email) ? (
                     <p className="text-[13px] text-red-500 font-semibold mt-1">Ingresá un correo electrónico válido.</p>
-                  ) : (
-                    <p className="text-[13px] text-muted-foreground flex items-center gap-1 mt-1"><Lock className="w-3 h-3" /> 100% privado. Sin spam.</p>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -243,6 +245,7 @@ export default function PaginaReserva() {
                   <input id="reserva-edad-cumple" type="text" inputMode="numeric" maxLength={2} className="flex h-11 w-full rounded-lg border border-input bg-slate-50 px-3 py-2 text-base md:text-sm outline-none transition-colors focus:border-azul-marino focus:ring-2 focus:ring-azul-marino/20" placeholder="Ej: 5" value={datosCliente.edadCumple} onChange={(e) => { const soloNumeros = e.target.value.replace(/\D/g, ""); setDatosCliente({...datosCliente, edadCumple: soloNumeros}); }} />
                 </div>
               </div>
+              <AvisoPrivacidad datos="nombre, teléfono, email, nombre y edad del cumpleañero/a, fecha y servicios elegidos" />
             </section>
 
             <section className={`bg-white rounded-3xl p-6 shadow-sm border ${showErrors && !metodoPago ? "border-red-400 error-field ring-4 ring-red-500/10" : "border-border/50"} transition-all`}>
@@ -258,7 +261,7 @@ export default function PaginaReserva() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-[100px]">
+            <div className="lg:sticky lg:top-[132px]">
               <ResumenReserva
                 selectedDate={selectedDate}
                 selectedTurno={selectedTurno}
@@ -279,6 +282,9 @@ export default function PaginaReserva() {
         <MessageCircle className="w-6 h-6 lg:w-7 lg:h-7" />
         <span className="absolute right-full mr-4 bg-white text-slate-800 text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">¿Dudas con tu reserva?</span>
       </a>
+      <div className="mt-16 bg-[#040A12] pb-36 lg:pb-0">
+        <PieLegal />
+      </div>
     </main>
   )
 }

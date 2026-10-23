@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { formatMoneyUI } from "@/lib/reserva"
 import { MAX_PORCENTAJE, senaEsValida, validarValorPrecio, type TipoPrecio } from "@/lib/precios"
 import { usePrecios } from "@/components/precios-provider"
+import { TextoTarjeta } from "@/components/admin/texto-tarjeta"
 
 interface FilaPrecio {
   clave: string
@@ -391,8 +392,8 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
         )}
         {esRecargo && (
           <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-2 mt-2 leading-snug">
-            En la web, la opción Tarjeta dice “Solo tarjetas bancarizadas”. Si cargás un recargo mayor a 0, pasa a
-            decir “Solo tarjetas bancarizadas (recargo X%)”.
+            En la web, la opción Tarjeta muestra el texto que escribís más abajo («Texto de la opción Tarjeta»). Si
+            cargás un recargo mayor a 0, se le agrega “(recargo X%)”.
           </p>
         )}
       </div>
@@ -448,6 +449,8 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
           </section>
         )
       })}
+
+      <TextoTarjeta supabase={supabase} />
 
       <section className="bg-white rounded-3xl border border-border/50 shadow-sm overflow-hidden">
         <h3 className="px-5 py-4 font-extrabold text-azul-marino bg-slate-50/70 border-b border-border/50 flex items-center gap-2">

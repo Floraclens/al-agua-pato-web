@@ -15,6 +15,9 @@ import {
   Instagram, Facebook 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { FranjaArrepentimiento } from "@/components/link-arrepentimiento"
+import { PieLegal } from "@/components/pie-legal"
+import { MAPS_URL } from "@/lib/datos-titular"
 import {
   Accordion,
   AccordionContent,
@@ -111,6 +114,7 @@ export default function LandingPage() {
         <LogoWatermark />
 
         <header className="bg-white/90 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 shadow-sm">
+          <FranjaArrepentimiento />
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
@@ -126,7 +130,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3 md:gap-4">
-                <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border-2 border-azul-marino text-azul-marino hover:bg-azul-marino hover:text-white transition-all duration-200 font-bold text-xs md:text-sm rounded-full shadow-sm hover:shadow-md active:scale-95">
+                <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border-2 border-azul-marino text-azul-marino hover:bg-azul-marino hover:text-white transition-all duration-200 font-bold text-xs md:text-sm rounded-full shadow-sm hover:shadow-md active:scale-95">
                   <MapPin className="h-4 w-4" />
                   <span className="hidden sm:inline">Ver en Maps</span>
                   <span className="sm:hidden">Ubicación</span>
@@ -203,7 +207,7 @@ export default function LandingPage() {
                   
                   <div className="flex flex-col">
                     <p className="text-base md:text-[1.15rem] font-bold text-white leading-snug drop-shadow-md">
-                      Precios congelados hasta el <strong className="text-transparent bg-clip-text bg-gradient-to-r from-rosa to-lavanda font-black tracking-tight text-xl">31/12</strong>
+                      Precios congelados hasta el <strong className="text-transparent bg-clip-text bg-gradient-to-r from-rosa to-lavanda font-black tracking-tight text-xl">31/12/2026</strong>
                     </p>
                     <p className="text-xs md:text-sm text-white/80 font-medium mt-1 flex items-center justify-center sm:justify-start gap-1.5">
                       Asegurá tu fecha y tu tarjeta digital de invitación 🎁
@@ -559,7 +563,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
-               <a href="https://maps.app.goo.gl/WrCxZMQu7GHACAR67" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
+               <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-white/60 hover:text-amarillo transition-colors text-sm font-medium">
                   <MapPin className="w-4 h-4" />
                   <span className="hidden sm:inline">Santiago del Estero</span>
                </a>
@@ -588,6 +592,9 @@ export default function LandingPage() {
                Diseñado con <span className="text-rosa">{"\u2764\uFE0F"}</span> por Ignacio
              </p>
           </div>
+        </div>
+        <div className="mt-8 border-t border-white/5">
+          <PieLegal />
         </div>
       </footer>
 

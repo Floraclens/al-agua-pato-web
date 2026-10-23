@@ -323,6 +323,12 @@ export function ExtrasSelector({
                 <p className="text-sm text-muted-foreground leading-snug">
                   {extra.descripcion}
                 </p>
+                {/* Res. SIC 4/2025 art. 2 c): junto al precio, cuando se ve. Mismo importe (monotributo). */}
+                {isRevealed && (
+                  <p className="mt-1.5 text-[10px] leading-tight font-medium text-slate-500 tracking-wide">
+                    PRECIO SIN IMPUESTOS NACIONALES: {extra.precioTexto.replace(/^\+/, "")}
+                  </p>
+                )}
               </div>
               
               {extra.needsAdultsCounter && isChecked && (

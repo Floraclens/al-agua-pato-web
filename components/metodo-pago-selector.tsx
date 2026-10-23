@@ -1,11 +1,14 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Banknote, Building2, CreditCard } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { MetodoPago } from "@/lib/reserva"
 import { cn } from "@/lib/utils"
 import { usePreciosListos } from "@/components/precios-provider"
+import { createBrowserClient } from "@/lib/supabase/client"
+import { cargarTextoTarjeta, TEXTO_TARJETA_DEFECTO } from "@/lib/textos-web"
 
 interface MetodoPagoSelectorProps {
   metodoPago: MetodoPago
@@ -14,10 +17,27 @@ interface MetodoPagoSelectorProps {
   onSelectPagoTotalidad: (val: boolean) => void
 }
 
-// La promo de 3 cuotas sin interés venció el 31/08: ya no se ofrece. Con recargo > 0 (editable desde /admin) se avisa el %.
-function descripcionTarjeta(recargoPct: number): string {
+// El texto lo escribe la admin en /admin (tabla `textos_web`); con recargo > 0 (también editable) se avisa el %.
+function descripcionTarjeta(texto: string, recargoPct: number): string {
   const recargo = recargoPct > 0 ? ` (recargo ${recargoPct}%)` : ""
-  return `Solo tarjetas bancarizadas${recargo}`
+  return `${texto}${recargo}`
+}
+
+/** Texto de la opción Tarjeta. Si la base no responde, el de siempre: no frena la reserva. */
+function useTextoTarjeta(): string {
+  const [texto, setTexto] = useState(TEXTO_TARJETA_DEFECTO)
+  useEffect(() => {
+    let vivo = true
+    cargarTextoTarjeta(createBrowserClient())
+      .then((t) => {
+        if (vivo && t) setTexto(t)
+      })
+      .catch((e) => console.warn("[textos_web] Se usa el texto por defecto:", e))
+    return () => {
+      vivo = false
+    }
+  }, [])
+  return texto
 }
 
 const metodos = [
@@ -40,7 +60,7 @@ const metodos = [
   {
     id: "tarjeta" as const,
     titulo: "Tarjeta",
-    descripcion: descripcionTarjeta(0),
+    descripcion: "",
     icon: CreditCard,
     color: "text-lavanda",
     bgColor: "bg-lavanda/10",
@@ -55,6 +75,7 @@ export function MetodoPagoSelector({
 }: MetodoPagoSelectorProps) {
   const { precios } = usePreciosListos()
   const descuentoPct = precios.descuento_efectivo_pct
+  const textoTarjeta = useTextoTarjeta()
 
   return (
     <div className="space-y-3">
@@ -98,7 +119,7 @@ export function MetodoPagoSelector({
               <div className="flex-1">
                 <h4 className="font-bold text-azul-marino mb-0.5">{metodo.titulo}</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metodo.id === "tarjeta" ? descripcionTarjeta(precios.recargo_tarjeta_pct) : metodo.descripcion}
+                  {metodo.id === "tarjeta" ? descripcionTarjeta(textoTarjeta, precios.recargo_tarjeta_pct) : metodo.descripcion}
                 </p>
               </div>
             </button>
