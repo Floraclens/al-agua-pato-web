@@ -544,17 +544,9 @@ export function ResumenReserva({
           </span>
         </Button>
 
-        <div className="flex flex-col items-center justify-center gap-1.5 mb-6 opacity-70">
-          <div className="flex items-center gap-1.5 text-azul-marino font-semibold text-xs">
-            <ShieldCheck className="w-4 h-4 text-verde" />
-            <span>Transacción segura y protegida</span>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant="outline" className="text-[10px] bg-white">Transferencia</Badge>
-            <Badge variant="outline" className="text-[10px] bg-white">MercadoPago</Badge>
-            <Badge variant="outline" className="text-[10px] bg-white">Efectivo</Badge>
-          </div>
-        </div>
+        <p className="text-center text-xs font-semibold text-azul-marino mb-6 opacity-70">
+          La seña se coordina por WhatsApp
+        </p>
 
         <div className="mt-6 space-y-3">
           <div className="flex items-start gap-2 text-sm bg-azul-claro/10 p-3 rounded-lg">

@@ -391,8 +391,8 @@ export function PanelPrecios({ supabase }: { supabase: SupabaseClient }) {
         )}
         {esRecargo && (
           <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-2 mt-2 leading-snug">
-            En la web, la opción Tarjeta dice “hasta en 3 cuotas sin interés”. Si cargás un recargo mayor a 0, pasa a
-            decir “hasta en 3 cuotas (recargo X%)”.
+            En la web, la opción Tarjeta dice “Solo tarjetas bancarizadas”. Si cargás un recargo mayor a 0, pasa a
+            decir “Solo tarjetas bancarizadas (recargo X%)”.
           </p>
         )}
       </div>

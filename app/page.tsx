@@ -22,6 +22,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
+// Perfil de Google Maps del complejo, abierto en la pestaña de opiniones.
+const RESENAS_GOOGLE_URL = "https://www.google.com/maps/place/al+agua+pato/@-27.8315895,-64.2158731,17z/data=!4m8!3m7!1s0x943b4fa5aa805d53:0x4f224311c8fee110!8m2!3d-27.8315895!4d-64.2132982!9m1!1b1!16s%2Fg%2F11s926p81_"
+
 export default function LandingPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showFloatingButton, setShowFloatingButton] = useState(true);
@@ -238,16 +241,9 @@ export default function LandingPage() {
             <div className="flex flex-col items-center text-center mb-12">
               <h3 className="text-3xl md:text-4xl font-black text-azul-marino mb-6">Lo que dicen las familias</h3>
               
-              <div className="inline-flex flex-col sm:flex-row items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-sm border border-border/50 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black text-slate-800">4.9</span>
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map(star => <Star key={star} className="w-5 h-5 fill-[#FBBC05] text-[#FBBC05]" />)}
-                  </div>
-                </div>
-                <div className="h-4 w-px bg-slate-200 hidden sm:block"></div>
+              <a href={RESENAS_GOOGLE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-sm border border-border/50 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
-                  Basado en reseñas en 
+                  Reseñas en Google
                   <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -255,15 +251,16 @@ export default function LandingPage() {
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
                 </div>
-              </div>
+              </a>
             </div>
 
             <div className="flex overflow-x-auto md:grid md:grid-cols-4 snap-x snap-mandatory gap-5 pb-6 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {/* Reseñas reales de 5 estrellas del perfil de Google, copiadas tal cual (23/10/2026). Sin fecha: Google solo muestra "Hace X" y acá quedaría desactualizado. */}
               {[
-                { nombre: "Laura G.", tiempo: "Hace 2 semanas", texto: "Festejamos los 5 de Mateo y salió todo perfecto. El predio es hermoso, súper limpio y el parque acuático es genial. ¡Los chicos no pararon de jugar!", color: "bg-rosa text-white" },
-                { nombre: "Martín P.", tiempo: "Hace 1 mes", texto: "Excelente atención de principio a fin. El show del Robot LED fue una locura, todos los invitados quedaron alucinados. Cero estrés para nosotros.", color: "bg-azul-claro text-white" },
-                { nombre: "Sabrina V.", tiempo: "Hace 3 meses", texto: "Súper recomendable. Las instalaciones, la pileta y los juegos son de 10. Los chicos se divirtieron toda la tarde y nosotros estuvimos súper cómodos.", color: "bg-lavanda text-white" },
-                { nombre: "Julieta F.", tiempo: "Hace 4 meses", texto: "El mejor lugar al que fuimos. La ambientación es soñada y el pelotero es gigante. Estuvimos súper cómodos y nos atendieron como reyes.", color: "bg-amarillo text-azul-marino" }
+                { nombre: "Vale G.", texto: "Muy lindo, los niños la pasan genial, las chicas que atienden el servicio son súper amables, lo recomiendo", color: "bg-rosa text-white" },
+                { nombre: "Laura I.", texto: "Excelente para niños de hasta 8 años, la atención fue muy buena, las chicas eran muy amable! Super recommendable!", color: "bg-azul-claro text-white" },
+                { nombre: "Patricia R.", texto: "Un lugar increíble para el festejo de los más pequeños!!! Muy original y novedoso en la ciudad. Las instalaciones están excelentes!", color: "bg-lavanda text-white" },
+                { nombre: "Hector S.", texto: "Hermoso lugar para eventos y disfrutar en familia", color: "bg-amarillo text-azul-marino" }
               ].map((review, i) => (
                 <div key={i} className="min-w-[85%] sm:min-w-[60%] md:min-w-0 snap-center bg-white p-6 rounded-3xl shadow-sm border border-border/50 relative flex flex-col hover:-translate-y-1 transition-transform duration-300">
                   <svg className="absolute top-6 right-6 w-5 h-5 opacity-70" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -273,13 +270,12 @@ export default function LandingPage() {
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
 
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-inner ${review.color}`}>
+                  <div className="flex items-center gap-3 mb-4 pr-6">
+                    <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold text-sm shadow-inner ${review.color}`}>
                       {review.nombre.charAt(0)}
                     </div>
                     <div>
                       <p className="font-bold text-slate-800 text-sm leading-tight">{review.nombre}</p>
-                      <p className="text-xs text-muted-foreground font-medium">{review.tiempo}</p>
                     </div>
                   </div>
                   
@@ -290,6 +286,12 @@ export default function LandingPage() {
                   <p className="text-[15px] text-slate-700 leading-relaxed font-medium">"{review.texto}"</p>
                 </div>
               ))}
+            </div>
+
+            <div className="text-center mt-8">
+              <a href={RESENAS_GOOGLE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 font-bold text-sm text-azul-marino border-2 border-azul-marino rounded-full hover:bg-azul-marino hover:text-white transition-colors">
+                Ver todas las reseñas en Google <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
           </div>
         </section>

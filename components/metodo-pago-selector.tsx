@@ -14,10 +14,10 @@ interface MetodoPagoSelectorProps {
   onSelectPagoTotalidad: (val: boolean) => void
 }
 
-// Con recargo > 0 (editable desde /admin) ya no son cuotas "sin interés". Con 0 el texto queda como siempre.
+// La promo de 3 cuotas sin interés venció el 31/08: ya no se ofrece. Con recargo > 0 (editable desde /admin) se avisa el %.
 function descripcionTarjeta(recargoPct: number): string {
-  const cuotas = recargoPct > 0 ? `(recargo ${recargoPct}%)` : "sin interés"
-  return `Solo tarjetas bancarizadas hasta en 3 cuotas ${cuotas} (Hasta el 31/08)`
+  const recargo = recargoPct > 0 ? ` (recargo ${recargoPct}%)` : ""
+  return `Solo tarjetas bancarizadas${recargo}`
 }
 
 const metodos = [
