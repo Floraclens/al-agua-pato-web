@@ -22,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    ...['/condiciones', '/privacidad', '/arrepentimiento'].map((ruta) => ({
+    ...['/condiciones', '/privacidad'].map((ruta) => ({
       url: `${baseUrl}${ruta}`,
       lastModified: new Date(),
       changeFrequency: 'yearly' as const,

@@ -1,9 +1,6 @@
 /**
- * Datos de la titular y del sitio que van publicados (pie, /privacidad, /condiciones,
- * botón de arrepentimiento). Un solo lugar para cambiarlos.
- *
- * Los que valen `null` están PENDIENTES de la titular: la web muestra «a completar»
- * en su lugar. No publicar con datos pendientes.
+ * Datos de la titular y del sitio que van publicados (pie, /privacidad, aviso de los
+ * formularios). Un solo lugar para cambiarlos.
  */
 
 import { WHATSAPP_SALON } from "./config-reservas"
@@ -13,10 +10,7 @@ export const TITULAR = {
   cuit: "27-26372409-2",
   condicionFiscal: "Titular inscripta en el Régimen Simplificado (Monotributo)",
   email: "lorevsoria77@gmail.com",
-  // PENDIENTE de la titular: calle y número (Maps solo dice «Los Flores, G4200 Santiago del Estero»).
-  domicilio: null as string | null,
-  // PENDIENTE de la titular: horario de atención (Disp. 954/2025, art. 6).
-  horarioAtencion: null as string | null,
+  domicilio: "Calle pública s/n, Barrio Los Flores, Santiago del Estero",
 }
 
 export const SITIO_URL = "https://al-agua-pato-web.vercel.app"
@@ -26,8 +20,6 @@ export const SITIO_DOMINIO = "al-agua-pato-web.vercel.app"
 export const MAPS_URL = "https://maps.app.goo.gl/YbYAZheBiSx4WAG59"
 
 export const WHATSAPP_VISIBLE = "385 404-3737"
-
-export const PENDIENTE = "a completar"
 
 // Res. AAIP 14/2018, art. 3: texto obligatorio, LITERAL. No tocar ni una coma.
 export const LEYENDA_AAIP =

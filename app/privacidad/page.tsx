@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { PaginaLegal, SeccionLegal } from "@/components/pagina-legal"
-import { DatoTitular } from "@/components/pie-legal"
 import { LEYENDA_AAIP, TITULAR, WHATSAPP_VISIBLE } from "@/lib/datos-titular"
 
 export const metadata: Metadata = {
@@ -16,8 +15,7 @@ export default function PaginaPrivacidad() {
     <PaginaLegal titulo="Política de privacidad" bajada="Cómo tratamos los datos que dejás al reservar (Ley 25.326).">
       <SeccionLegal titulo="Quién es responsable de tus datos">
         <p>
-          {TITULAR.nombre}, CUIT {TITULAR.cuit}, con domicilio en <DatoTitular valor={TITULAR.domicilio} />, Santiago del
-          Estero. Contacto: {TITULAR.email} o WhatsApp {WHATSAPP_VISIBLE}.
+          {TITULAR.nombre}, CUIT {TITULAR.cuit}, con domicilio en {TITULAR.domicilio}. Contacto: {TITULAR.email} o WhatsApp {WHATSAPP_VISIBLE}.
         </p>
       </SeccionLegal>
 

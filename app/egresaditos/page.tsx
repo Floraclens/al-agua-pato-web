@@ -8,7 +8,6 @@ import { LogoWatermark } from "@/components/logo-watermark"
 import { Info, ArrowLeft, PartyPopper, MessageCircle, ChevronDown, GraduationCap, School, AlertCircle } from "lucide-react"
 import { PrecioSinImpuestos } from "@/components/precio-sin-impuestos"
 import { AvisoPrivacidad } from "@/components/aviso-privacidad"
-import { FranjaArrepentimiento } from "@/components/link-arrepentimiento"
 import { PieLegal } from "@/components/pie-legal"
 import { usePreciosListos } from "@/components/precios-provider"
 import { formatMoneyUI } from "@/lib/reserva"
@@ -45,7 +44,6 @@ export default function PaginaReservaEgresaditos() {
     <main className="relative isolate min-h-screen bg-slate-50/30 font-sans">
       <LogoWatermark />
       <header className="bg-white border-b border-border/50 sticky top-0 z-50 shadow-sm">
-        <FranjaArrepentimiento />
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="inline-flex items-center gap-2 text-azul-marino font-bold hover:text-azul-marino/80 transition-colors">
             <ArrowLeft className="w-5 h-5" /> Volver al inicio
@@ -240,7 +238,7 @@ export default function PaginaReservaEgresaditos() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-[132px]">
+            <div className="lg:sticky lg:top-[100px]">
               <ResumenReserva
                 selectedDate={selectedDate}
                 selectedTurno={selectedTurno}

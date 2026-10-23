@@ -1,13 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { FranjaArrepentimiento } from "@/components/link-arrepentimiento"
 import { PieLegal } from "@/components/pie-legal"
 
-/** Marco común de /condiciones, /privacidad y /arrepentimiento. */
+/** Marco común de /condiciones y /privacidad. */
 export function PaginaLegal({ titulo, bajada, children }: { titulo: string; bajada?: string; children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/30 font-sans">
-      <FranjaArrepentimiento />
       <header className="bg-white border-b border-border/50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="inline-flex items-center gap-2 min-h-11 text-azul-marino font-bold hover:text-azul-marino/80 transition-colors">

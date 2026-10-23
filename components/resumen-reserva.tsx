@@ -31,8 +31,7 @@ import { WHATSAPP_SALON } from "@/lib/config-reservas"
 import { usePreciosListos } from "@/components/precios-provider"
 import { PrecioSinImpuestos } from "@/components/precio-sin-impuestos"
 import { CondicionesReserva } from "@/components/condiciones-reserva"
-import { condicionesParaWhatsApp } from "@/lib/condiciones"
-import { SITIO_URL } from "@/lib/datos-titular"
+import { CONDICION_REPROGRAMACION } from "@/lib/condiciones"
 import Link from "next/link"
 
 interface ResumenReservaProps {
@@ -236,8 +235,6 @@ export function ResumenReserva({
 ☀️ Turno: ${datosCliente.turno_colegio}
 👤 A nombre de: ${datosCliente.nombre}
 
-${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
-
 *(ID interno de reserva: ${reservaId})*
 
 ¿Te puedo pasar el comprobante por acá para confirmar la fecha?`
@@ -258,8 +255,6 @@ ${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
 *Mis datos:*
 👤 A nombre de: ${datosCliente.nombre}
 🎂 Cumpleañero/a: ${datosCliente.nombreCumpleanero || "No especificado"} (${datosCliente.edadCumple ? datosCliente.edadCumple + " añitos" : "-"})
-
-${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
 
 *(ID interno de reserva: ${reservaId})*
 
@@ -364,9 +359,7 @@ ${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
             <div className="border-2 border-azul-marino/30 rounded-xl p-4 mb-6 text-left text-[13px] leading-snug text-slate-700">
               <p className="font-extrabold text-azul-marino mb-1">Condiciones de tu reserva</p>
               <p>
-                <strong>DERECHO DE REVOCACIÓN:</strong> podés revocar la reserva dentro de los 10 días corridos, sin costo:
-                te devolvemos el 100 % de la seña. Pasado ese plazo, si cancelás, la seña se pierde; podés reprogramar para
-                las fechas siguientes disponibles y la seña queda a cuenta.
+                <strong>{CONDICION_REPROGRAMACION.titulo}:</strong> {CONDICION_REPROGRAMACION.texto}
               </p>
               <Link href="/condiciones" target="_blank" className="inline-flex items-center min-h-11 font-bold text-azul-marino underline underline-offset-2">
                 Ver las condiciones completas
@@ -557,7 +550,7 @@ ${condicionesParaWhatsApp(`${SITIO_URL}/condiciones`)}
           {/* SE ELIMINÓ EL MENSAJE DE RECARGO DE LA SEÑA ACÁ */}
         </div>
 
-        <CondicionesReserva sena={pagoTotalidad ? undefined : formatPrice(calculos.sena)} className="mb-4" />
+        <CondicionesReserva className="mb-4" />
 
         <Button
           type="button"

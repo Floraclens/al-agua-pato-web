@@ -15,7 +15,6 @@ import {
   Instagram, Facebook 
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { FranjaArrepentimiento } from "@/components/link-arrepentimiento"
 import { PieLegal } from "@/components/pie-legal"
 import { MAPS_URL } from "@/lib/datos-titular"
 import {
@@ -114,7 +113,6 @@ export default function LandingPage() {
         <LogoWatermark />
 
         <header className="bg-white/90 backdrop-blur-md border-b border-border/50 sticky top-0 z-50 shadow-sm">
-          <FranjaArrepentimiento />
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 md:gap-4">
