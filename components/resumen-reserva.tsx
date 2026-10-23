@@ -30,9 +30,6 @@ import { preciosIguales } from "@/lib/precios"
 import { WHATSAPP_SALON } from "@/lib/config-reservas"
 import { usePreciosListos } from "@/components/precios-provider"
 import { PrecioSinImpuestos } from "@/components/precio-sin-impuestos"
-import { CondicionesReserva } from "@/components/condiciones-reserva"
-import { CONDICION_REPROGRAMACION } from "@/lib/condiciones"
-import Link from "next/link"
 
 interface ResumenReservaProps {
   selectedDate: Date | undefined
@@ -356,15 +353,6 @@ export function ResumenReserva({
                 1. Enviar comprobante
               </a>
             </div>
-            <div className="border-2 border-azul-marino/30 rounded-xl p-4 mb-6 text-left text-[13px] leading-snug text-slate-700">
-              <p className="font-extrabold text-azul-marino mb-1">Condiciones de tu reserva</p>
-              <p>
-                <strong>{CONDICION_REPROGRAMACION.titulo}:</strong> {CONDICION_REPROGRAMACION.texto}
-              </p>
-              <Link href="/condiciones" target="_blank" className="inline-flex items-center min-h-11 font-bold text-azul-marino underline underline-offset-2">
-                Ver las condiciones completas
-              </Link>
-            </div>
             <div className="bg-azul-claro/10 border border-azul-claro/20 rounded-xl p-5 mb-8 text-left shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="bg-azul-claro/20 p-2.5 rounded-full shrink-0">
@@ -549,8 +537,6 @@ export function ResumenReserva({
           <PrecioSinImpuestos monto={calculos.sena} />
           {/* SE ELIMINÓ EL MENSAJE DE RECARGO DE LA SEÑA ACÁ */}
         </div>
-
-        <CondicionesReserva className="mb-4" />
 
         <Button
           type="button"

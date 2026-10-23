@@ -1,7 +1,6 @@
 /**
  * Condiciones de la reserva (P1 #14 de la propuesta). Textos decididos por la titular
- * (23/10/2026): solo reprogramación y saldo. Los usan /condiciones, el recuadro antes de
- * «Confirmar Reserva» y la pantalla de éxito.
+ * (23/10/2026): solo reprogramación y saldo. Los usa /condiciones.
  */
 
 export interface Condicion {
